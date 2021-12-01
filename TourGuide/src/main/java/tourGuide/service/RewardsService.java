@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import gpsUtil.GpsUtil;
@@ -39,15 +40,16 @@ public class RewardsService {
         proximityBuffer = defaultProximityBuffer;
     }
 
+    @Async("threadPoolTaskExecutor")
     public void calculateRewards(User user) {
         List<VisitedLocation> userLocations = new ArrayList<>();
         userLocations.addAll(user.getVisitedLocations());
         List<Attraction> attractions = gpsUtil.getAttractions();
-       // List<UserReward> rewardList = new ArrayList<>();
+        // List<UserReward> rewardList = new ArrayList<>();
         for (VisitedLocation visitedLocation : userLocations) {
             for (Attraction attraction : attractions) {
-                if(user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
-                    if(nearAttraction(visitedLocation, attraction)) {
+                if (user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
+                    if (nearAttraction(visitedLocation, attraction)) {
                         user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
                     }
                 }
