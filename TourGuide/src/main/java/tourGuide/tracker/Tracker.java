@@ -54,6 +54,7 @@ public class Tracker extends Thread {
 //                            }
                 logger.debug("Begin Tracker. Tracking " + usersList.get(finalI).size() + " users.");
                 stopWatch.start();
+                //todo the same function that we has to test !!!!
                 usersList.get(finalI).forEach(u -> tourGuideService.trackUserLocation(u));
                 stopWatch.stop();
                 logger.debug("Tracker Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");

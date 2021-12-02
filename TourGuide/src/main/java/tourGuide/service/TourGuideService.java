@@ -85,6 +85,7 @@ public class TourGuideService {
         return providers;
     }
 
+    //todo what we do here why there is calculate rewards in this function , are there any explanation in curse about this ?
     public VisitedLocation trackUserLocation(User user) {
         VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
         user.addToVisitedLocations(visitedLocation);

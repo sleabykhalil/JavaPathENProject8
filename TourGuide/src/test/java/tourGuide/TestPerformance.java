@@ -53,18 +53,24 @@ public class TestPerformance {
         RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
         InternalTestHelper.setInternalUserNumber(100000);
-        //TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+        /*todo see constructor there is the same for loop  !!!!
+               for (User user : allUsers) {
+                   tourGuideService.trackUserLocation(user);
+           }
+        */
+        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 
-//        List<User> allUsers = new ArrayList<>();
-//        allUsers = tourGuideService.getAllUsers();
+        List<User> allUsers = new ArrayList<>();
+        allUsers = tourGuideService.getAllUsers();
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 //        for (User user : allUsers) {
 //            tourGuideService.trackUserLocation(user);
 //        }
-//        allUsers.parallelStream().forEach(tourGuideService::trackUserLocation);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+
+        //todo we test this for loop but it is already made by TourGuideService constructor !!!!
+        allUsers.parallelStream().forEach(tourGuideService::trackUserLocation);
 
         stopWatch.stop();
         tourGuideService.tracker.stopTracking();
