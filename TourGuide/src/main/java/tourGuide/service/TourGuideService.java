@@ -47,7 +47,7 @@ public class TourGuideService {
 			logger.debug("Finished initializing users");
 		}
 		tracker = new Tracker(this);
-		addShutDownHook();
+		//addShutDownHook();
 	}
 	
 	public List<UserReward> getUserRewards(User user) {
