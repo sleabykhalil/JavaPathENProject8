@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rewardCentral.RewardCentral;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
@@ -23,11 +24,12 @@ import java.util.stream.IntStream;
 
 @Service
 public class UserServices {
-    @Autowired
-    RewardsService rewardsService;
+    //@Autowired
+    RewardsService rewardsService = new RewardsService(new RewardCentral());
+    //@Autowired
+    GpsUnitService gpsUnitService = new GpsUnitService();
 
     private Logger logger = LoggerFactory.getLogger(UserServices.class);
-    private final GpsUtil gpsUtil = new GpsUtil();
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
 
@@ -59,9 +61,9 @@ public class UserServices {
     public VisitedLocation trackUserLocation(User user) {
 
         Future<VisitedLocation> visitedLocationFuture = executorService.submit(() -> {
-            logger.info("track user: {}", user.getUserName());
+            // logger.info("track user: {}", user.getUserName());
 
-            VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
+            VisitedLocation visitedLocation = gpsUnitService.getUserLocation(user.getUserId());
             user.addToVisitedLocations(visitedLocation);
             rewardsService.calculateRewards(user);
             return visitedLocation;

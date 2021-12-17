@@ -24,114 +24,114 @@ import tripPricer.Provider;
 
 @SpringBootTest
 public class TestTourGuideService {
-	@Autowired
-	UserServices userServices;
-	@Autowired
-	TourGuideService tourGuideService;
+    @Autowired
+    UserServices userServices;
+    @Autowired
+    TourGuideService tourGuideService;
 
-	@Test
-	public void getUserLocation() {
-		GpsUtil gpsUtil = new GpsUtil();
-		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-		InternalTestHelper.setInternalUserNumber(0);
-		tourGuideService.initGuideService(gpsUtil);
+    @Test
+    public void getUserLocation() {
+        GpsUtil gpsUtil = new GpsUtil();
+        RewardsService rewardsService = new RewardsService(new RewardCentral());
+        InternalTestHelper.setInternalUserNumber(0);
+        tourGuideService.initGuideService(userServices);
 
-		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-		VisitedLocation visitedLocation = userServices.trackUserLocation(user);
-		tourGuideService.tracker.stopTracking();
-		assertTrue(visitedLocation.userId.equals(user.getUserId()));
-	}
+        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+        VisitedLocation visitedLocation = userServices.trackUserLocation(user);
+        tourGuideService.tracker.stopTracking();
+        assertTrue(visitedLocation.userId.equals(user.getUserId()));
+    }
 
-	@Test
-	public void addUser() {
-		GpsUtil gpsUtil = new GpsUtil();
-		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-		InternalTestHelper.setInternalUserNumber(0);
-		tourGuideService.initGuideService(gpsUtil);
+    @Test
+    public void addUser() {
+        GpsUtil gpsUtil = new GpsUtil();
+        RewardsService rewardsService = new RewardsService(new RewardCentral());
+        InternalTestHelper.setInternalUserNumber(0);
+        tourGuideService.initGuideService(userServices);
 
-		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-		User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
+        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+        User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
 
-		userServices.addUser(user);
-		userServices.addUser(user2);
+        userServices.addUser(user);
+        userServices.addUser(user2);
 
-		User retrivedUser = userServices.getUser(user.getUserName());
-		User retrivedUser2 = userServices.getUser(user2.getUserName());
+        User retrivedUser = userServices.getUser(user.getUserName());
+        User retrivedUser2 = userServices.getUser(user2.getUserName());
 
-		tourGuideService.tracker.stopTracking();
+        tourGuideService.tracker.stopTracking();
 
-		assertEquals(user, retrivedUser);
-		assertEquals(user2, retrivedUser2);
-	}
+        assertEquals(user, retrivedUser);
+        assertEquals(user2, retrivedUser2);
+    }
 
-	@Test
-	public void getAllUsers() {
-		GpsUtil gpsUtil = new GpsUtil();
-		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-		InternalTestHelper.setInternalUserNumber(0);
-		tourGuideService.initGuideService(gpsUtil);
+    @Test
+    public void getAllUsers() {
+        GpsUtil gpsUtil = new GpsUtil();
+        RewardsService rewardsService = new RewardsService(new RewardCentral());
+        InternalTestHelper.setInternalUserNumber(0);
+        tourGuideService.initGuideService(userServices);
 
-		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-		User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
+        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+        User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
 
-		userServices.addUser(user);
-		userServices.addUser(user2);
+        userServices.addUser(user);
+        userServices.addUser(user2);
 
-		List<User> allUsers = userServices.getAllUsers();
+        List<User> allUsers = userServices.getAllUsers();
 
-		tourGuideService.tracker.stopTracking();
+        tourGuideService.tracker.stopTracking();
 
-		assertTrue(allUsers.contains(user));
-		assertTrue(allUsers.contains(user2));
-	}
+        assertTrue(allUsers.contains(user));
+        assertTrue(allUsers.contains(user2));
+    }
 
-	@Test
-	public void trackUser() {
-		GpsUtil gpsUtil = new GpsUtil();
-		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-		InternalTestHelper.setInternalUserNumber(0);
-		tourGuideService.initGuideService(gpsUtil);
+    @Test
+    public void trackUser() {
+        GpsUtil gpsUtil = new GpsUtil();
+        RewardsService rewardsService = new RewardsService(new RewardCentral());
+        InternalTestHelper.setInternalUserNumber(0);
+        tourGuideService.initGuideService(userServices);
 
-		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-		VisitedLocation visitedLocation = userServices.trackUserLocation(user);
+        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+        VisitedLocation visitedLocation = userServices.trackUserLocation(user);
 
-		tourGuideService.tracker.stopTracking();
+        tourGuideService.tracker.stopTracking();
 
-		assertEquals(user.getUserId(), visitedLocation.userId);
-	}
+        assertEquals(user.getUserId(), visitedLocation.userId);
+    }
 
-	@Ignore // Not yet implemented
-	@Test
-	public void getNearbyAttractions() {
-		GpsUtil gpsUtil = new GpsUtil();
-		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-		InternalTestHelper.setInternalUserNumber(0);
-		tourGuideService.initGuideService(gpsUtil);
+    @Ignore // Not yet implemented
+    @Test
+    public void getNearbyAttractions() {
+        GpsUtil gpsUtil = new GpsUtil();
+        RewardsService rewardsService = new RewardsService(new RewardCentral());
+        InternalTestHelper.setInternalUserNumber(0);
+        tourGuideService.initGuideService(userServices);
 
-		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-		VisitedLocation visitedLocation = userServices.trackUserLocation(user);
+        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+        VisitedLocation visitedLocation = userServices.trackUserLocation(user);
 
-		List<Attraction> attractions = tourGuideService.getNearByAttractions(visitedLocation);
+        List<Attraction> attractions = tourGuideService.getNearByAttractions(visitedLocation);
 
-		tourGuideService.tracker.stopTracking();
+        tourGuideService.tracker.stopTracking();
 
-		assertEquals(5, attractions.size());
-	}
+        assertEquals(5, attractions.size());
+    }
 
-	public void getTripDeals() {
-		GpsUtil gpsUtil = new GpsUtil();
-		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-		InternalTestHelper.setInternalUserNumber(0);
-		tourGuideService.initGuideService(gpsUtil);
+    public void getTripDeals() {
+        GpsUtil gpsUtil = new GpsUtil();
+        RewardsService rewardsService = new RewardsService(new RewardCentral());
+        InternalTestHelper.setInternalUserNumber(0);
+        tourGuideService.initGuideService(userServices);
 
-		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
 
-		List<Provider> providers = tourGuideService.getTripDeals(user);
+        List<Provider> providers = tourGuideService.getTripDeals(user);
 
-		tourGuideService.tracker.stopTracking();
+        tourGuideService.tracker.stopTracking();
 
-		assertEquals(10, providers.size());
-	}
+        assertEquals(10, providers.size());
+    }
 
 
 }

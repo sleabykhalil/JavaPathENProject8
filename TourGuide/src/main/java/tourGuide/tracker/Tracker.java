@@ -16,7 +16,7 @@ import tourGuide.service.UserServices;
 import tourGuide.user.User;
 
 public class Tracker extends Thread {
-    private static final int NUMBER_OF_USER_BY_THREAD = 100;
+    private static final int NUMBER_OF_USER_BY_THREAD = 1000;
     private Logger logger = LoggerFactory.getLogger(Tracker.class);
     private static final long trackingPollingInterval = TimeUnit.MINUTES.toSeconds(5);
     private final ExecutorService executorService = Executors.newCachedThreadPool();

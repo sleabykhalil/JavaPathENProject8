@@ -35,20 +35,19 @@ import javax.annotation.PostConstruct;
 @Service
 public class TourGuideService {
     //@Autowired
-    UserServices userServices = new UserServices();
+    //UserServices userServices ;
     //@Autowired
-    RewardsService rewardsService = new RewardsService(new GpsUtil(), new RewardCentral());
-
+    RewardsService rewardsService = new RewardsService(new RewardCentral());
+    //@Autowired
+    GpsUnitService gpsUnitService = new GpsUnitService();
     private Logger logger = LoggerFactory.getLogger(TourGuideService.class);
-    private GpsUtil gpsUtil;
 
     private final TripPricer tripPricer = new TripPricer();
     public Tracker tracker;
     boolean testMode = true;
 
     //   @PostConstruct
-    public void initGuideService(GpsUtil gpsUtil) {
-        this.gpsUtil = gpsUtil;
+    public void initGuideService(UserServices userServices) {
         //this.rewardsService = rewardsService;
 
         if (testMode) {
@@ -73,7 +72,7 @@ public class TourGuideService {
 
     public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
         List<Attraction> nearbyAttractions = new ArrayList<>();
-        for (Attraction attraction : gpsUtil.getAttractions()) {
+        for (Attraction attraction : gpsUnitService.getAttractions()) {
             if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
                 nearbyAttractions.add(attraction);
             }
