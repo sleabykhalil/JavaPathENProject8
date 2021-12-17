@@ -40,7 +40,8 @@ public class RewardsService {
     }
 
     public void calculateRewards(User user) {
-        List<VisitedLocation> userLocations = user.getVisitedLocations();
+        List<VisitedLocation> userLocations = new ArrayList<>(user.getVisitedLocations());
+
         List<Attraction> attractions = gpsUtil.getAttractions();
 
         Set<UserReward> rewardHashSet = new HashSet<>();
