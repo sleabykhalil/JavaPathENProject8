@@ -1,5 +1,6 @@
 package tourGuide.tracker;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -14,6 +15,7 @@ import tourGuide.service.TourGuideService;
 import tourGuide.user.User;
 
 public class Tracker extends Thread {
+    private static final int NUMBER_OF_USER_BY_THREAD = 100;
     private Logger logger = LoggerFactory.getLogger(Tracker.class);
     private static final long trackingPollingInterval = TimeUnit.MINUTES.toSeconds(5);
     private final ExecutorService executorService = Executors.newCachedThreadPool();
@@ -22,14 +24,47 @@ public class Tracker extends Thread {
 
     public Tracker(TourGuideService tourGuideService) {
         this.tourGuideService = tourGuideService;
+        List<List<User>> usersList = new ArrayList<List<User>>();
+
         int start = 0;
         int end = 0;
-        do {
-            end = start + 100;
-            executorService.submit(Objects.requireNonNull(trackUsers(tourGuideService.getAllUsers().subList(start, Math.min(end, tourGuideService.getAllUsers().size())))));
-            start = end;
-        } while (end < tourGuideService.getAllUsers().size());
+        int i = 0;
 
+        do {
+            start = end;
+            end = start + NUMBER_OF_USER_BY_THREAD;
+
+            usersList.add(tourGuideService.getAllUsers().
+                    subList(start, Math.min(end, tourGuideService.getAllUsers().size())));
+            int finalI = i;
+            executorService.submit(() -> {
+                StopWatch stopWatch = new StopWatch();
+//                        while (true) {
+//                            if (Thread.currentThread().isInterrupted() || stop) {
+//                                logger.debug("Tracker stopping");
+//                                logger.debug(" shutdown of stop flag");
+//
+//                                break;
+//                            }
+                logger.debug("Begin Tracker. Tracking " + usersList.get(finalI).size() + " users.");
+                stopWatch.start();
+                //todo the same function that we has to test !!!!
+                usersList.get(finalI).forEach(u -> tourGuideService.trackUserLocation(u));
+                stopWatch.stop();
+                logger.debug("Tracker Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
+                stopWatch.reset();
+                try {
+                    logger.debug("Tracker sleeping");
+                    TimeUnit.SECONDS.sleep(trackingPollingInterval);
+                    logger.debug("Tracker finished");
+                } catch (InterruptedException e) {
+                    logger.error("InterruptedException threw ::: " + e);
+                    // break;
+                }
+            });
+
+            i++;
+        } while (end < tourGuideService.getAllUsers().size());
 
     }
 
@@ -38,7 +73,7 @@ public class Tracker extends Thread {
      */
     public void stopTracking() {
         stop = true;
-        executorService.shutdownNow();
+        // executorService.shutdownNow();
     }
 
     private Runnable trackUsers(List<User> userList) {

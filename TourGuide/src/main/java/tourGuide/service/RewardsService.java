@@ -1,10 +1,9 @@
 package tourGuide.service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 import org.springframework.stereotype.Service;
 
@@ -62,8 +61,9 @@ public class RewardsService {
                 rewardHashSet.clear();
             });
         });*/
-        List<UserReward> userRewards = user.getUserRewards();
+        List<UserReward> userRewards = Collections.synchronizedList(user.getUserRewards());
         CompletableFuture<UserReward> completableFuture = CompletableFuture.supplyAsync(() -> null);
+
         for (VisitedLocation visitedLocation : userLocations) {
             for (Attraction attraction : attractions) {
                 //for (UserReward userReward : user.getUserRewards()) {
@@ -105,7 +105,12 @@ public class RewardsService {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        rewardHashSet.forEach(user::addUserReward);
+        while (true) {
+            if (completableFuture.isDone()) {
+                rewardHashSet.forEach(user::addUserReward);
+                break;
+            }
+        }
         // rewardHashSet.clear();
     }
 
