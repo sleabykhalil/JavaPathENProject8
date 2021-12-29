@@ -1,11 +1,11 @@
-package userApi;
+package rewordApi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class UserApi {
+public class RewordApi {
     public static void main(String[] args) {
-        SpringApplication.run(UserApi.class, args);
+        SpringApplication.run(RewordApi.class, args);
     }
 }
