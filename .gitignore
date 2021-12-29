@@ -1,3 +1,5 @@
 /TourGuide/.gradle/
 /TourGuide/build/
+/user-api/.gradle/
+/user-api/build/
 /.idea/
