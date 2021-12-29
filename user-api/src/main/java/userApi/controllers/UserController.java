@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import userApi.service.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -18,6 +19,10 @@ public class UserController {
     @Autowired
     UserService userService;
 
+    @GetMapping("/users")
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
+    }
 
     @GetMapping("/user/initForTest")
     public void initUser(int internalUserNumber) {
@@ -25,13 +30,14 @@ public class UserController {
     }
 
     @GetMapping("/user/rewords")
-    public List<UserReward> getUserRewords(@RequestParam String userId) {
-        return userService.getUserRewards(userId);
-    }
+    public List<UserReward> getUserRewords(@RequestParam(required = false) String userId,
+                                           @RequestParam(required = false) User user) {
+        if (!(userId == null))
+            return userService.getUserRewards(userId);
+        if (!(user == null))
+            return userService.getUserRewards(user);
 
-    @GetMapping("/user/rewords")
-    public List<UserReward> getUserRewords(@RequestParam User user) {
-        return userService.getUserRewards(user);
+        return new ArrayList<>();
     }
 
     @GetMapping("/user/visitedLocations")
