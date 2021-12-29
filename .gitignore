@@ -2,4 +2,6 @@
 /TourGuide/build/
 /user-api/.gradle/
 /user-api/build/
+/reword-api/.gradle/
+/reword-api/build/
 /.idea/
