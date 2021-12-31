@@ -4,4 +4,6 @@
 /user-api/build/
 /reword-api/.gradle/
 /reword-api/build/
+/gps-api/.gradle/
+/gps-api/build/
 /.idea/

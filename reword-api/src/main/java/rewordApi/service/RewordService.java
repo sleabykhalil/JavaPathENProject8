@@ -19,13 +19,13 @@ public class RewordService {
     private int defaultProximityBuffer = 10;
     private int proximityBuffer = defaultProximityBuffer;
     private int attractionProximityRange = 200;
-    private final GpsUtil gpsUtil;
-    private final RewardCentral rewardsCentral;
+    private final GpsUtil gpsUtil = new GpsUtil();
+    private final RewardCentral rewardsCentral = new RewardCentral();
 
-    public  RewordService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
+/*    public  RewordService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
         this.gpsUtil = gpsUtil;
         this.rewardsCentral = rewardCentral;
-    }
+    }*/
 
 
     public void setProximityBuffer(int proximityBuffer) {
