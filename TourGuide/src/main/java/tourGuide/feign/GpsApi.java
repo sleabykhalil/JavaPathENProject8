@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 import java.util.UUID;
 
-@FeignClient(value = "rewordApi", url = "http://localhost:8083/")
+@FeignClient(value = "gps-Api", url = "localhost:8083")
 public interface GpsApi {
 
     @GetMapping("gps/attractions")

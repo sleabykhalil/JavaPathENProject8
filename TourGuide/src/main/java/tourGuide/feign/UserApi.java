@@ -10,7 +10,7 @@ import tripPricer.Provider;
 
 import java.util.List;
 
-@FeignClient(value = "userApi", url = "http://localhost:8081/")
+@FeignClient(value = "user-Api", url = "localhost:8081")
 public interface UserApi {
 
     @GetMapping("/users")
