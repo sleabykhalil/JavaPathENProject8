@@ -1,19 +1,19 @@
 package tourGuide.feign;
 
-import gpsUtil.location.Attraction;
-import gpsUtil.location.VisitedLocation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import tourGuide.feign.dto.gpsDto.Attraction;
+import tourGuide.feign.dto.gpsDto.VisitedLocation;
 
 import java.util.List;
-import java.util.UUID;
 
-@FeignClient(value = "gps-Api", url = "localhost:8083")
+@FeignClient(name = "GpsApi", url = "http://localhost:8083")
 public interface GpsApi {
 
     @GetMapping("gps/attractions")
-    public List<Attraction> getAllAttraction() ;
+    List<Attraction> getAllAttraction();
 
-    @GetMapping("gps/attraction")
-    public VisitedLocation getUserAttraction(UUID userId);
+    @GetMapping("gps/attraction/{userId}")
+    VisitedLocation getUserAttraction(@PathVariable String userId);
 }

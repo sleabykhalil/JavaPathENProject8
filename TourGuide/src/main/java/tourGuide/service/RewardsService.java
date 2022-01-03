@@ -2,14 +2,18 @@ package tourGuide.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import gpsUtil.GpsUtil;
-import gpsUtil.location.Attraction;
-import gpsUtil.location.Location;
-import gpsUtil.location.VisitedLocation;
+
 import rewardCentral.RewardCentral;
-import tourGuide.user.User;
+import tourGuide.feign.GpsApi;
+import tourGuide.feign.RewordApi;
+import tourGuide.feign.dto.User;
+import tourGuide.feign.dto.gpsDto.Attraction;
+import tourGuide.feign.dto.gpsDto.Location;
+import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.user.UserReward;
 
 @Service
@@ -20,12 +24,17 @@ public class RewardsService {
     private int defaultProximityBuffer = 10;
     private int proximityBuffer = defaultProximityBuffer;
     private int attractionProximityRange = 200;
-    private final GpsUtil gpsUtil;
-    private final RewardCentral rewardsCentral;
+    // private final GpsUtil gpsUtil;
+    //private final RewardCentral rewardsCentral;
+    GpsApi gpsApi;
+    RewordApi rewordApi;
 
-    public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
-        this.gpsUtil = gpsUtil;
-        this.rewardsCentral = rewardCentral;
+    @Autowired
+    public RewardsService( GpsApi gpsApi, RewordApi rewordApi) {
+        this.gpsApi = gpsApi;
+        this.rewordApi = rewordApi;
+        // this.gpsUtil = gpsUtil;
+        //this.rewardsCentral = rewardCentral;
     }
 
     public void setProximityBuffer(int proximityBuffer) {
@@ -38,13 +47,14 @@ public class RewardsService {
 
     public void calculateRewards(User user) {
         List<VisitedLocation> userLocations = user.getVisitedLocations();
-        List<Attraction> attractions = gpsUtil.getAttractions();
+        List<Attraction> attractions = gpsApi.getAllAttraction();
 
         for (VisitedLocation visitedLocation : userLocations) {
             for (Attraction attraction : attractions) {
                 if (user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
                     if (nearAttraction(visitedLocation, attraction)) {
-                        user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
+                        user.addUserReward(new UserReward(visitedLocation, attraction,
+                                rewordApi.getRewardPoints(user.getUserId().toString(), attraction.getAttractionId().toString())));
                     }
                 }
             }
@@ -59,9 +69,9 @@ public class RewardsService {
         return getDistance(attraction, visitedLocation.location) > proximityBuffer ? false : true;
     }
 
-    private int getRewardPoints(Attraction attraction, User user) {
+/*    private int getRewardPoints(Attraction attraction, User user) {
         return rewardsCentral.getAttractionRewardPoints(attraction.attractionId, user.getUserId());
-    }
+    }*/
 
     public double getDistance(Location loc1, Location loc2) {
         double lat1 = Math.toRadians(loc1.latitude);

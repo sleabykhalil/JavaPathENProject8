@@ -1,30 +1,33 @@
 package tourGuide;
 
-import static org.junit.Assert.assertTrue;
+import gpsUtil.GpsUtil;
+import jdk.nashorn.internal.ir.annotations.Ignore;
+import org.apache.commons.lang3.time.StopWatch;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import rewardCentral.RewardCentral;
+import tourGuide.feign.dto.User;
+import tourGuide.feign.dto.gpsDto.Attraction;
+import tourGuide.feign.dto.gpsDto.VisitedLocation;
+import tourGuide.feign.GpsApi;
+import tourGuide.feign.RewordApi;
+import tourGuide.feign.UserApi;
+import tourGuide.helper.InternalTestHelper;
+import tourGuide.service.RewardsService;
+import tourGuide.service.TourGuideService;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.time.StopWatch;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import gpsUtil.GpsUtil;
-import gpsUtil.location.Attraction;
-import gpsUtil.location.VisitedLocation;
-import org.springframework.boot.test.context.SpringBootTest;
-import rewardCentral.RewardCentral;
-import tourGuide.helper.InternalTestHelper;
-import tourGuide.service.RewardsService;
-import tourGuide.service.TourGuideService;
-import tourGuide.user.User;
-import tourGuide.user.UserReward;
 @SpringBootTest
 public class TestPerformance {
-
+    GpsApi gpsApi;
+    UserApi userApi;
+    RewordApi rewordApi;
     /*
      * A note on performance improvements:
      *
@@ -49,10 +52,10 @@ public class TestPerformance {
     @Test
     public void highVolumeTrackLocation() {
         GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
+        RewardsService rewardsService = new RewardsService(gpsApi, rewordApi);
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
         InternalTestHelper.setInternalUserNumber(10);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService,gpsApi,userApi);
 
         List<User> allUsers = new ArrayList<>();
         allUsers = tourGuideService.getAllUsers();
@@ -73,15 +76,15 @@ public class TestPerformance {
     @Test
     public void highVolumeGetRewards() {
         GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
+        RewardsService rewardsService = new RewardsService(gpsApi,rewordApi);
 
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
         InternalTestHelper.setInternalUserNumber(100);
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService,gpsApi,userApi);
 
-        Attraction attraction = gpsUtil.getAttractions().get(0);
+        Attraction attraction = gpsApi.getAllAttraction().get(0);
         List<User> allUsers = new ArrayList<>();
         allUsers = tourGuideService.getAllUsers();
         allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));

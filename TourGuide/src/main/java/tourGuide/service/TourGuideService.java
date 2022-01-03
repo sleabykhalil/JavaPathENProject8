@@ -2,36 +2,31 @@ package tourGuide.service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import gpsUtil.GpsUtil;
-import gpsUtil.location.Attraction;
-import gpsUtil.location.Location;
-import gpsUtil.location.VisitedLocation;
+import tourGuide.feign.dto.User;
+import tourGuide.feign.dto.gpsDto.Attraction;
+import tourGuide.feign.dto.gpsDto.Location;
+import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.feign.GpsApi;
-import tourGuide.feign.RewordApi;
 import tourGuide.feign.UserApi;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.tracker.Tracker;
-import tourGuide.user.User;
 import tourGuide.user.UserReward;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
 @Service
+@Lazy
 public class TourGuideService {
     private Logger logger = LoggerFactory.getLogger(TourGuideService.class);
     private final GpsUtil gpsUtil;
@@ -39,19 +34,14 @@ public class TourGuideService {
     private final TripPricer tripPricer = new TripPricer();
     public final Tracker tracker;
     boolean testMode = true;
-    @Autowired
     GpsApi gpsApi;
-    @Autowired
     UserApi userApi;
-    @Autowired
-    RewordApi rewordApi;
 
     @Autowired
-    public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {//, GpsApi gpsApi, UserApi userApi, RewordApi rewordApi) {
-//
-//        this.gpsApi = gpsApi;
-//        this.rewordApi = rewordApi;
-//        this.userApi = userApi;
+    public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService, GpsApi gpsApi, UserApi userApi) {
+
+        this.gpsApi = gpsApi;
+        this.userApi = userApi;
 
         this.gpsUtil = gpsUtil;
         this.rewardsService = rewardsService;
@@ -107,15 +97,16 @@ public class TourGuideService {
     }*/
 
     public VisitedLocation trackUserLocation(User user) {
-        VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId());
+
+        VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString());
         user.addToVisitedLocations(visitedLocation);
-        rewordApi.calculateRewards(user);
+        rewardsService.calculateRewards(user);
         return visitedLocation;
     }
 
     public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
         List<Attraction> nearbyAttractions = new ArrayList<>();
-        for (Attraction attraction : gpsUtil.getAttractions()) {
+        for (Attraction attraction : gpsApi.getAllAttraction()) {
             if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
                 nearbyAttractions.add(attraction);
             }

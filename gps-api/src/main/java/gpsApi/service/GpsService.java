@@ -16,7 +16,8 @@ public class GpsService {
         return gpsUtil.getAttractions();
     }
 
-    public VisitedLocation getUserAttraction(UUID userId) {
-        return gpsUtil.getUserLocation(userId);
+    public VisitedLocation getUserAttraction(String userId) {
+        UUID userIdAsUUID=UUID.fromString(userId);
+        return gpsUtil.getUserLocation(userIdAsUUID);
     }
 }

@@ -48,20 +48,20 @@ public class UserService {
         return userToFind.getVisitedLocations();
     }
 
-    public void setTripDeals(User user, List<Provider> providers) {
-        User userToFind = userRepository.getUserByUserName(user.getUserName());
+    public void setTripDeals(String userName, List<Provider> providers) {
+        User userToFind = userRepository.getUserByUserName(userName);
         userToFind.setTripDeals(providers);
         userRepository.save(userToFind);
     }
 
-    public void addToVisitedLocations(User user, VisitedLocation visitedLocation) {
-        User userToFind = userRepository.getUserByUserName(user.getUserName());
+    public void addToVisitedLocations(String userName, VisitedLocation visitedLocation) {
+        User userToFind = userRepository.getUserByUserName(userName);
         userToFind.getVisitedLocations().add(visitedLocation);
         userRepository.save(userToFind);
     }
 
-    public void addUserReward(User user, UserReward userReward) {
-        User userToFind = userRepository.getUserByUserName(user.getUserName());
+    public void addUserReward(String userName, UserReward userReward) {
+        User userToFind = userRepository.getUserByUserName(userName);
         userToFind.getUserRewards().add(userReward);
         userRepository.save(userToFind);
     }

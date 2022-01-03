@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import gpsUtil.location.VisitedLocation;
+import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tripPricer.Provider;
 
 public class User {
@@ -29,7 +29,6 @@ public class User {
     public UUID getUserId() {
         return userId;
     }
-
     public String getUserName() {
         return userName;
     }
@@ -99,5 +98,6 @@ public class User {
     public List<Provider> getTripDeals() {
         return tripDeals;
     }
+
 
 }

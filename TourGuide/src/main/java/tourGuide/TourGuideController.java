@@ -3,18 +3,21 @@ package tourGuide;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jsoniter.output.JsonStream;
 
-import gpsUtil.location.VisitedLocation;
+import tourGuide.feign.dto.User;
+import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.service.TourGuideService;
-import tourGuide.user.User;
+
 import tripPricer.Provider;
 
 @RestController
+@Lazy
 public class TourGuideController {
 
     @Autowired
