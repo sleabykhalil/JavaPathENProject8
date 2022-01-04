@@ -3,7 +3,6 @@ package tourGuide.service;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
@@ -13,7 +12,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import gpsUtil.GpsUtil;
-import tourGuide.feign.dto.User;
+import tourGuide.feign.dto.UserDte.User;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.Location;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
@@ -21,7 +20,6 @@ import tourGuide.feign.GpsApi;
 import tourGuide.feign.UserApi;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.tracker.Tracker;
-import tourGuide.user.UserReward;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
@@ -49,16 +47,15 @@ public class TourGuideService {
         if (testMode) {
             logger.info("TestMode enabled");
             logger.debug("Initializing users");
-            initializeInternalUsers();
+            userApi.initUser(InternalTestHelper.getInternalUserNumber());
+            //initializeInternalUsers();
             logger.debug("Finished initializing users");
         }
-        tracker = new Tracker(this);
+        tracker = new Tracker(this, userApi);
         addShutDownHook();
     }
 
-    public List<UserReward> getUserRewards(User user) {
-        return user.getUserRewards();
-    }
+
 
     public VisitedLocation getUserLocation(User user) {
         VisitedLocation visitedLocation = (user.getVisitedLocations().size() > 0) ?
@@ -67,19 +64,6 @@ public class TourGuideService {
         return visitedLocation;
     }
 
-    public User getUser(String userName) {
-        return internalUserMap.get(userName);
-    }
-
-    public List<User> getAllUsers() {
-        return internalUserMap.values().stream().collect(Collectors.toList());
-    }
-
-    public void addUser(User user) {
-        if (!internalUserMap.containsKey(user.getUserName())) {
-            internalUserMap.put(user.getUserName(), user);
-        }
-    }
 
     public List<Provider> getTripDeals(User user) {
         int cumulatativeRewardPoints = user.getUserRewards().stream().mapToInt(i -> i.getRewardPoints()).sum();
@@ -88,13 +72,6 @@ public class TourGuideService {
         user.setTripDeals(providers);
         return providers;
     }
-
-/*    public VisitedLocation trackUserLocation(User user) {
-        VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
-        user.addToVisitedLocations(visitedLocation);
-        rewardsService.calculateRewards(user);
-        return visitedLocation;
-    }*/
 
     public VisitedLocation trackUserLocation(User user) {
 

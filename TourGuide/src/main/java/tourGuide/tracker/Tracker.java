@@ -9,7 +9,8 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tourGuide.feign.dto.User;
+import tourGuide.feign.UserApi;
+import tourGuide.feign.dto.UserDte.User;
 import tourGuide.service.TourGuideService;
 
 public class Tracker extends Thread {
@@ -18,10 +19,11 @@ public class Tracker extends Thread {
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final TourGuideService tourGuideService;
     private boolean stop = false;
+    private UserApi userApi;
 
-    public Tracker(TourGuideService tourGuideService) {
+    public Tracker(TourGuideService tourGuideService, UserApi userApi) {
         this.tourGuideService = tourGuideService;
-
+        this.userApi = userApi;
         executorService.submit(this);
     }
 
@@ -42,7 +44,7 @@ public class Tracker extends Thread {
                 break;
             }
 
-            List<User> users = tourGuideService.getAllUsers();
+            List<User> users = userApi.getAllUsers();
             logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
             stopWatch.start();
             users.forEach(u -> tourGuideService.trackUserLocation(u));

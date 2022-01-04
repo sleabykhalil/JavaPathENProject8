@@ -21,8 +21,18 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @GetMapping("/user/initForTest")
-    public void initUser(int internalUserNumber) {
+    @GetMapping("/users/{userName}")
+    public User getUserByUserName(@PathVariable String userName) {
+        return userService.getUser(userName);
+    }
+
+    @PostMapping("/users/addUser")
+    public User addUser(@RequestBody User user) {
+        return userService.addUser(user);
+    }
+
+    @PostMapping("/user/initForTest")
+    void initUser(@RequestParam int internalUserNumber) {
         userService.initializeInternalUsers(internalUserNumber);
     }
 
@@ -41,6 +51,7 @@ public class UserController {
             return userService.getUserRewards(userName);
         return new ArrayList<>();
     }
+
     @GetMapping("/user/visitedLocations")
     public List<VisitedLocation> getVisitedLocations(@RequestBody User user) {
         return userService.getVisitedLocation(user);

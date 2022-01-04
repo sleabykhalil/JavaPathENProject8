@@ -3,8 +3,7 @@ package tourGuide;
 import gpsUtil.GpsUtil;
 import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.Test;
-import rewardCentral.RewardCentral;
-import tourGuide.feign.dto.User;
+import tourGuide.feign.dto.UserDte.User;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.feign.GpsApi;
@@ -62,8 +61,8 @@ public class TestRewardsService {
         InternalTestHelper.setInternalUserNumber(1);
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
 
-        rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
-        List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
+        rewardsService.calculateRewards(userApi.getAllUsers().get(0));
+        List<UserReward> userRewards = userApi.getUserRewords(userApi.getAllUsers().get(0));
         tourGuideService.tracker.stopTracking();
 
         assertEquals(gpsUtil.getAttractions().size(), userRewards.size());

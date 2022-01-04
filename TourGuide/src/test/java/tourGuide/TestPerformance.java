@@ -4,9 +4,9 @@ import gpsUtil.GpsUtil;
 import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import rewardCentral.RewardCentral;
-import tourGuide.feign.dto.User;
+import tourGuide.feign.dto.UserDte.User;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.feign.GpsApi;
@@ -25,8 +25,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class TestPerformance {
+    @Autowired
     GpsApi gpsApi;
+    @Autowired
     UserApi userApi;
+    @Autowired
     RewordApi rewordApi;
     /*
      * A note on performance improvements:
@@ -58,7 +61,7 @@ public class TestPerformance {
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService,gpsApi,userApi);
 
         List<User> allUsers = new ArrayList<>();
-        allUsers = tourGuideService.getAllUsers();
+        allUsers = userApi.getAllUsers();
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -86,7 +89,7 @@ public class TestPerformance {
 
         Attraction attraction = gpsApi.getAllAttraction().get(0);
         List<User> allUsers = new ArrayList<>();
-        allUsers = tourGuideService.getAllUsers();
+        allUsers = userApi.getAllUsers();
         allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
 
         allUsers.forEach(u -> rewardsService.calculateRewards(u));

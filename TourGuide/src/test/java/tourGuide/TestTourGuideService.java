@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import tourGuide.feign.GpsApi;
 import tourGuide.feign.RewordApi;
 import tourGuide.feign.UserApi;
-import tourGuide.feign.dto.User;
+import tourGuide.feign.dto.UserDte.User;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.helper.InternalTestHelper;
@@ -48,11 +48,11 @@ public class TestTourGuideService {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
 
-        tourGuideService.addUser(user);
-        tourGuideService.addUser(user2);
+        userApi.addUser(user);
+        userApi.addUser(user2);
 
-        User retrivedUser = tourGuideService.getUser(user.getUserName());
-        User retrivedUser2 = tourGuideService.getUser(user2.getUserName());
+        User retrivedUser = userApi.getUserByUserName(user.getUserName());
+        User retrivedUser2 = userApi.getUserByUserName(user2.getUserName());
 
         tourGuideService.tracker.stopTracking();
 
@@ -70,10 +70,10 @@ public class TestTourGuideService {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
 
-        tourGuideService.addUser(user);
-        tourGuideService.addUser(user2);
+        userApi.addUser(user);
+        userApi.addUser(user2);
 
-        List<User> allUsers = tourGuideService.getAllUsers();
+        List<User> allUsers = userApi.getAllUsers();
 
         tourGuideService.tracker.stopTracking();
 

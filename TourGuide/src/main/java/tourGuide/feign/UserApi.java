@@ -1,12 +1,9 @@
 package tourGuide.feign;
 
-import gpsUtil.location.VisitedLocation;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import tourGuide.user.User;
+import org.springframework.web.bind.annotation.*;
+import tourGuide.feign.dto.UserDte.User;
+import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.user.UserReward;
 import tripPricer.Provider;
 
@@ -18,8 +15,11 @@ public interface UserApi {
     @GetMapping("/users")
     List<User> getAllUsers();
 
-    @GetMapping("/user/initForTest")
-    void initUser(int internalUserNumber);
+    @GetMapping("/users/{userName}")
+    User getUserByUserName(@PathVariable String userName);
+
+    @PostMapping("/user/initForTest")
+    void initUser(@RequestParam int internalUserNumber);
 
     @GetMapping("/user/rewords")
     List<UserReward> getUserRewords(@RequestBody User user);
@@ -39,4 +39,6 @@ public interface UserApi {
     @PostMapping("/user/rewords/{userName}")
     void addUserReward(@PathVariable String userName, @RequestBody UserReward userReward);
 
+    @PostMapping("/users/addUser")
+    User addUser(@RequestBody User user);
 }

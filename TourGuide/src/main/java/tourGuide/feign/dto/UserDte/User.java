@@ -1,7 +1,6 @@
-package tourGuide.feign.dto;
+package tourGuide.feign.dto.UserDte;
 
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
-import tourGuide.user.UserPreferences;
 import tourGuide.user.UserReward;
 import tripPricer.Provider;
 
