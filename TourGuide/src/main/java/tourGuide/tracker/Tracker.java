@@ -1,6 +1,7 @@
 package tourGuide.tracker;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +33,8 @@ public class Tracker extends Thread {
      */
     public void stopTracking() {
         stop = true;
-        executorService.shutdownNow();
+        //executorService.shutdownNow();
+        executorService.shutdown();
     }
 
     @Override
@@ -47,8 +49,16 @@ public class Tracker extends Thread {
             List<User> users = userApi.getAllUsers();
             logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
             stopWatch.start();
-            users.forEach(u -> tourGuideService.trackUserLocation(u));
-            stopWatch.stop();
+            //users.forEach(u -> tourGuideService.trackUserLocation(u));
+            //tourGuideService.trackAllUserLocation(users);
+            CompletableFuture completableFuture = tourGuideService.trackAllUserLocation(users);
+            while (true) {
+                if (completableFuture.isDone()) {
+                    stopWatch.stop();
+                    break;
+                }
+            }
+            //stopWatch.stop();
             logger.debug("Tracker Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
             stopWatch.reset();
             try {

@@ -3,6 +3,7 @@ package tourGuide.service;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
@@ -34,6 +35,8 @@ public class TourGuideService {
     boolean testMode = true;
     GpsApi gpsApi;
     UserApi userApi;
+    ExecutorService executor = Executors.newFixedThreadPool(1000);
+    final Map<String, Integer> testTracingTimes = new ConcurrentHashMap<>();
 
     @Autowired
     public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService, GpsApi gpsApi, UserApi userApi) {
@@ -56,7 +59,6 @@ public class TourGuideService {
     }
 
 
-
     public VisitedLocation getUserLocation(User user) {
         VisitedLocation visitedLocation = (user.getVisitedLocations().size() > 0) ?
                 getLastVisitedLocation(user.getVisitedLocations()) :
@@ -65,7 +67,7 @@ public class TourGuideService {
     }
 
     private VisitedLocation getLastVisitedLocation(List<VisitedLocation> visitedLocations) {
-            return visitedLocations.get(visitedLocations.size() - 1);
+        return visitedLocations.get(visitedLocations.size() - 1);
     }
 
 
@@ -78,11 +80,38 @@ public class TourGuideService {
     }
 
     public VisitedLocation trackUserLocation(User user) {
-
+        addToTestMap(user);
         VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString());
         user.addToVisitedLocations(visitedLocation);
         rewardsService.calculateRewards(user);
         return visitedLocation;
+    }
+
+    private void addToTestMap(User user) {
+        if (testTracingTimes.containsKey(user.getUserName()))
+            testTracingTimes.put(user.getUserName(), testTracingTimes.get(user.getUserName()) + 1);
+        else
+            testTracingTimes.put(user.getUserName(), 1);
+    }
+
+    public Map<String, Integer> getTestTracingTimes() {
+        return testTracingTimes;
+    }
+
+    public CompletableFuture trackAllUserLocation(List<User> userList) {
+        CompletableFuture completableFuture = CompletableFuture.supplyAsync(() -> null);
+        for (User user : userList) {
+            completableFuture = completableFuture.thenCombine(CompletableFuture.supplyAsync(
+                    () -> trackUserLocation(user), executor), (x, y) -> null);
+        }
+/*        while (true) {
+            if (completableFuture.isDone()) {
+                logger.info("tracking all user done");
+                System.out.println("I am in service but fin");
+                break;
+            }
+        }*/
+        return completableFuture;
     }
 
     public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {

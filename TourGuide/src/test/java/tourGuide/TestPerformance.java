@@ -6,12 +6,12 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import tourGuide.feign.dto.UserDte.User;
-import tourGuide.feign.dto.gpsDto.Attraction;
-import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.feign.GpsApi;
 import tourGuide.feign.RewordApi;
 import tourGuide.feign.UserApi;
+import tourGuide.feign.dto.UserDte.User;
+import tourGuide.feign.dto.gpsDto.Attraction;
+import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
@@ -19,9 +19,10 @@ import tourGuide.service.TourGuideService;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class TestPerformance {
@@ -51,27 +52,41 @@ public class TestPerformance {
      *          assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
      */
 
-   // @Ignore
+    // @Ignore
     @Test
     public void highVolumeTrackLocation() {
         GpsUtil gpsUtil = new GpsUtil();
         RewardsService rewardsService = new RewardsService(gpsApi, rewordApi);
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-        InternalTestHelper.setInternalUserNumber(10);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService,gpsApi,userApi);
+        InternalTestHelper.setInternalUserNumber(100000);
+        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
 
         List<User> allUsers = new ArrayList<>();
         allUsers = userApi.getAllUsers();
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        for (User user : allUsers) {
+/*        for (User user : allUsers) {
             tourGuideService.trackUserLocation(user);
+        }*/
+        CompletableFuture completableFuture = new CompletableFuture();
+        completableFuture = tourGuideService.trackAllUserLocation(allUsers);
+        while (true) {
+            if (completableFuture.isDone()) {
+                stopWatch.stop();
+                tourGuideService.tracker.stopTracking();
+                break;
+            }
         }
-        stopWatch.stop();
-        tourGuideService.tracker.stopTracking();
-
         System.out.println("highVolumeTrackLocation: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
+//        for (String x : tourGuideService.getTestTracingTimes().keySet()) {
+//            System.out.println(x + " " + tourGuideService.getTestTracingTimes().get(x).toString());
+//        }
+
+        assertEquals(tourGuideService.getTestTracingTimes().size(), allUsers.size());
+        assertTrue(tourGuideService.getTestTracingTimes().containsValue(2));
+        assertFalse(tourGuideService.getTestTracingTimes().containsValue(1));
+
         assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 
@@ -79,13 +94,13 @@ public class TestPerformance {
     @Test
     public void highVolumeGetRewards() {
         GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsApi,rewordApi);
+        RewardsService rewardsService = new RewardsService(gpsApi, rewordApi);
 
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
         InternalTestHelper.setInternalUserNumber(100);
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService,gpsApi,userApi);
+        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
 
         Attraction attraction = gpsApi.getAllAttraction().get(0);
         List<User> allUsers = new ArrayList<>();
