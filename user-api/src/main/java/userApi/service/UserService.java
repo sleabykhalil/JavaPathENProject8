@@ -75,20 +75,21 @@ return userRepository.save(user);
      *
      **********************************************************************************/
     public void initializeInternalUsers(int internalUserNumber) {
+        userRepository.deleteAll();
         IntStream.range(0, internalUserNumber).forEach(i -> {
             String userName = "internalUser" + i;
             String phone = "000";
             String email = userName + "@tourGuide.com";
             User user = new User(UUID.randomUUID(), userName, phone, email);
-            generateUserLocationHistory(user);
             userRepository.addUser(userName, user);
+            generateUserLocationHistory(user);
         });
         logger.debug("Created " + internalUserNumber + " internal test users.");
     }
 
     private void generateUserLocationHistory(User user) {
         IntStream.range(0, 3).forEach(i -> {
-            user.addToVisitedLocations(new VisitedLocation(user.getUserId(), new Location(generateRandomLatitude(), generateRandomLongitude()), getRandomTime()));
+            addToVisitedLocations(user.getUserName(), new VisitedLocation(user.getUserId(), new Location(generateRandomLatitude(), generateRandomLongitude()), getRandomTime()));
         });
     }
 

@@ -59,9 +59,13 @@ public class TourGuideService {
 
     public VisitedLocation getUserLocation(User user) {
         VisitedLocation visitedLocation = (user.getVisitedLocations().size() > 0) ?
-                user.getLastVisitedLocation() :
+                getLastVisitedLocation(user.getVisitedLocations()) :
                 trackUserLocation(user);
         return visitedLocation;
+    }
+
+    private VisitedLocation getLastVisitedLocation(List<VisitedLocation> visitedLocations) {
+            return visitedLocations.get(visitedLocations.size() - 1);
     }
 
 

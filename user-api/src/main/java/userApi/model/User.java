@@ -24,6 +24,9 @@ public class User {
         this.userName = userName;
         this.phoneNumber = phoneNumber;
         this.emailAddress = emailAddress;
+        this.visitedLocations = new ArrayList<>();
+        this.userRewards = new ArrayList<>();
+        this.tripDeals = new ArrayList<>();
     }
 
     public UUID getUserId() {
@@ -58,10 +61,6 @@ public class User {
         return latestLocationTimestamp;
     }
 
-    public void addToVisitedLocations(VisitedLocation visitedLocation) {
-        visitedLocations.add(visitedLocation);
-    }
-
     public List<VisitedLocation> getVisitedLocations() {
         return visitedLocations;
     }
@@ -86,10 +85,6 @@ public class User {
 
     public void setUserPreferences(UserPreferences userPreferences) {
         this.userPreferences = userPreferences;
-    }
-
-    public VisitedLocation getLastVisitedLocation() {
-        return visitedLocations.get(visitedLocations.size() - 1);
     }
 
     public void setTripDeals(List<Provider> tripDeals) {

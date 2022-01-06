@@ -1,13 +1,21 @@
 package tourGuide.feign.dto.UserDte;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.javamoney.moneta.Money;
+
 
 import javax.money.CurrencyUnit;
 import javax.money.Monetary;
 
 public class UserPreferences {
     private int attractionProximity = Integer.MAX_VALUE;
+    //@JsonIgnore
     private CurrencyUnit currency = Monetary.getCurrency("USD");
+
+   /* @JsonSerialize(converter = MoneyJsonConverters.ToString.class)
+    @JsonDeserialize(converter = MoneyJsonConverters.FromString.class)*/
     private Money lowerPricePoint = Money.of(0, currency);
     private Money highPricePoint = Money.of(Integer.MAX_VALUE, currency);
     private int tripDuration = 1;
@@ -83,6 +91,18 @@ public class UserPreferences {
     }
 
     public UserPreferences(int attractionProximity, CurrencyUnit currency, Money lowerPricePoint, Money highPricePoint, int tripDuration, int ticketQuantity, int numberOfAdults, int numberOfChildren) {
+        this.attractionProximity = attractionProximity;
+        this.currency = currency;
+        this.lowerPricePoint = lowerPricePoint;
+        this.highPricePoint = highPricePoint;
+        this.tripDuration = tripDuration;
+        this.ticketQuantity = ticketQuantity;
+        this.numberOfAdults = numberOfAdults;
+        this.numberOfChildren = numberOfChildren;
+    }
+
+
+    public UserPreferences(int attractionProximity, Money lowerPricePoint, Money highPricePoint, int tripDuration, int ticketQuantity, int numberOfAdults, int numberOfChildren) {
         this.attractionProximity = attractionProximity;
         this.currency = currency;
         this.lowerPricePoint = lowerPricePoint;
