@@ -1,7 +1,6 @@
 package tourGuide.feign.dto.UserDte;
 
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
-import tourGuide.user.UserReward;
 import tripPricer.Provider;
 
 import java.util.ArrayList;

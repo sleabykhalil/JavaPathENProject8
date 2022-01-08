@@ -4,7 +4,9 @@ import gpsUtil.location.VisitedLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tripPricer.Provider;
+import userApi.dto.*;
 import userApi.model.User;
+import userApi.model.UserPreferences;
 import userApi.model.UserReward;
 import userApi.service.UserService;
 
@@ -15,6 +17,8 @@ import java.util.List;
 public class UserController {
     @Autowired
     UserService userService;
+//    @Autowired
+//    UserMapper userMapper;
 
     @GetMapping("/users")
     public List<User> getAllUsers() {
@@ -27,8 +31,55 @@ public class UserController {
     }
 
     @PostMapping("/users/addUser")
-    public User addUser(@RequestBody User user) {
+    public User addUser(@RequestBody UserDto userDto) {
+        User user = userDtoToUser(userDto);
         return userService.addUser(user);
+    }
+
+    private User userDtoToUser(UserDto userDto) {
+        User user = new User(userDto.getUserId(), userDto.getUserName(), userDto.getPhoneNumber(), userDto.getEmailAddress());
+        user.setLatestLocationTimestamp(userDto.getLatestLocationTimestamp());
+        user.setVisitedLocations(toVisitedLocations(userDto.getVisitedLocations()));
+        user.setUserRewards(toUserReward(userDto.getUserRewards()));
+        user.setUserPreferences(toUserPreferences(userDto.getUserPreferences()));
+        user.setTripDeals(toTripDeals(userDto.getTripDeals()));
+        return user;
+    }
+
+    private List<Provider> toTripDeals(List<ProviderDto> tripDeals) {
+        List<Provider> providerList = new ArrayList<>();
+        for (ProviderDto td :
+                tripDeals) {
+            providerList.add(new Provider(td.getTripId(), td.getName(), td.getPrice()));
+        }
+        return providerList;
+    }
+
+    private UserPreferences toUserPreferences(UserPreferencesDto userPreferencesDto) {
+        return new UserPreferences(userPreferencesDto.getAttractionProximity(),
+                userPreferencesDto.getCurrency(),
+                userPreferencesDto.getLowerPricePoint(),
+                userPreferencesDto.getHighPricePoint(),
+                userPreferencesDto.getTripDuration(),
+                userPreferencesDto.getTicketQuantity(),
+                userPreferencesDto.getNumberOfAdults(),
+                userPreferencesDto.getNumberOfChildren());
+    }
+
+    private List<UserReward> toUserReward(List<UserRewardDto> userRewards) {
+        List<UserReward> userRewardList = new ArrayList<>();
+        for (UserRewardDto ur : userRewards) {
+            userRewardList.add(new UserReward(ur.getVisitedLocation(), ur.getAttraction(), ur.getRewardPoints()));
+        }
+        return userRewardList;
+    }
+
+    private List<VisitedLocation> toVisitedLocations(List<VisitedLocationDto> visitedLocations) {
+        List<VisitedLocation> visitedLocationList = new ArrayList<>();
+        for (VisitedLocationDto vl : visitedLocations) {
+            visitedLocationList.add(new VisitedLocation(vl.getUserId(), vl.getLocation(), vl.getTimeVisited()));
+        }
+        return visitedLocationList;
     }
 
     @PostMapping("/user/initForTest")

@@ -40,7 +40,7 @@ public class UserService {
     }
 
     public User addUser(User user) {
-return userRepository.save(user);
+        return userRepository.save(user);
     }
 
     public List<User> getAllUsers() {
@@ -69,6 +69,7 @@ return userRepository.save(user);
         userToFind.getUserRewards().add(userReward);
         userRepository.save(userToFind);
     }
+
     /**********************************************************************************
      *
      * Methods Below: For Internal Testing

@@ -17,7 +17,6 @@ public class UserApi {
 
     @Bean
     public ObjectMapper objectMapper() {
-
         ObjectMapper mapper = new ObjectMapper()
                 .registerModule(new MoneyModule());
         return mapper;

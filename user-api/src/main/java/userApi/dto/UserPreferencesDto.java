@@ -1,13 +1,11 @@
-package userApi.model;
+package userApi.dto;
 
 import org.javamoney.moneta.Money;
 
 import javax.money.CurrencyUnit;
 import javax.money.Monetary;
 
-
-public class UserPreferences {
-
+public class UserPreferencesDto {
     private int attractionProximity = Integer.MAX_VALUE;
     private CurrencyUnit currency = Monetary.getCurrency("USD");
     private Money lowerPricePoint = Money.of(0, currency);
@@ -17,10 +15,10 @@ public class UserPreferences {
     private int numberOfAdults = 1;
     private int numberOfChildren = 0;
 
-    public UserPreferences() {
+    public UserPreferencesDto() {
     }
 
-    public UserPreferences(int attractionProximity, CurrencyUnit currency, Money lowerPricePoint, Money highPricePoint, int tripDuration, int ticketQuantity, int numberOfAdults, int numberOfChildren) {
+    public UserPreferencesDto(int attractionProximity, CurrencyUnit currency, Money lowerPricePoint, Money highPricePoint, int tripDuration, int ticketQuantity, int numberOfAdults, int numberOfChildren) {
         this.attractionProximity = attractionProximity;
         this.currency = currency;
         this.lowerPricePoint = lowerPricePoint;
@@ -31,12 +29,34 @@ public class UserPreferences {
         this.numberOfChildren = numberOfChildren;
     }
 
-    public void setAttractionProximity(int attractionProximity) {
-        this.attractionProximity = attractionProximity;
+    @Override
+    public String toString() {
+        return "UserPreferencesDto{" +
+                "attractionProximity=" + attractionProximity +
+                ", currency=" + currency +
+                ", lowerPricePoint=" + lowerPricePoint +
+                ", highPricePoint=" + highPricePoint +
+                ", tripDuration=" + tripDuration +
+                ", ticketQuantity=" + ticketQuantity +
+                ", numberOfAdults=" + numberOfAdults +
+                ", numberOfChildren=" + numberOfChildren +
+                '}';
     }
 
     public int getAttractionProximity() {
         return attractionProximity;
+    }
+
+    public void setAttractionProximity(int attractionProximity) {
+        this.attractionProximity = attractionProximity;
+    }
+
+    public CurrencyUnit getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(CurrencyUnit currency) {
+        this.currency = currency;
     }
 
     public Money getLowerPricePoint() {
@@ -86,5 +106,4 @@ public class UserPreferences {
     public void setNumberOfChildren(int numberOfChildren) {
         this.numberOfChildren = numberOfChildren;
     }
-
 }

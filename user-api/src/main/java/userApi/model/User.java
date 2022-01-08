@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class User {
-    private final UUID userId;
-    private final String userName;
+    private  UUID userId;
+    private  String userName;
     private String phoneNumber;
     private String emailAddress;
     private Date latestLocationTimestamp;
@@ -18,6 +18,9 @@ public class User {
     private List<UserReward> userRewards = new ArrayList<>();
     private UserPreferences userPreferences = new UserPreferences();
     private List<Provider> tripDeals = new ArrayList<>();
+
+    public User() {
+    }
 
     public User(UUID userId, String userName, String phoneNumber, String emailAddress) {
         this.userId = userId;
@@ -27,6 +30,14 @@ public class User {
         this.visitedLocations = new ArrayList<>();
         this.userRewards = new ArrayList<>();
         this.tripDeals = new ArrayList<>();
+    }
+
+    public void setVisitedLocations(List<VisitedLocation> visitedLocations) {
+        this.visitedLocations = visitedLocations;
+    }
+
+    public void setUserRewards(List<UserReward> userRewards) {
+        this.userRewards = userRewards;
     }
 
     public UUID getUserId() {

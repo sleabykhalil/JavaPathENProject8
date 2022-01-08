@@ -83,6 +83,7 @@ public class TourGuideService {
         addToTestMap(user);
         VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString());
         user.addToVisitedLocations(visitedLocation);
+        userApi.addUser(user);
         rewardsService.calculateRewards(user);
         return visitedLocation;
     }

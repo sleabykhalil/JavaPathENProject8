@@ -4,6 +4,7 @@ import gpsUtil.GpsUtil;
 import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.Test;
 import tourGuide.feign.dto.UserDte.User;
+import tourGuide.feign.dto.UserDte.UserReward;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.feign.GpsApi;
@@ -12,7 +13,6 @@ import tourGuide.feign.UserApi;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
-import tourGuide.user.UserReward;
 
 import java.util.Date;
 import java.util.List;
@@ -29,7 +29,7 @@ public class TestRewardsService {
     @Test
     public void userGetRewards() {
         GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsApi, rewordApi);
+        RewardsService rewardsService = new RewardsService(gpsApi, rewordApi, userApi);
 
         InternalTestHelper.setInternalUserNumber(0);
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
@@ -55,7 +55,7 @@ public class TestRewardsService {
     @Test
     public void nearAllAttractions() {
         GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsApi, rewordApi);
+        RewardsService rewardsService = new RewardsService(gpsApi, rewordApi, userApi);
         rewardsService.setProximityBuffer(Integer.MAX_VALUE);
 
         InternalTestHelper.setInternalUserNumber(1);

@@ -3,8 +3,8 @@ package tourGuide.feign;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 import tourGuide.feign.dto.UserDte.User;
+import tourGuide.feign.dto.UserDte.UserReward;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
-import tourGuide.user.UserReward;
 import tripPricer.Provider;
 
 import java.util.List;
