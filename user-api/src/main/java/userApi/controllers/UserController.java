@@ -15,6 +15,7 @@ import userApi.model.UserReward;
 import userApi.service.UserService;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -76,8 +77,8 @@ public class UserController {
         userService.setTripDeals(userName, providers);
     }
 
-    @PostMapping("/user/visitedLocation/{userName}")
-    public void addToVisitedLocations(@PathVariable String userName, @RequestBody VisitedLocationDto visitedLocationDto) {
+    @PostMapping("/user/addVisitedLocation")
+    public void addToVisitedLocations(@RequestParam String userName, @RequestParam String visitDate, @RequestBody VisitedLocationDto visitedLocationDto) {
         VisitedLocation visitedLocation = mapper.toVisitedLocation(visitedLocationDto);
         userService.addToVisitedLocations(userName, visitedLocation);
     }

@@ -61,8 +61,10 @@ public class UserService {
 
     public void addToVisitedLocations(String userName, VisitedLocation visitedLocation) {
         User userToFind = userRepository.getUserByUserName(userName);
-        userToFind.getVisitedLocations().add(visitedLocation);
-        userRepository.save(userToFind);
+        if (userToFind.getVisitedLocations().stream().filter(vl -> vl.equals(visitedLocation)).count() == 0) {
+            userToFind.getVisitedLocations().add(visitedLocation);
+            userRepository.save(userToFind);
+        }
     }
 
     public void addUserReward(String userName, UserReward userReward) {

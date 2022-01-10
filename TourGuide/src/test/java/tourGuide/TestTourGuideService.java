@@ -16,6 +16,7 @@ import tripPricer.Provider;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -33,7 +34,14 @@ public class TestTourGuideService {
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
+        VisitedLocation visitedLocation = null;
+        try {
+            visitedLocation = tourGuideService.trackUserLocation(user).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
         tourGuideService.tracker.stopTracking();
         assertEquals(visitedLocation.userId, user.getUserId());
     }
@@ -89,7 +97,14 @@ public class TestTourGuideService {
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
+        VisitedLocation visitedLocation = null;
+        try {
+            visitedLocation = tourGuideService.trackUserLocation(user).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
 
         tourGuideService.tracker.stopTracking();
 
@@ -105,7 +120,14 @@ public class TestTourGuideService {
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
+        VisitedLocation visitedLocation = null;
+        try {
+            visitedLocation = tourGuideService.trackUserLocation(user).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
 
         List<Attraction> attractions = tourGuideService.getNearByAttractions(visitedLocation);
 

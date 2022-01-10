@@ -35,7 +35,6 @@ public class TourGuideService {
     GpsApi gpsApi;
     UserApi userApi;
     ExecutorService executor = Executors.newFixedThreadPool(1500);
-    final Map<String, Integer> testTracingTimes = new ConcurrentHashMap<>();
 
     @Autowired
     public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService, GpsApi gpsApi, UserApi userApi) {
@@ -59,9 +58,16 @@ public class TourGuideService {
 
 
     public VisitedLocation getUserLocation(User user) {
-        VisitedLocation visitedLocation = (user.getVisitedLocations().size() > 0) ?
-                getLastVisitedLocation(user.getVisitedLocations()) :
-                trackUserLocation(user);
+        VisitedLocation visitedLocation = null;
+        try {
+            visitedLocation = (user.getVisitedLocations().size() > 0) ?
+                    getLastVisitedLocation(user.getVisitedLocations()) :
+                    trackUserLocation(user).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
         return visitedLocation;
     }
 
@@ -78,12 +84,20 @@ public class TourGuideService {
         return providers;
     }
 
-    public VisitedLocation trackUserLocation(User user) {
-        addToTestMap(user);
-        VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString());
+    public  CompletableFuture<VisitedLocation> trackUserLocation(User user) {
+        CompletableFuture<VisitedLocation> visitedLocationCompletableFuture;
+        visitedLocationCompletableFuture = CompletableFuture.supplyAsync(() -> {
+            VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString());
+            //user.addToVisitedLocations(visitedLocation);
+            userApi.addToVisitedLocations(user.getUserName(),visitedLocation.getTimeVisited().toString() ,visitedLocation);
+            return visitedLocation;
+        }).thenCombine(rewardsService.calculateRewards(user),(x,y)-> x);
+
+
+/*        VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString());
         //user.addToVisitedLocations(visitedLocation);
-        userApi.addToVisitedLocations(user.getUserName(),visitedLocation);
-        rewardsService.calculateRewards(user);
+        userApi.addToVisitedLocations(user.getUserName(), visitedLocation.getTimeVisited().toString(), visitedLocation);
+        rewardsService.calculateRewards(user);*/
 /*        try {
             rewardsService.calculateRewards(user).get();
         } catch (InterruptedException e) {
@@ -91,18 +105,8 @@ public class TourGuideService {
         } catch (ExecutionException e) {
             e.printStackTrace();
         }*/
-        return visitedLocation;
-    }
-
-    private void addToTestMap(User user) {
-        if (testTracingTimes.containsKey(user.getUserName()))
-            testTracingTimes.put(user.getUserName(), testTracingTimes.get(user.getUserName()) + 1);
-        else
-            testTracingTimes.put(user.getUserName(), 1);
-    }
-
-    public Map<String, Integer> getTestTracingTimes() {
-        return testTracingTimes;
+        return visitedLocationCompletableFuture;
+//return visitedLocationCompletableFuture.whenComplete();
     }
 
     public CompletableFuture trackAllUserLocation(List<User> userList) {

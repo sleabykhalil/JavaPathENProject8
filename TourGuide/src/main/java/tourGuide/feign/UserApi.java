@@ -33,8 +33,8 @@ public interface UserApi {
     @PostMapping("/user/tripDeals/{userName}")
     void setTripDeals(@PathVariable String userName, @RequestBody List<Provider> providers);
 
-    @PostMapping("/user/visitedLocation/{userName}")
-    void addToVisitedLocations(@PathVariable String userName, @RequestBody VisitedLocation visitedLocation);
+    @PostMapping("/user/addVisitedLocation")
+     void addToVisitedLocations(@RequestParam String userName, @RequestParam String visitDate, @RequestBody VisitedLocation visitedLocation);
 
     @PostMapping("/user/rewords/{userName}")
     void addUserReward(@PathVariable String userName, @RequestBody UserReward userReward);

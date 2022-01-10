@@ -32,8 +32,8 @@ public class Tracker extends Thread {
      */
     public void stopTracking() {
         stop = true;
-        //executorService.shutdownNow();
-        executorService.shutdown();
+        executorService.shutdownNow();
+        //executorService.shutdown();
     }
 
     @Override

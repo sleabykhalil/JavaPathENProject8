@@ -30,7 +30,7 @@ public class RewardsService {
     GpsApi gpsApi;
     RewordApi rewordApi;
     UserApi userApi;
-    ExecutorService executorService = Executors.newCachedThreadPool();
+    ExecutorService executorService = Executors.newFixedThreadPool(15000);
 
     @Autowired
     public RewardsService(GpsApi gpsApi, RewordApi rewordApi, UserApi userApi) {
