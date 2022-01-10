@@ -1,16 +1,7 @@
 package tourGuide.service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import tourGuide.feign.GpsApi;
 import tourGuide.feign.RewordApi;
 import tourGuide.feign.UserApi;
@@ -19,6 +10,12 @@ import tourGuide.feign.dto.UserDte.UserReward;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.Location;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class RewardsService {
@@ -33,8 +30,7 @@ public class RewardsService {
     GpsApi gpsApi;
     RewordApi rewordApi;
     UserApi userApi;
-    ExecutorService cpuBound = Executors.newFixedThreadPool(4);
-    ExecutorService ioBound = Executors.newCachedThreadPool();
+    ExecutorService executorService = Executors.newCachedThreadPool();
 
     @Autowired
     public RewardsService(GpsApi gpsApi, RewordApi rewordApi, UserApi userApi) {
@@ -45,14 +41,6 @@ public class RewardsService {
         //this.rewardsCentral = rewardCentral;
     }
 
-    public ExecutorService getCpuBound() {
-        return cpuBound;
-    }
-
-    public ExecutorService getIoBound() {
-        return ioBound;
-    }
-
     public void setProximityBuffer(int proximityBuffer) {
         this.proximityBuffer = proximityBuffer;
     }
@@ -61,14 +49,14 @@ public class RewardsService {
         proximityBuffer = defaultProximityBuffer;
     }
 
-    public CompletableFuture calculateRewardsForAllUser(List<User> userList) {
+/*    public CompletableFuture calculateRewardsForAllUser(List<User> userList) {
         CompletableFuture completableFuture = CompletableFuture.supplyAsync(() -> null);
         for (User user : userList) {
             completableFuture = completableFuture.thenCombine(CompletableFuture.supplyAsync(() -> calculateRewards(user), cpuBound),
                     (x, y) -> null);
         }
         return completableFuture;
-    }
+    }*/
 
     public CompletableFuture calculateRewards(User user) {
         List<VisitedLocation> userLocations = user.getVisitedLocations();
@@ -77,12 +65,21 @@ public class RewardsService {
         CompletableFuture completableFuture = new CompletableFuture<>();
         for (VisitedLocation visitedLocation : userLocations) {
             for (Attraction attraction : attractions) {
-                completableFuture = CompletableFuture.supplyAsync(() -> getUserReword(user, visitedLocation, attraction), cpuBound)
-                        .thenAcceptAsync((userReward -> {
+                completableFuture = CompletableFuture.supplyAsync(() -> getUserReword(user, visitedLocation, attraction),
+                                executorService)
+                        .thenAccept((userReward) -> {
                             if (userReward != null) {
                                 userApi.addUserReward(user.getUserName(), userReward);
                             }
-                        }), ioBound);
+                        });
+/*                completableFuture = CompletableFuture.supplyAsync(() -> {
+                            UserReward userReward = getUserReword(user, visitedLocation, attraction);
+                            if (userReward != null) {
+                                userApi.addUserReward(user.getUserName(), userReward);
+                            }
+                            return null;
+                        },
+                        executorService);*/
                 //userRewardSet.add(getUserReword(user, visitedLocation, attraction));
             }
         }
@@ -91,11 +88,27 @@ public class RewardsService {
         return completableFuture;
     }
 
+    public CompletableFuture calculateRewardsForListOfUser(List<User> userList) {
+        CompletableFuture completableFuture = CompletableFuture.supplyAsync(() -> null);
+        for (User user : userList) {
+            completableFuture = completableFuture.thenCombine(calculateRewards(user), (x, y) -> null);
+        }
+/*        try {
+            completableFuture.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }*/
+        return completableFuture;
+    }
+
     private UserReward getUserReword(User user, VisitedLocation visitedLocation, Attraction attraction) {
         if (user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
             if (nearAttraction(visitedLocation, attraction)) {
-                return (new UserReward(visitedLocation, attraction,
+                UserReward userReward = (new UserReward(visitedLocation, attraction,
                         rewordApi.getRewardPoints(user.getUserId().toString(), attraction.getAttractionId().toString())));
+                return userReward;
             }
         }
         return null;

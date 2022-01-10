@@ -1,12 +1,16 @@
 package userApi.controllers;
 
 import gpsUtil.location.VisitedLocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tripPricer.Provider;
-import userApi.dto.*;
+import userApi.dto.Mapper;
+import userApi.dto.UserDto;
+import userApi.dto.UserRewardDto;
+import userApi.dto.VisitedLocationDto;
 import userApi.model.User;
-import userApi.model.UserPreferences;
 import userApi.model.UserReward;
 import userApi.service.UserService;
 
@@ -15,8 +19,12 @@ import java.util.List;
 
 @RestController
 public class UserController {
+    private Logger logger = LoggerFactory.getLogger(UserController.class);
+
     @Autowired
     UserService userService;
+    //@Autowired
+    Mapper mapper = new Mapper();
 //    @Autowired
 //    UserMapper userMapper;
 
@@ -32,55 +40,10 @@ public class UserController {
 
     @PostMapping("/users/addUser")
     public User addUser(@RequestBody UserDto userDto) {
-        User user = userDtoToUser(userDto);
+        User user = mapper.userDtoToUser(userDto);
         return userService.addUser(user);
     }
 
-    private User userDtoToUser(UserDto userDto) {
-        User user = new User(userDto.getUserId(), userDto.getUserName(), userDto.getPhoneNumber(), userDto.getEmailAddress());
-        user.setLatestLocationTimestamp(userDto.getLatestLocationTimestamp());
-        user.setVisitedLocations(toVisitedLocations(userDto.getVisitedLocations()));
-        user.setUserRewards(toUserReward(userDto.getUserRewards()));
-        user.setUserPreferences(toUserPreferences(userDto.getUserPreferences()));
-        user.setTripDeals(toTripDeals(userDto.getTripDeals()));
-        return user;
-    }
-
-    private List<Provider> toTripDeals(List<ProviderDto> tripDeals) {
-        List<Provider> providerList = new ArrayList<>();
-        for (ProviderDto td :
-                tripDeals) {
-            providerList.add(new Provider(td.getTripId(), td.getName(), td.getPrice()));
-        }
-        return providerList;
-    }
-
-    private UserPreferences toUserPreferences(UserPreferencesDto userPreferencesDto) {
-        return new UserPreferences(userPreferencesDto.getAttractionProximity(),
-                userPreferencesDto.getCurrency(),
-                userPreferencesDto.getLowerPricePoint(),
-                userPreferencesDto.getHighPricePoint(),
-                userPreferencesDto.getTripDuration(),
-                userPreferencesDto.getTicketQuantity(),
-                userPreferencesDto.getNumberOfAdults(),
-                userPreferencesDto.getNumberOfChildren());
-    }
-
-    private List<UserReward> toUserReward(List<UserRewardDto> userRewards) {
-        List<UserReward> userRewardList = new ArrayList<>();
-        for (UserRewardDto ur : userRewards) {
-            userRewardList.add(new UserReward(ur.getVisitedLocation(), ur.getAttraction(), ur.getRewardPoints()));
-        }
-        return userRewardList;
-    }
-
-    private List<VisitedLocation> toVisitedLocations(List<VisitedLocationDto> visitedLocations) {
-        List<VisitedLocation> visitedLocationList = new ArrayList<>();
-        for (VisitedLocationDto vl : visitedLocations) {
-            visitedLocationList.add(new VisitedLocation(vl.getUserId(), vl.getLocation(), vl.getTimeVisited()));
-        }
-        return visitedLocationList;
-    }
 
     @PostMapping("/user/initForTest")
     void initUser(@RequestParam int internalUserNumber) {
@@ -114,12 +77,15 @@ public class UserController {
     }
 
     @PostMapping("/user/visitedLocation/{userName}")
-    public void addToVisitedLocations(@PathVariable String userName, @RequestBody VisitedLocation visitedLocation) {
+    public void addToVisitedLocations(@PathVariable String userName, @RequestBody VisitedLocationDto visitedLocationDto) {
+        VisitedLocation visitedLocation = mapper.toVisitedLocation(visitedLocationDto);
         userService.addToVisitedLocations(userName, visitedLocation);
     }
 
     @PostMapping("/user/rewords/{userName}")
-    public void addUserReward(@PathVariable String userName, @RequestBody UserReward userReward) {
+    public void addUserReward(@PathVariable String userName, @RequestBody UserRewardDto userRewardDto) {
+        logger.info("add user reword{} to user{}", userRewardDto.toString(), userName);
+        UserReward userReward = mapper.toUserReword(userRewardDto);
         userService.addUserReward(userName, userReward);
     }
 }

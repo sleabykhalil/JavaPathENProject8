@@ -20,8 +20,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class TestPerformance {
@@ -57,7 +59,7 @@ public class TestPerformance {
         GpsUtil gpsUtil = new GpsUtil();
         RewardsService rewardsService = new RewardsService(gpsApi, rewordApi, userApi);
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-        InternalTestHelper.setInternalUserNumber(10);
+        InternalTestHelper.setInternalUserNumber(100);
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
 
         List<User> allUsers = new ArrayList<>();
@@ -94,7 +96,7 @@ public class TestPerformance {
         RewardsService rewardsService = new RewardsService(gpsApi, rewordApi, userApi);
 
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
-        InternalTestHelper.setInternalUserNumber(10);
+        InternalTestHelper.setInternalUserNumber(10000);
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
@@ -103,22 +105,25 @@ public class TestPerformance {
         List<User> allUsers;
         allUsers = userApi.getAllUsers();
         allUsers.forEach(u -> {
-            u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date()));
-            userApi.addUser(u);
+            //u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date()));
+            userApi.addToVisitedLocations(u.getUserName(),new VisitedLocation(u.getUserId(), attraction, new Date()));
         });
         allUsers = userApi.getAllUsers();
 
-        // allUsers.forEach(u -> rewardsService.calculateRewards(u));
-        CompletableFuture completableFuture = rewardsService.calculateRewardsForAllUser(allUsers);
-        while (true) {
-            if (completableFuture.isDone()) {
-                break;
-            }
-        }
-        allUsers.clear();
-        allUsers.addAll(userApi.getAllUsers());
+        allUsers.forEach(u -> rewardsService.calculateRewards(u));
+
+//        CompletableFuture calculateRewardsForListOfUser = rewardsService.calculateRewardsForListOfUser(allUsers);
+//        while (true) {
+//            if (calculateRewardsForListOfUser.isDone()) {
+////                stopWatch.stop();
+////                tourGuideService.tracker.stopTracking();
+//                System.out.println("calculation done ");
+//                break;
+//            }
+//        }
+
         for (User user : allUsers) {
-            assertTrue(user.getUserRewards().size() > 0);
+            assertTrue(userApi.getUserByUserName(user.getUserName()).getUserRewards().size() > 0);
         }
         stopWatch.stop();
         tourGuideService.tracker.stopTracking();

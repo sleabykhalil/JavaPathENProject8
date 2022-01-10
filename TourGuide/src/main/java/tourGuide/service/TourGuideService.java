@@ -1,28 +1,27 @@
 package tourGuide.service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.stream.IntStream;
-
+import gpsUtil.GpsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-
-import gpsUtil.GpsUtil;
+import tourGuide.feign.GpsApi;
+import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDte.User;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.Location;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
-import tourGuide.feign.GpsApi;
-import tourGuide.feign.UserApi;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.tracker.Tracker;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
+
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.IntStream;
 
 @Service
 @Lazy
@@ -35,7 +34,7 @@ public class TourGuideService {
     boolean testMode = true;
     GpsApi gpsApi;
     UserApi userApi;
-    ExecutorService executor = Executors.newFixedThreadPool(1000);
+    ExecutorService executor = Executors.newFixedThreadPool(1500);
     final Map<String, Integer> testTracingTimes = new ConcurrentHashMap<>();
 
     @Autowired
@@ -82,9 +81,16 @@ public class TourGuideService {
     public VisitedLocation trackUserLocation(User user) {
         addToTestMap(user);
         VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString());
-        user.addToVisitedLocations(visitedLocation);
-        userApi.addUser(user);
+        //user.addToVisitedLocations(visitedLocation);
+        userApi.addToVisitedLocations(user.getUserName(),visitedLocation);
         rewardsService.calculateRewards(user);
+/*        try {
+            rewardsService.calculateRewards(user).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }*/
         return visitedLocation;
     }
 

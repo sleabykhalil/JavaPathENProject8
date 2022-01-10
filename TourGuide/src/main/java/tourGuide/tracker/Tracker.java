@@ -1,18 +1,17 @@
 package tourGuide.tracker;
 
+import org.apache.commons.lang3.time.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tourGuide.feign.UserApi;
+import tourGuide.feign.dto.UserDte.User;
+import tourGuide.service.TourGuideService;
+
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.lang3.time.StopWatch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import tourGuide.feign.UserApi;
-import tourGuide.feign.dto.UserDte.User;
-import tourGuide.service.TourGuideService;
 
 public class Tracker extends Thread {
     private Logger logger = LoggerFactory.getLogger(Tracker.class);
@@ -54,6 +53,8 @@ public class Tracker extends Thread {
             CompletableFuture completableFuture = tourGuideService.trackAllUserLocation(users);
             while (true) {
                 if (completableFuture.isDone()) {
+                    logger.debug("Tracker stop completableFuture of tracking is done.");
+
                     stopWatch.stop();
                     break;
                 }

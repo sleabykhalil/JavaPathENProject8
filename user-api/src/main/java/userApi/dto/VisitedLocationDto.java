@@ -1,19 +1,18 @@
 package userApi.dto;
 
-import gpsUtil.location.Location;
 
 import java.util.Date;
 import java.util.UUID;
 
 public class VisitedLocationDto {
     public  UUID userId;
-    public  Location location;
+    public  LocationDto location;
     public  Date timeVisited;
 
     public VisitedLocationDto() {
     }
 
-    public VisitedLocationDto(UUID userId, Location location, Date timeVisited) {
+    public VisitedLocationDto(UUID userId, LocationDto location, Date timeVisited) {
         this.userId = userId;
         this.location = location;
         this.timeVisited = timeVisited;
@@ -36,11 +35,11 @@ public class VisitedLocationDto {
         this.userId = userId;
     }
 
-    public Location getLocation() {
+    public LocationDto getLocation() {
         return location;
     }
 
-    public void setLocation(Location location) {
+    public void setLocation(LocationDto location) {
         this.location = location;
     }
 

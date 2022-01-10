@@ -4,13 +4,19 @@ import java.util.Date;
 import java.util.UUID;
 
 public class VisitedLocation {
-    public  UUID userId;
-    public  Location location;
+    public UUID userId;
+    public Location location;
     public Date timeVisited;
 
     public VisitedLocation(UUID userId, Location location, Date timeVisited) {
         this.userId = userId;
         this.location = location;
+        this.timeVisited = timeVisited;
+    }
+
+    public VisitedLocation(UUID userId, Attraction attraction, Date timeVisited) {
+        this.userId = userId;
+        this.location = new Location(attraction.getLatitude(), attraction.getLongitude());
         this.timeVisited = timeVisited;
     }
 
@@ -49,4 +55,5 @@ public class VisitedLocation {
                 ", timeVisited=" + timeVisited +
                 '}';
     }
+
 }

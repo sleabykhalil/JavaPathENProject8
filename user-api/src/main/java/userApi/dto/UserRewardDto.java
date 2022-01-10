@@ -1,17 +1,16 @@
 package userApi.dto;
 
-import gpsUtil.location.Attraction;
-import gpsUtil.location.VisitedLocation;
+
 
 public class UserRewardDto {
-    public  VisitedLocation visitedLocation;
-    public  Attraction attraction;
+    public  VisitedLocationDto visitedLocation;
+    public  AttractionDto attraction;
     private int rewardPoints;
 
     public UserRewardDto() {
     }
 
-    public UserRewardDto(VisitedLocation visitedLocation, Attraction attraction, int rewardPoints) {
+    public UserRewardDto(VisitedLocationDto visitedLocation, AttractionDto attraction, int rewardPoints) {
         this.visitedLocation = visitedLocation;
         this.attraction = attraction;
         this.rewardPoints = rewardPoints;
@@ -26,19 +25,19 @@ public class UserRewardDto {
                 '}';
     }
 
-    public VisitedLocation getVisitedLocation() {
+    public VisitedLocationDto getVisitedLocation() {
         return visitedLocation;
     }
 
-    public void setVisitedLocation(VisitedLocation visitedLocation) {
+    public void setVisitedLocation(VisitedLocationDto visitedLocation) {
         this.visitedLocation = visitedLocation;
     }
 
-    public Attraction getAttraction() {
+    public AttractionDto getAttraction() {
         return attraction;
     }
 
-    public void setAttraction(Attraction attraction) {
+    public void setAttraction(AttractionDto attraction) {
         this.attraction = attraction;
     }
 

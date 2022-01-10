@@ -32,6 +32,18 @@ public class User {
         this.tripDeals = new ArrayList<>();
     }
 
+    public User(UUID userId, String userName, String phoneNumber, String emailAddress, Date latestLocationTimestamp, List<VisitedLocation> visitedLocations, List<UserReward> userRewards, UserPreferences userPreferences, List<Provider> tripDeals) {
+        this.userId = userId;
+        this.userName = userName;
+        this.phoneNumber = phoneNumber;
+        this.emailAddress = emailAddress;
+        this.latestLocationTimestamp = latestLocationTimestamp;
+        this.visitedLocations = visitedLocations;
+        this.userRewards = userRewards;
+        this.userPreferences = userPreferences;
+        this.tripDeals = tripDeals;
+    }
+
     public void setVisitedLocations(List<VisitedLocation> visitedLocations) {
         this.visitedLocations = visitedLocations;
     }
