@@ -1,5 +1,6 @@
 package tourGuide;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class TourGuideController {
 
     @RequestMapping("/getLocation")
     public String getLocation(@RequestParam String userName) {
-        VisitedLocation visitedLocation = tourGuideService.getUserLocation(userApi.getUserByUserName(userName));
+        VisitedLocation visitedLocation = tourGuideService.getUserLocation(userApi.getUserByUserName(userName, new Date().toString()));
         return JsonStream.serialize(visitedLocation.location);
     }
 
@@ -48,13 +49,13 @@ public class TourGuideController {
     //    Note: Attraction reward points can be gathered from RewardsCentral
     @RequestMapping("/getNearbyAttractions")
     public String getNearbyAttractions(@RequestParam String userName) {
-        VisitedLocation visitedLocation = tourGuideService.getUserLocation(userApi.getUserByUserName(userName));
+        VisitedLocation visitedLocation = tourGuideService.getUserLocation(userApi.getUserByUserName(userName, new Date().toString()));
         return JsonStream.serialize(tourGuideService.getNearByAttractions(visitedLocation));
     }
 
     @RequestMapping("/getRewards")
     public String getRewards(@RequestParam String userName) {
-        return JsonStream.serialize(userApi.getUserRewordsById(userName));
+        return JsonStream.serialize(userApi.getUserRewordsById(userName, new Date().toString()));
     }
 
     @RequestMapping("/getAllCurrentLocations")
@@ -74,7 +75,7 @@ public class TourGuideController {
 
     @RequestMapping("/getTripDeals")
     public String getTripDeals(@RequestParam String userName) {
-        List<Provider> providers = tourGuideService.getTripDeals(userApi.getUserByUserName(userName));
+        List<Provider> providers = tourGuideService.getTripDeals(userApi.getUserByUserName(userName, new Date().toString()));
         return JsonStream.serialize(providers);
     }
 

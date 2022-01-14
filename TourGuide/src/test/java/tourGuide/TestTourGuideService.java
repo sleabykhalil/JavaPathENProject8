@@ -14,9 +14,10 @@ import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tripPricer.Provider;
 
+import javax.xml.crypto.Data;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -35,13 +36,7 @@ public class TestTourGuideService {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         VisitedLocation visitedLocation = null;
-        try {
-            visitedLocation = tourGuideService.trackUserLocation(user).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+        visitedLocation = tourGuideService.trackUserLocation(user);
         tourGuideService.tracker.stopTracking();
         assertEquals(visitedLocation.userId, user.getUserId());
     }
@@ -56,11 +51,11 @@ public class TestTourGuideService {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
 
-        userApi.addUser(user);
-        userApi.addUser(user2);
+        userApi.addUser(new Date().toString(), user);
+        userApi.addUser(new Date().toString(), user2);
 
-        User retrivedUser = userApi.getUserByUserName(user.getUserName());
-        User retrivedUser2 = userApi.getUserByUserName(user2.getUserName());
+        User retrivedUser = userApi.getUserByUserName(user.getUserName(), new Date().toString());
+        User retrivedUser2 = userApi.getUserByUserName(user2.getUserName(), new Date().toString());
 
         tourGuideService.tracker.stopTracking();
 
@@ -78,10 +73,10 @@ public class TestTourGuideService {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
 
-        userApi.addUser(user);
-        userApi.addUser(user2);
+        userApi.addUser(new Date().toString(), user);
+        userApi.addUser(new Date().toString(), user2);
 
-        List<User> allUsers = userApi.getAllUsers();
+        List<User> allUsers = userApi.getAllUsers(new Date().toString());
 
         tourGuideService.tracker.stopTracking();
 
@@ -98,14 +93,7 @@ public class TestTourGuideService {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         VisitedLocation visitedLocation = null;
-        try {
-            visitedLocation = tourGuideService.trackUserLocation(user).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-
+        visitedLocation = tourGuideService.trackUserLocation(user);
         tourGuideService.tracker.stopTracking();
 
         assertEquals(user.getUserId(), visitedLocation.userId);
@@ -121,14 +109,7 @@ public class TestTourGuideService {
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         VisitedLocation visitedLocation = null;
-        try {
-            visitedLocation = tourGuideService.trackUserLocation(user).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-
+        visitedLocation = tourGuideService.trackUserLocation(user);
         List<Attraction> attractions = tourGuideService.getNearByAttractions(visitedLocation);
 
         tourGuideService.tracker.stopTracking();

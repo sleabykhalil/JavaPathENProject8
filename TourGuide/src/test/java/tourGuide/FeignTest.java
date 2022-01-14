@@ -7,6 +7,7 @@ import tourGuide.feign.GpsApi;
 import tourGuide.feign.RewordApi;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 
+import java.util.Date;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -21,7 +22,7 @@ public class FeignTest {
     @Test
     void gpsGetAttractionForUser() {
 
-        VisitedLocation visitedLocation = gpsApi.getUserAttraction(UUID.randomUUID().toString());
+        VisitedLocation visitedLocation = gpsApi.getUserAttraction(UUID.randomUUID().toString(), new Date().toString());
 
         assertThat(visitedLocation).isNotNull();
     }
@@ -31,7 +32,7 @@ public class FeignTest {
         String attractionId = UUID.randomUUID().toString();
         String userId = UUID.randomUUID().toString();
 
-        int result = rewordApi.getRewardPoints(attractionId, userId);
+        int result = rewordApi.getRewardPoints(new Date().toString(), attractionId, userId);
 
         assertThat(result).isNotNull();
     }

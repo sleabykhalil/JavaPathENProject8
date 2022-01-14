@@ -1,5 +1,6 @@
 package userApi.service;
 
+import gpsUtil.location.Attraction;
 import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tripPricer.Provider;
+import userApi.dto.UserRewardDto;
 import userApi.dto.VisitedLocationDto;
 import userApi.model.User;
 import userApi.model.UserReward;
@@ -73,6 +75,15 @@ public class UserService {
         userRepository.save(userToFind);
     }
 
+    public List<UserReward> addUserRewardList(String userName, List<UserReward> userRewards) {
+        User userToFind = userRepository.getUserByUserName(userName);
+        for (UserReward userReward : userRewards) {
+            userToFind.getUserRewards().add(userReward);
+        }
+        userRepository.save(userToFind);
+        return userToFind.getUserRewards();
+    }
+
     /**********************************************************************************
      *
      * Methods Below: For Internal Testing
@@ -89,6 +100,14 @@ public class UserService {
             generateUserLocationHistory(user);
         });
         logger.debug("Created " + internalUserNumber + " internal test users.");
+    }
+
+    public void addVisitedLocationForTest(Attraction attraction) {
+        List<User> allUser = userRepository.getAllUser();
+        for (User user : allUser) {
+            user.getVisitedLocations().add(new VisitedLocation(user.getUserId(), new Location(attraction.latitude, attraction.longitude), getRandomTime()));
+            userRepository.save(user);
+        }
     }
 
     private void generateUserLocationHistory(User user) {

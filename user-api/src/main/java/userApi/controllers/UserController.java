@@ -6,16 +6,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tripPricer.Provider;
-import userApi.dto.Mapper;
-import userApi.dto.UserDto;
-import userApi.dto.UserRewardDto;
-import userApi.dto.VisitedLocationDto;
+import userApi.dto.*;
 import userApi.model.User;
 import userApi.model.UserReward;
 import userApi.service.UserService;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -29,64 +25,84 @@ public class UserController {
 //    @Autowired
 //    UserMapper userMapper;
 
-    @GetMapping("/users")
-    public List<User> getAllUsers() {
+    @GetMapping("/users/{timeStamp}")
+    public List<User> getAllUsers(@PathVariable String timeStamp) {
+        logger.info("/users/timeStamp{}",timeStamp);
         return userService.getAllUsers();
     }
 
-    @GetMapping("/users/{userName}")
-    public User getUserByUserName(@PathVariable String userName) {
+    @GetMapping("/users/{userName}/{timeStamp}")
+    public User getUserByUserName(@PathVariable String userName, @PathVariable String timeStamp) {
+        logger.info("/users/userName{}/timeStamp{}", userName, timeStamp);
         return userService.getUser(userName);
     }
 
-    @PostMapping("/users/addUser")
-    public User addUser(@RequestBody UserDto userDto) {
+    @PostMapping("/users/addUser/{timeStamp}")
+    public User addUser(@PathVariable String timeStamp, @RequestBody UserDto userDto) {
+        logger.info("/users/addUser/timeStamp{} userName={}", timeStamp, userDto.getUserName());
         User user = mapper.userDtoToUser(userDto);
         return userService.addUser(user);
     }
 
 
-    @PostMapping("/user/initForTest")
-    void initUser(@RequestParam int internalUserNumber) {
+    @PostMapping("/users/initForTest/{timeStamp}")
+    void initUser(@PathVariable String timeStamp, @RequestParam int internalUserNumber) {
+        logger.info("/users/initForTest/timeStamp{}", timeStamp);
         userService.initializeInternalUsers(internalUserNumber);
     }
-
-    @GetMapping("/user/rewords")
-    public List<UserReward> getUserRewords(@RequestBody User user) {
-
-        if (!(user == null))
+    @PostMapping("/users/initForTest/addVisitedLocation/{timeStamp}")
+    void initUserByAddVisitedLocation(@PathVariable String timeStamp, @RequestBody AttractionDto attractionDto) {
+        logger.info("/users/initForTest/addVisitedLocation/timeStamp{}", timeStamp);
+        userService.addVisitedLocationForTest(mapper.toAttraction(attractionDto));
+    }
+    @GetMapping("/users/rewards/{timeStamp}")
+    public List<UserReward> getUserRewords(@PathVariable String timeStamp, @RequestBody User user) {
+        logger.info("/users/rewards/timeStamp{}", timeStamp);
+        if (!(user == null)) {
             return userService.getUserRewards(user);
-
+        }
         return new ArrayList<>();
     }
 
-    @GetMapping("/user/rewords/{userName}")
-    public List<UserReward> getUserRewordsById(@PathVariable String userName) {
-        if (!(userName == null))
+    @GetMapping("/users/rewards/{userName}/{timeStamp}")
+    public List<UserReward> getUserRewordsById(@PathVariable String userName, @PathVariable String timeStamp) {
+        logger.info("/users/rewards/userName{}/timeStamp{}", userName, timeStamp);
+        if (userName != null) {
             return userService.getUserRewards(userName);
+        }
         return new ArrayList<>();
     }
 
-    @GetMapping("/user/visitedLocations")
-    public List<VisitedLocation> getVisitedLocations(@RequestBody User user) {
+    @GetMapping("/users/visitedLocations/{timeStamp}")
+    public List<VisitedLocation> getVisitedLocations(@PathVariable String timeStamp, @RequestBody User user) {
+        logger.info("/users/visitedLocations/timeStamp{}", timeStamp);
         return userService.getVisitedLocation(user);
     }
 
-    @PostMapping("/user/tripDeals/{userName}")
-    public void setTripDeals(@PathVariable String userName, @RequestBody List<Provider> providers) {
+    @PostMapping("/users/tripDeals/{userName}/{timeStamp}")
+    public void setTripDeals(@PathVariable String userName, @PathVariable String timeStamp, @RequestBody List<Provider> providers) {
+        logger.info("/users/tripDeals/userName{}/timeStamp{}", userName, timeStamp);
         userService.setTripDeals(userName, providers);
     }
 
-    @PostMapping("/user/addVisitedLocation")
-    public void addToVisitedLocations(@RequestParam String userName, @RequestParam String visitDate, @RequestBody VisitedLocationDto visitedLocationDto) {
+    @PostMapping("/users/addVisitedLocation/{timeStamp}")
+    public void addToVisitedLocations(@PathVariable String timeStamp, @RequestParam String userName, @RequestParam String visitDate, @RequestBody VisitedLocationDto visitedLocationDto) {
+        logger.info("/users/addVisitedLocation/userName{}/timeStamp{}", userName, timeStamp);
         VisitedLocation visitedLocation = mapper.toVisitedLocation(visitedLocationDto);
         userService.addToVisitedLocations(userName, visitedLocation);
     }
 
-    @PostMapping("/user/rewords/{userName}")
-    public void addUserReward(@PathVariable String userName, @RequestBody UserRewardDto userRewardDto) {
-        logger.info("add user reword{} to user{}", userRewardDto.toString(), userName);
+    @PostMapping("/users/addReward/{userName}/{timeStamp}")
+    public void addUserReward(@PathVariable String timeStamp, @PathVariable String userName, @RequestBody UserRewardDto userRewardDto) {
+        logger.info("/users/addReward/userName{}/timeStamp{}", userName, timeStamp);
         UserReward userReward = mapper.toUserReword(userRewardDto);
         userService.addUserReward(userName, userReward);
+    }
+
+    @PostMapping("/users/addRewardList/{userName}/{timeStamp}")
+    public List<UserRewardDto> addUserRewardList(@PathVariable String timeStamp, @PathVariable String userName, @RequestBody List<UserRewardDto> userRewardDto) {
+        logger.info("/users/addRewardList/userName{}/timeStamp{}", userName, timeStamp);
+        List<UserReward> userRewards = mapper.toUserRewardList(userRewardDto);
+       return mapper.toUserRewordListDto( userService.addUserRewardList(userName, userRewards));
     }
 }

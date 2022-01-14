@@ -16,7 +16,7 @@ public class Mapper {
         User user = new User(userDto.getUserId(), userDto.getUserName(), userDto.getPhoneNumber(), userDto.getEmailAddress(),
                 userDto.getLatestLocationTimestamp(),
                 toVisitedLocations(userDto.getVisitedLocations()),
-                toUserReward(userDto.getUserRewards()),
+                toUserRewardList(userDto.getUserRewards()),
                 toUserPreferences(userDto.getUserPreferences()),
                 toTripDeals(userDto.getTripDeals()));
 /*        user.setLatestLocationTimestamp(userDto.getLatestLocationTimestamp());
@@ -46,7 +46,7 @@ public class Mapper {
                 userPreferencesDto.getNumberOfChildren());
     }
 
-    private List<UserReward> toUserReward(List<UserRewardDto> userRewards) {
+    public List<UserReward> toUserRewardList(List<UserRewardDto> userRewards) {
         List<UserReward> userRewardList = new ArrayList<>();
         for (UserRewardDto ur : userRewards) {
             userRewardList.add(new UserReward(toVisitedLocation(ur.getVisitedLocation()), toAttraction(ur.getAttraction()), ur.getRewardPoints()));
@@ -54,7 +54,7 @@ public class Mapper {
         return userRewardList;
     }
 
-    private Attraction toAttraction(AttractionDto attractionDto) {
+    public Attraction toAttraction(AttractionDto attractionDto) {
         return new Attraction(attractionDto.attractionName, attractionDto.city, attractionDto.state, attractionDto.latitude, attractionDto.longitude);
     }
 
@@ -76,6 +76,26 @@ public class Mapper {
 
     public UserReward toUserReword(UserRewardDto userRewardDto) {
         return new UserReward(toVisitedLocation(userRewardDto.getVisitedLocation()),
-                toAttraction(userRewardDto.getAttraction()),userRewardDto.getRewardPoints());
+                toAttraction(userRewardDto.getAttraction()), userRewardDto.getRewardPoints());
+    }
+
+    public List<UserRewardDto> toUserRewordListDto(List<UserReward> UserRewardList) {
+        List<UserRewardDto> userRewardDtoList = new ArrayList<>();
+        for (UserReward ur : UserRewardList) {
+            userRewardDtoList.add(new UserRewardDto(toVisitedLocationDto(ur.getVisitedLocation()), toAttractionDto(ur.getAttraction()), ur.getRewardPoints()));
+        }
+        return userRewardDtoList;
+    }
+
+    private AttractionDto toAttractionDto(Attraction attraction) {
+        return new AttractionDto(attraction.attractionName, attraction.city, attraction.state, attraction.attractionId);
+    }
+
+    private VisitedLocationDto toVisitedLocationDto(VisitedLocation visitedLocation) {
+        return new VisitedLocationDto(visitedLocation.userId, toLocationDto(visitedLocation.location), visitedLocation.timeVisited);
+    }
+
+    private LocationDto toLocationDto(Location location) {
+        return new LocationDto(location.latitude, location.longitude);
     }
 }

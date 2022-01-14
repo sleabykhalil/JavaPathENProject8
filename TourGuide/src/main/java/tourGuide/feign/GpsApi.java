@@ -11,9 +11,9 @@ import java.util.List;
 @FeignClient(name = "GpsApi", url = "http://localhost:8083")
 public interface GpsApi {
 
-    @GetMapping("gps/attractions")
-    List<Attraction> getAllAttraction();
+    @GetMapping("gps/attractions/{timeStamp}")
+    List<Attraction> getAllAttraction(@PathVariable String timeStamp);
 
-    @GetMapping("gps/attraction/{userId}")
-    VisitedLocation getUserAttraction(@PathVariable String userId);
+    @GetMapping("gps/attraction/{userId}/{timeStamp}")
+    VisitedLocation getUserAttraction(@PathVariable String userId, @PathVariable String timeStamp);
 }
