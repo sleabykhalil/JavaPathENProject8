@@ -7,16 +7,18 @@ import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDte.User;
 import tourGuide.service.TourGuideService;
 
+import javax.xml.crypto.Data;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class Tracker extends Thread {
+public class Tracker {
     private Logger logger = LoggerFactory.getLogger(Tracker.class);
     private static final long trackingPollingInterval = TimeUnit.MINUTES.toSeconds(5);
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final TourGuideService tourGuideService;
     private boolean stop = false;
     private UserApi userApi;
@@ -24,7 +26,7 @@ public class Tracker extends Thread {
     public Tracker(TourGuideService tourGuideService, UserApi userApi) {
         this.tourGuideService = tourGuideService;
         this.userApi = userApi;
-        executorService.submit(this);
+        executorService.submit(this::runTracking);
     }
 
     /**
@@ -35,9 +37,15 @@ public class Tracker extends Thread {
         executorService.shutdownNow();
         //executorService.shutdown();
     }
+    public void startTracking(){
+        this.executorService=Executors.newSingleThreadExecutor();
+        executorService.submit(this::runTracking);
+        stop = false;
+        logger.debug("restart tracker");
+    }
 
-    @Override
-    public void run() {
+    //@Override
+    public void runTracking() {
         StopWatch stopWatch = new StopWatch();
         while (true) {
             if (Thread.currentThread().isInterrupted() || stop) {
@@ -45,7 +53,7 @@ public class Tracker extends Thread {
                 break;
             }
 
-            List<User> users = userApi.getAllUsers();
+            List<User> users = userApi.getAllUsers(new Date().toString());
             logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
             stopWatch.start();
             //users.forEach(u -> tourGuideService.trackUserLocation(u));
@@ -54,7 +62,6 @@ public class Tracker extends Thread {
             while (true) {
                 if (completableFuture.isDone()) {
                     logger.debug("Tracker stop completableFuture of tracking is done.");
-
                     stopWatch.stop();
                     break;
                 }

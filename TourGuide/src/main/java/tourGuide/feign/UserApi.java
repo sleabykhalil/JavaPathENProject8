@@ -12,33 +12,36 @@ import java.util.List;
 @FeignClient(name = "user-Api", url = "http://localhost:8081")
 public interface UserApi {
 
-    @GetMapping("/users")
-    List<User> getAllUsers();
+    @GetMapping("/users/{timeStamp}")
+    List<User> getAllUsers(@PathVariable String timeStamp);
 
-    @GetMapping("/users/{userName}")
-    User getUserByUserName(@PathVariable String userName);
+    @GetMapping("/users/{userName}/{timeStamp}")
+    User getUserByUserName(@PathVariable String userName, @PathVariable String timeStamp);
 
-    @PostMapping("/user/initForTest")
-    void initUser(@RequestParam int internalUserNumber);
+    @PostMapping("/users/addUser/{timeStamp}")
+    User addUser(@PathVariable String timeStamp, @RequestBody User userDto);
 
-    @GetMapping("/user/rewords")
-    List<UserReward> getUserRewords(@RequestBody User user);
+    @PostMapping("/users/initForTest/{timeStamp}")
+    void initUser(@PathVariable String timeStamp, @RequestParam int internalUserNumber);
 
-    @GetMapping("/user/rewords/{userName}")
-    List<UserReward> getUserRewordsById(@PathVariable String userName);
+    @GetMapping("/users/rewards/{timeStamp}")
+    List<UserReward> getUserRewords(@PathVariable String timeStamp, @RequestBody User user);
 
-    @GetMapping("/user/visitedLocations")
-    List<VisitedLocation> getVisitedLocations(@RequestBody User user);
+    @GetMapping("/users/rewards/{userName}/{timeStamp}")
+    List<UserReward> getUserRewordsById(@PathVariable String userName, @PathVariable String timeStamp);
 
-    @PostMapping("/user/tripDeals/{userName}")
-    void setTripDeals(@PathVariable String userName, @RequestBody List<Provider> providers);
+    @GetMapping("/users/visitedLocations/{timeStamp}")
+    List<VisitedLocation> getVisitedLocations(@PathVariable String timeStamp, @RequestBody User user);
 
-    @PostMapping("/user/addVisitedLocation")
-     void addToVisitedLocations(@RequestParam String userName, @RequestParam String visitDate, @RequestBody VisitedLocation visitedLocation);
+    @PostMapping("/users/tripDeals/{userName}/{timeStamp}")
+    void setTripDeals(@PathVariable String userName, @PathVariable String timeStamp, @RequestBody List<Provider> providers);
 
-    @PostMapping("/user/rewords/{userName}")
-    void addUserReward(@PathVariable String userName, @RequestBody UserReward userReward);
+    @PostMapping("/users/addVisitedLocation/{timeStamp}")
+    void addToVisitedLocations(@PathVariable String timeStamp, @RequestParam String userName, @RequestParam String visitDate, @RequestBody VisitedLocation visitedLocation);
 
-    @PostMapping("/users/addUser")
-    User addUser(@RequestBody User user);
+    @PostMapping("/users/addReward/{userName}/{timeStamp}")
+    void addUserReward(@PathVariable String timeStamp, @PathVariable String userName, @RequestBody UserReward userReward);
+
+    @PostMapping("/users/addRewardList/{userName}/{timeStamp}")
+    List<UserReward> addUserRewardList(@PathVariable String timeStamp, @PathVariable String userName, @RequestBody List<UserReward> userRewardListDto);
 }

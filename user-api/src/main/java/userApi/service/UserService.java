@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tripPricer.Provider;
+import userApi.dto.UserRewardDto;
 import userApi.dto.VisitedLocationDto;
 import userApi.model.User;
 import userApi.model.UserReward;
@@ -71,6 +72,15 @@ public class UserService {
         User userToFind = userRepository.getUserByUserName(userName);
         userToFind.getUserRewards().add(userReward);
         userRepository.save(userToFind);
+    }
+
+    public List<UserReward> addUserRewardList(String userName, List<UserReward> userRewards) {
+        User userToFind = userRepository.getUserByUserName(userName);
+        for (UserReward userReward : userRewards) {
+            userToFind.getUserRewards().add(userReward);
+        }
+        userRepository.save(userToFind);
+        return userToFind.getUserRewards();
     }
 
     /**********************************************************************************

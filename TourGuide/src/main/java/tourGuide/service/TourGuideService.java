@@ -12,6 +12,7 @@ import tourGuide.feign.dto.UserDte.User;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.Location;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
+import tourGuide.helper.DateTimeHelper;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.tracker.Tracker;
 import tripPricer.Provider;
@@ -32,9 +33,10 @@ public class TourGuideService {
     private final TripPricer tripPricer = new TripPricer();
     public final Tracker tracker;
     boolean testMode = true;
+    private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
     GpsApi gpsApi;
     UserApi userApi;
-    ExecutorService executor = Executors.newFixedThreadPool(1500);
+    ExecutorService executorService = Executors.newFixedThreadPool(50);
 
     @Autowired
     public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService, GpsApi gpsApi, UserApi userApi) {
@@ -48,7 +50,7 @@ public class TourGuideService {
         if (testMode) {
             logger.info("TestMode enabled");
             logger.debug("Initializing users");
-            userApi.initUser(InternalTestHelper.getInternalUserNumber());
+            userApi.initUser(new Date().toString(), InternalTestHelper.getInternalUserNumber());
             //initializeInternalUsers();
             logger.debug("Finished initializing users");
         }
@@ -59,15 +61,9 @@ public class TourGuideService {
 
     public VisitedLocation getUserLocation(User user) {
         VisitedLocation visitedLocation = null;
-        try {
-            visitedLocation = (user.getVisitedLocations().size() > 0) ?
-                    getLastVisitedLocation(user.getVisitedLocations()) :
-                    trackUserLocation(user).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+        visitedLocation = (user.getVisitedLocations().size() > 0) ?
+                getLastVisitedLocation(user.getVisitedLocations()) :
+                trackUserLocation(user);
         return visitedLocation;
     }
 
@@ -84,36 +80,21 @@ public class TourGuideService {
         return providers;
     }
 
-    public  CompletableFuture<VisitedLocation> trackUserLocation(User user) {
-        CompletableFuture<VisitedLocation> visitedLocationCompletableFuture;
-        visitedLocationCompletableFuture = CompletableFuture.supplyAsync(() -> {
-            VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString());
-            //user.addToVisitedLocations(visitedLocation);
-            userApi.addToVisitedLocations(user.getUserName(),visitedLocation.getTimeVisited().toString() ,visitedLocation);
-            return visitedLocation;
-        }).thenCombine(rewardsService.calculateRewards(user),(x,y)-> x);
+    public VisitedLocation trackUserLocation(User user) {
 
+        VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString(), new Date().toString());
+        userApi.addToVisitedLocations(dateTimeHelper.getTimeStamp(), user.getUserName(), visitedLocation.getTimeVisited().toString(), visitedLocation);
 
-/*        VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString());
-        //user.addToVisitedLocations(visitedLocation);
-        userApi.addToVisitedLocations(user.getUserName(), visitedLocation.getTimeVisited().toString(), visitedLocation);
-        rewardsService.calculateRewards(user);*/
-/*        try {
-            rewardsService.calculateRewards(user).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }*/
-        return visitedLocationCompletableFuture;
-//return visitedLocationCompletableFuture.whenComplete();
+        rewardsService.calculateRewards(user);
+
+        return visitedLocation;
     }
 
     public CompletableFuture trackAllUserLocation(List<User> userList) {
         CompletableFuture completableFuture = CompletableFuture.supplyAsync(() -> null);
         for (User user : userList) {
             completableFuture = completableFuture.thenCombine(CompletableFuture.supplyAsync(
-                    () -> trackUserLocation(user), executor), (x, y) -> null);
+                    () -> trackUserLocation(user), executorService), (x, y) -> null);
         }
 /*        while (true) {
             if (completableFuture.isDone()) {
@@ -127,7 +108,7 @@ public class TourGuideService {
 
     public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
         List<Attraction> nearbyAttractions = new ArrayList<>();
-        for (Attraction attraction : gpsApi.getAllAttraction()) {
+        for (Attraction attraction : gpsApi.getAllAttraction(new Date().toString())) {
             if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
                 nearbyAttractions.add(attraction);
             }

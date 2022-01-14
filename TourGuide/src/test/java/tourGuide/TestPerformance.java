@@ -1,6 +1,5 @@
 package tourGuide;
 
-import feign.RetryableException;
 import gpsUtil.GpsUtil;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.Test;
@@ -12,6 +11,7 @@ import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDte.User;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
+import tourGuide.helper.DateTimeHelper;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
@@ -19,11 +19,8 @@ import tourGuide.service.TourGuideService;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -34,6 +31,8 @@ public class TestPerformance {
     UserApi userApi;
     @Autowired
     RewordApi rewordApi;
+
+    DateTimeHelper dateTimeHelper = new DateTimeHelper();
     /*
      * A note on performance improvements:
      *
@@ -60,11 +59,11 @@ public class TestPerformance {
         GpsUtil gpsUtil = new GpsUtil();
         RewardsService rewardsService = new RewardsService(gpsApi, rewordApi, userApi);
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-        InternalTestHelper.setInternalUserNumber(100);
+        InternalTestHelper.setInternalUserNumber(6666);
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
 
         List<User> allUsers = new ArrayList<>();
-        allUsers = userApi.getAllUsers();
+        allUsers = userApi.getAllUsers(new Date().toString());
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -97,36 +96,66 @@ public class TestPerformance {
         RewardsService rewardsService = new RewardsService(gpsApi, rewordApi, userApi);
 
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
-        InternalTestHelper.setInternalUserNumber(6667);
+        InternalTestHelper.setInternalUserNumber(100000);
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
-
-        Attraction attraction = gpsApi.getAllAttraction().get(0);
+        //tourGuideService.tracker.stopTracking();
+        Attraction attraction = gpsApi.getAllAttraction(new Date().toString()).get(0);
         List<User> allUsers;
-        allUsers = userApi.getAllUsers();
-        allUsers.parallelStream().forEach(u -> {
+        allUsers = userApi.getAllUsers(new Date().toString());
+        System.out.println("Add attraction for test");
+        allUsers.stream().forEach(u -> {
             VisitedLocation visitedLocation = new VisitedLocation(u.getUserId(), attraction, new Date());
-            userApi.addToVisitedLocations(u.getUserName(), visitedLocation.getTimeVisited().toString(), visitedLocation);
+            userApi.addToVisitedLocations(dateTimeHelper.getTimeStamp(), u.getUserName(), visitedLocation.getTimeVisited().toString(), visitedLocation);
         });
-/*        allUsers.forEach(u -> {
-            VisitedLocation visitedLocation = new VisitedLocation(u.getUserId(), attraction, new Date());
-            userApi.addToVisitedLocations(u.getUserName(), visitedLocation.getTimeVisited().toString(), visitedLocation);
-        });*/
-        allUsers = userApi.getAllUsers();
+        System.out.println("Add attraction is done");
 
-//        allUsers.forEach(u -> rewardsService.calculateRewards(u));
+        //tourGuideService.tracker.startTracking();
 
-        CompletableFuture calculateRewardsForListOfUser = rewardsService.calculateRewardsForListOfUser(allUsers);
-        while (true) {
-            if (calculateRewardsForListOfUser.isDone()) {
-                System.out.println("calculation done ");
-                break;
-            }
+
+        // allUsers.forEach(u -> rewardsService.calculateRewards(u));
+//
+////        CompletableFuture calculateRewardsForListOfUser = rewardsService.calculateRewardsForListOfUser(allUsers);
+////        while (true) {
+////            if (calculateRewardsForListOfUser.isDone()) {
+////                System.out.println("calculation done ");
+////                break;
+////            }
+////        }
+//        allUsers = userApi.getAllUsers(new Date().toString());
+//
+//        CompletableFuture completableFuture = new CompletableFuture();
+//        completableFuture = rewardsService.calculateRewardsForListOfUser(allUsers);
+//
+//        while (true) {
+//            if (completableFuture.isDone()) {
+//                //stopWatch.stop();
+//                //tourGuideService.tracker.stopTracking();
+//                break;
+//            }
+//        }
+//        try {
+//            completableFuture.get();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        }
+
+//        allUsers.parallelStream().forEach(u -> rewardsService.calculateRewards(u));
+
+        allUsers = userApi.getAllUsers(new Date().toString());
+
+        while (allUsers.size() != 0) {
+            allUsers.removeIf(user -> userApi.getUserByUserName(user.getUserName(), new Date().toString()).getUserRewards().size() > 0);
+            System.out.println("##############" + allUsers.size() + "###############" + stopWatch.getTime() + "#######");
         }
 
+        allUsers = userApi.getAllUsers(new Date().toString());
+
         for (User user : allUsers) {
-            assertTrue(userApi.getUserByUserName(user.getUserName()).getUserRewards().size() > 0);
+            assertTrue(user.getUserRewards().size() > 0);
         }
         stopWatch.stop();
         tourGuideService.tracker.stopTracking();
@@ -135,4 +164,25 @@ public class TestPerformance {
         assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 
+    @Test
+    public void testThread() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.submit(() -> {
+            int i = 0;
+            while (i < 1000000) {
+                System.out.print(i++);
+            }
+        });
+        executorService.shutdownNow();
+        executorService = Executors.newSingleThreadExecutor();
+        executorService.submit(() -> {
+            int i = 0;
+            System.out.print("###################################################################");
+
+            while (i < 1000000) {
+                System.out.print(i++);
+            }
+        });
+
+    }
 }
