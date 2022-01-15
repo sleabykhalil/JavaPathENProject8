@@ -15,8 +15,6 @@ import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -33,7 +31,7 @@ public class TestPerformance {
     UserApi userApi;
     @Autowired
     RewordApi rewordApi;
-    ExecutorService executorService = Executors.newCachedThreadPool();
+
     DateTimeHelper dateTimeHelper = new DateTimeHelper();
     /*
      * A note on performance improvements:
@@ -64,14 +62,12 @@ public class TestPerformance {
         InternalTestHelper.setInternalUserNumber(100000);
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
 
-        List<User> allUsers = new ArrayList<>();
+        List<User> allUsers;
         allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-/*        for (User user : allUsers) {
-            tourGuideService.trackUserLocation(user);
-        }*/
+
         CompletableFuture completableFuture = new CompletableFuture();
         completableFuture = tourGuideService.trackAllUserLocation(allUsers);
         while (true) {
@@ -82,11 +78,6 @@ public class TestPerformance {
             }
         }
         System.out.println("highVolumeTrackLocation: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
-
-
-//        assertEquals(tourGuideService.getTestTracingTimes().size(), allUsers.size());
-//        assertTrue(tourGuideService.getTestTracingTimes().containsValue(2));
-//        assertFalse(tourGuideService.getTestTracingTimes().containsValue(1));
 
         assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
@@ -102,76 +93,27 @@ public class TestPerformance {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
-        // tourGuideService.tracker.stopTracking();
         Attraction attraction = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).get(0);
         List<User> allUsers;
-        // allUsers = userApi.getAllUsers(new Date().toString());
         System.out.println("Start adding attraction for test");
-        //VisitedLocation visitedLocation = new VisitedLocation(u.getUserId(), attraction, new Date());
         userApi.initUserByAddVisitedLocation(dateTimeHelper.getTimeStamp(), attraction);
-//        allUsers.forEach(u ->
-//                executorService.submit(() -> {
-//                    VisitedLocation visitedLocation = new VisitedLocation(u.getUserId(), attraction, new Date());
-//                    userApi.addToVisitedLocations(dateTimeHelper.getTimeStamp(), u.getUserName(),
-//                            visitedLocation.getTimeVisited().toString(), visitedLocation);
-//
-//                }));
+
         System.out.println("Add attraction is done");
-        //       stopWatch.start();
 
-        //  tourGuideService.tracker.startTracking();
-
-
-        // allUsers.forEach(u -> rewardsService.calculateRewards(u));
-//
-////        CompletableFuture calculateRewardsForListOfUser = rewardsService.calculateRewardsForListOfUser(allUsers);
-////        while (true) {
-////            if (calculateRewardsForListOfUser.isDone()) {
-////                System.out.println("calculation done ");
-////                break;
-////            }
-////        }
-//        allUsers = userApi.getAllUsers(new Date().toString());
-//
-//        CompletableFuture completableFuture = new CompletableFuture();
-//        completableFuture = rewardsService.calculateRewardsForListOfUser(allUsers);
-//
-//        while (true) {
-//            if (completableFuture.isDone()) {
-//                //stopWatch.stop();
-//                //tourGuideService.tracker.stopTracking();
-//                break;
-//            }
-//        }
-//        try {
-//            completableFuture.get();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        } catch (ExecutionException e) {
-//            e.printStackTrace();
-//        }
-
-//        allUsers.parallelStream().forEach(u -> rewardsService.calculateRewards(u));
         allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
         rewardsService.calculateRewardsForListOfUser(allUsers);
         boolean firstTry = true;
         while ((allUsers.size() != 0) &&
                 (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) <= TimeUnit.MINUTES.toSeconds(20))) {
-//            try {
-//                TimeUnit.MILLISECONDS.sleep(allUsers.size());
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
 
             allUsers.removeIf(user -> userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()).getUserRewards().size() > 0);
             System.out.println("##############" + allUsers.size() + "###############" + TimeUnit.MILLISECONDS.toMinutes(stopWatch.getTime()) + "#######");
             if ((allUsers.size() != 0) && firstTry &&
-                    (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) > TimeUnit.MINUTES.toSeconds(15))){
+                    (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) > TimeUnit.MINUTES.toSeconds(15))) {
                 rewardsService.calculateRewardsForListOfUser(allUsers);
                 firstTry = false;
             }
         }
-
 
         allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
 
