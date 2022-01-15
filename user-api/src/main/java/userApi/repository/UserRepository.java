@@ -42,4 +42,8 @@ public class UserRepository {
     public List<User> getAllUser() {
         return new ArrayList<>(internalUserMap.values());
     }
+
+    public void deleteAll() {
+        internalUserMap.clear();
+    }
 }

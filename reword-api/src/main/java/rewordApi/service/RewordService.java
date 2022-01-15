@@ -1,31 +1,26 @@
 package rewordApi.service;
 
-import gpsUtil.GpsUtil;
-import gpsUtil.location.Attraction;
-import gpsUtil.location.Location;
-import gpsUtil.location.VisitedLocation;
 import org.springframework.stereotype.Service;
 import rewardCentral.RewardCentral;
-import rewordApi.model.User;
-import rewordApi.model.UserReward;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 
 @Service
 public class RewordService {
-    private static final double STATUTE_MILES_PER_NAUTICAL_MILE = 1.15077945;
+    private final RewardCentral rewardsCentral = new RewardCentral();
+
+  /*  private static final double STATUTE_MILES_PER_NAUTICAL_MILE = 1.15077945;
 
     private int defaultProximityBuffer = 10;
     private int proximityBuffer = defaultProximityBuffer;
     private int attractionProximityRange = 200;
-    private final GpsUtil gpsUtil;
-    private final RewardCentral rewardsCentral;
+    private final GpsUtil gpsUtil = new GpsUtil();
+    private final RewardCentral rewardsCentral = new RewardCentral();
 
-    public  RewordService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
+*//*    public  RewordService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
         this.gpsUtil = gpsUtil;
         this.rewardsCentral = rewardCentral;
-    }
+    }*//*
 
 
     public void setProximityBuffer(int proximityBuffer) {
@@ -69,7 +64,11 @@ public class RewordService {
         return statuteMiles;
     }
 
-    public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
-        return !(getDistance(attraction, location) > attractionProximityRange);
+    public boolean isWithinAttractionProximity(List<Attraction> attractions) {
+        return !(getDistance(attractions.get(0), attractions.get(1)) > attractionProximityRange);
+    }*/
+
+    public int getRewordPoints(String userId, String attractionId) {
+        return rewardsCentral.getAttractionRewardPoints(UUID.fromString(userId),UUID.fromString(attractionId));
     }
 }

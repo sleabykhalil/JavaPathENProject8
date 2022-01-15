@@ -1,28 +1,34 @@
 package tourGuide.tracker;
 
+import org.apache.commons.lang3.time.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tourGuide.feign.UserApi;
+import tourGuide.feign.dto.UserDte.User;
+import tourGuide.helper.DateTimeHelper;
+import tourGuide.service.TourGuideService;
+
+import javax.xml.crypto.Data;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.time.StopWatch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import tourGuide.service.TourGuideService;
-import tourGuide.user.User;
-
-public class Tracker extends Thread {
+public class Tracker {
     private Logger logger = LoggerFactory.getLogger(Tracker.class);
     private static final long trackingPollingInterval = TimeUnit.MINUTES.toSeconds(5);
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final TourGuideService tourGuideService;
     private boolean stop = false;
+    private UserApi userApi;
+    private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
-    public Tracker(TourGuideService tourGuideService) {
+    public Tracker(TourGuideService tourGuideService, UserApi userApi) {
         this.tourGuideService = tourGuideService;
-
-        executorService.submit(this);
+        this.userApi = userApi;
+        executorService.submit(this::runTracking);
     }
 
     /**
@@ -31,10 +37,17 @@ public class Tracker extends Thread {
     public void stopTracking() {
         stop = true;
         executorService.shutdownNow();
+        //executorService.shutdown();
+    }
+    public void startTracking(){
+        this.executorService=Executors.newSingleThreadExecutor();
+        executorService.submit(this::runTracking);
+        stop = false;
+        logger.debug("restart tracker");
     }
 
-    @Override
-    public void run() {
+    //@Override
+    public void runTracking() {
         StopWatch stopWatch = new StopWatch();
         while (true) {
             if (Thread.currentThread().isInterrupted() || stop) {
@@ -42,11 +55,20 @@ public class Tracker extends Thread {
                 break;
             }
 
-            List<User> users = tourGuideService.getAllUsers();
+            List<User> users = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
             logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
             stopWatch.start();
-            users.forEach(u -> tourGuideService.trackUserLocation(u));
-            stopWatch.stop();
+            //users.forEach(u -> tourGuideService.trackUserLocation(u));
+            //tourGuideService.trackAllUserLocation(users);
+            CompletableFuture completableFuture = tourGuideService.trackAllUserLocation(users);
+            while (true) {
+                if (completableFuture.isDone()) {
+                    logger.debug("Tracker stop completableFuture of tracking is done.");
+                    stopWatch.stop();
+                    break;
+                }
+            }
+            //stopWatch.stop();
             logger.debug("Tracker Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
             stopWatch.reset();
             try {

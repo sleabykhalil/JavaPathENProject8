@@ -1,19 +1,19 @@
 package tourGuide.feign;
 
-import gpsUtil.location.Attraction;
-import gpsUtil.location.Location;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import tourGuide.user.User;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(value = "rewordApi", url = "http://localhost:8082/")
+@FeignClient(name = "reword-api", url = "http://localhost:8082")
 public interface RewordApi {
 
-    @PostMapping("/reword/calculateRewards")
-    void calculateRewards(User user);
+/*    @PostMapping("/reword/calculateRewards")
+    void calculateRewards(@RequestBody User user);
 
     @GetMapping("/reword/isWithinAttractionProximity")
-    boolean isWithinAttractionProximity(Attraction attraction, Location location);
+    boolean isWithinAttractionProximity(@RequestBody List<Attraction> attractions);*/
 
+    @GetMapping("/reword/getRewordPoints/{timeStamp}")
+    int getRewardPoints(@PathVariable String timeStamp, @RequestParam String userId, @RequestParam String attractionId);
 }

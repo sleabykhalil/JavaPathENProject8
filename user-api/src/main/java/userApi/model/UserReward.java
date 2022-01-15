@@ -28,4 +28,11 @@ public class UserReward {
         return rewardPoints;
     }
 
+    public VisitedLocation getVisitedLocation() {
+        return visitedLocation;
+    }
+
+    public Attraction getAttraction() {
+        return attraction;
+    }
 }
