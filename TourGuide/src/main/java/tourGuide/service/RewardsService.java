@@ -11,6 +11,7 @@ import tourGuide.feign.dto.UserDte.UserReward;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.Location;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
+import tourGuide.helper.DateTimeHelper;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,8 +32,9 @@ public class RewardsService {
     GpsApi gpsApi;
     RewordApi rewordApi;
     UserApi userApi;
-    ExecutorService executorService = Executors.newFixedThreadPool(100);
+    ExecutorService executorService = Executors.newFixedThreadPool(1000);
     // ExecutorService apiExecutorService = Executors.newFixedThreadPool(10);
+    private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
 
     @Autowired
@@ -87,14 +89,14 @@ public class RewardsService {
         List<UserReward> userRewards = new ArrayList<>();
         for (AttractionVisitedLocationPair attVlPair : attVlPairList) {
             userRewards.add(new UserReward(attVlPair.getVisitedLocation(), attVlPair.getAttraction(),
-                    rewordApi.getRewardPoints(new Date().toString(), user.getUserId().toString(), attVlPair.getAttraction().getAttractionId().toString())));
+                    rewordApi.getRewardPoints(dateTimeHelper.getTimeStamp(), user.getUserId().toString(), attVlPair.getAttraction().getAttractionId().toString())));
         }
         return userRewards;
     }
 
     public CompletableFuture<List<UserReward>> calculateRewards(User user) {
 
-        CompletableFuture<List<Attraction>> attractionListCF = CompletableFuture.supplyAsync(() -> gpsApi.getAllAttraction(new Date().toString()), executorService);
+        CompletableFuture<List<Attraction>> attractionListCF = CompletableFuture.supplyAsync(() -> gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()), executorService);
 
         CompletableFuture<List<AttractionVisitedLocationPair>> attVlPairCF = attractionListCF.thenApply((attractionList) -> getAttVlPairList(attractionList, user));
 
@@ -102,7 +104,7 @@ public class RewardsService {
 
         CompletableFuture<List<UserReward>> addListOfUserRewardsCF = userRewordListCF.thenApply(userRewards -> {
             if (userRewards.size() > 0)
-                return userApi.addUserRewardList(new Date().toString(), user.getUserName(), userRewards);
+                return userApi.addUserRewardList(dateTimeHelper.getTimeStamp(), user.getUserName(), userRewards);
             return userRewards;
         });
 
@@ -123,7 +125,7 @@ public class RewardsService {
         if (user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
             if (nearAttraction(visitedLocation, attraction)) {
                 UserReward userReward = (new UserReward(visitedLocation, attraction,
-                        rewordApi.getRewardPoints(new Date().toString(), user.getUserId().toString(), attraction.getAttractionId().toString())));
+                        rewordApi.getRewardPoints(dateTimeHelper.getTimeStamp(), user.getUserId().toString(), attraction.getAttractionId().toString())));
                 return userReward;
             }
         }

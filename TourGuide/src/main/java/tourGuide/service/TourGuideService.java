@@ -36,7 +36,7 @@ public class TourGuideService {
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
     GpsApi gpsApi;
     UserApi userApi;
-    ExecutorService executorService = Executors.newFixedThreadPool(100);
+    ExecutorService executorService = Executors.newFixedThreadPool(20);
 
     @Autowired
     public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService, GpsApi gpsApi, UserApi userApi) {
@@ -50,7 +50,7 @@ public class TourGuideService {
         if (testMode) {
             logger.info("TestMode enabled");
             logger.debug("Initializing users");
-            userApi.initUser(new Date().toString(), InternalTestHelper.getInternalUserNumber());
+            userApi.initUser(dateTimeHelper.getTimeStamp(), InternalTestHelper.getInternalUserNumber());
             //initializeInternalUsers();
             logger.debug("Finished initializing users");
         }
@@ -82,7 +82,7 @@ public class TourGuideService {
 
     public VisitedLocation trackUserLocation(User user) {
 
-        VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString(), new Date().toString());
+        VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString(), dateTimeHelper.getTimeStamp());
         userApi.addToVisitedLocations(dateTimeHelper.getTimeStamp(), user.getUserName(), visitedLocation.getTimeVisited().toString(), visitedLocation);
 
         rewardsService.calculateRewards(user);
@@ -108,7 +108,7 @@ public class TourGuideService {
 
     public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
         List<Attraction> nearbyAttractions = new ArrayList<>();
-        for (Attraction attraction : gpsApi.getAllAttraction(new Date().toString())) {
+        for (Attraction attraction : gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp())) {
             if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
                 nearbyAttractions.add(attraction);
             }

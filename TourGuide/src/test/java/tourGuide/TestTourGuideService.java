@@ -9,6 +9,7 @@ import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDte.User;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
+import tourGuide.helper.DateTimeHelper;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
@@ -26,6 +27,7 @@ public class TestTourGuideService {
     GpsApi gpsApi;
     UserApi userApi;
     RewordApi rewordApi;
+    private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
     @Test
     public void getUserLocation() {
@@ -51,11 +53,11 @@ public class TestTourGuideService {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
 
-        userApi.addUser(new Date().toString(), user);
-        userApi.addUser(new Date().toString(), user2);
+        userApi.addUser(dateTimeHelper.getTimeStamp(), user);
+        userApi.addUser(dateTimeHelper.getTimeStamp(), user2);
 
-        User retrivedUser = userApi.getUserByUserName(user.getUserName(), new Date().toString());
-        User retrivedUser2 = userApi.getUserByUserName(user2.getUserName(), new Date().toString());
+        User retrivedUser = userApi.getUserByUserName(user.getUserName(),dateTimeHelper.getTimeStamp());
+        User retrivedUser2 = userApi.getUserByUserName(user2.getUserName(), dateTimeHelper.getTimeStamp());
 
         tourGuideService.tracker.stopTracking();
 
@@ -73,10 +75,10 @@ public class TestTourGuideService {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
 
-        userApi.addUser(new Date().toString(), user);
-        userApi.addUser(new Date().toString(), user2);
+        userApi.addUser(dateTimeHelper.getTimeStamp(), user);
+        userApi.addUser(dateTimeHelper.getTimeStamp(), user2);
 
-        List<User> allUsers = userApi.getAllUsers(new Date().toString());
+        List<User> allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
 
         tourGuideService.tracker.stopTracking();
 

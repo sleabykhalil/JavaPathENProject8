@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDte.User;
+import tourGuide.helper.DateTimeHelper;
 import tourGuide.service.TourGuideService;
 
 import javax.xml.crypto.Data;
@@ -22,6 +23,7 @@ public class Tracker {
     private final TourGuideService tourGuideService;
     private boolean stop = false;
     private UserApi userApi;
+    private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
     public Tracker(TourGuideService tourGuideService, UserApi userApi) {
         this.tourGuideService = tourGuideService;
@@ -53,7 +55,7 @@ public class Tracker {
                 break;
             }
 
-            List<User> users = userApi.getAllUsers(new Date().toString());
+            List<User> users = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
             logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
             stopWatch.start();
             //users.forEach(u -> tourGuideService.trackUserLocation(u));

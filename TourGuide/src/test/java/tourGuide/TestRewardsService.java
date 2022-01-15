@@ -10,6 +10,7 @@ import tourGuide.feign.dto.UserDte.User;
 import tourGuide.feign.dto.UserDte.UserReward;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
+import tourGuide.helper.DateTimeHelper;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
@@ -24,6 +25,7 @@ public class TestRewardsService {
     GpsApi gpsApi;
     UserApi userApi;
     RewordApi rewordApi;
+    private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
     @Test
     public void userGetRewards() {
@@ -34,7 +36,7 @@ public class TestRewardsService {
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        Attraction attraction = gpsApi.getAllAttraction(new Date().toString()).get(0);
+        Attraction attraction = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).get(0);
         user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction, new Date()));
         tourGuideService.trackUserLocation(user);
         List<UserReward> userRewards = user.getUserRewards();
@@ -60,8 +62,8 @@ public class TestRewardsService {
         InternalTestHelper.setInternalUserNumber(1);
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
 
-        rewardsService.calculateRewards(userApi.getAllUsers(new Date().toString()).get(0));
-        List<UserReward> userRewards = userApi.getUserRewords(new Date().toString(), userApi.getAllUsers(new Date().toString()).get(0));
+        rewardsService.calculateRewards(userApi.getAllUsers(dateTimeHelper.getTimeStamp()).get(0));
+        List<UserReward> userRewards = userApi.getUserRewords(dateTimeHelper.getTimeStamp(), userApi.getAllUsers(new Date().toString()).get(0));
         tourGuideService.tracker.stopTracking();
 
         assertEquals(gpsUtil.getAttractions().size(), userRewards.size());

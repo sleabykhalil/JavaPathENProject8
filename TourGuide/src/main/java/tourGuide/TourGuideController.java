@@ -13,6 +13,7 @@ import com.jsoniter.output.JsonStream;
 
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
+import tourGuide.helper.DateTimeHelper;
 import tourGuide.service.TourGuideService;
 
 import tripPricer.Provider;
@@ -26,6 +27,7 @@ public class TourGuideController {
 
     @Autowired
     UserApi userApi;
+    private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
     @RequestMapping("/")
     public String index() {
@@ -34,7 +36,7 @@ public class TourGuideController {
 
     @RequestMapping("/getLocation")
     public String getLocation(@RequestParam String userName) {
-        VisitedLocation visitedLocation = tourGuideService.getUserLocation(userApi.getUserByUserName(userName, new Date().toString()));
+        VisitedLocation visitedLocation = tourGuideService.getUserLocation(userApi.getUserByUserName(userName,dateTimeHelper.getTimeStamp()));
         return JsonStream.serialize(visitedLocation.location);
     }
 
@@ -55,7 +57,7 @@ public class TourGuideController {
 
     @RequestMapping("/getRewards")
     public String getRewards(@RequestParam String userName) {
-        return JsonStream.serialize(userApi.getUserRewordsById(userName, new Date().toString()));
+        return JsonStream.serialize(userApi.getUserRewordsById(userName, dateTimeHelper.getTimeStamp()));
     }
 
     @RequestMapping("/getAllCurrentLocations")
@@ -75,7 +77,7 @@ public class TourGuideController {
 
     @RequestMapping("/getTripDeals")
     public String getTripDeals(@RequestParam String userName) {
-        List<Provider> providers = tourGuideService.getTripDeals(userApi.getUserByUserName(userName, new Date().toString()));
+        List<Provider> providers = tourGuideService.getTripDeals(userApi.getUserByUserName(userName,dateTimeHelper.getTimeStamp()));
         return JsonStream.serialize(providers);
     }
 

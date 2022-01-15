@@ -61,11 +61,11 @@ public class TestPerformance {
         GpsUtil gpsUtil = new GpsUtil();
         RewardsService rewardsService = new RewardsService(gpsApi, rewordApi, userApi);
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-        InternalTestHelper.setInternalUserNumber(6666);
+        InternalTestHelper.setInternalUserNumber(100000);
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
 
         List<User> allUsers = new ArrayList<>();
-        allUsers = userApi.getAllUsers(new Date().toString());
+        allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -102,10 +102,10 @@ public class TestPerformance {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
-        tourGuideService.tracker.stopTracking();
-        Attraction attraction = gpsApi.getAllAttraction(new Date().toString()).get(0);
+        // tourGuideService.tracker.stopTracking();
+        Attraction attraction = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).get(0);
         List<User> allUsers;
-       // allUsers = userApi.getAllUsers(new Date().toString());
+        // allUsers = userApi.getAllUsers(new Date().toString());
         System.out.println("Start adding attraction for test");
         //VisitedLocation visitedLocation = new VisitedLocation(u.getUserId(), attraction, new Date());
         userApi.initUserByAddVisitedLocation(dateTimeHelper.getTimeStamp(), attraction);
@@ -117,9 +117,9 @@ public class TestPerformance {
 //
 //                }));
         System.out.println("Add attraction is done");
- //       stopWatch.start();
+        //       stopWatch.start();
 
-        tourGuideService.tracker.startTracking();
+        //  tourGuideService.tracker.startTracking();
 
 
         // allUsers.forEach(u -> rewardsService.calculateRewards(u));
@@ -152,15 +152,28 @@ public class TestPerformance {
 //        }
 
 //        allUsers.parallelStream().forEach(u -> rewardsService.calculateRewards(u));
+        allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
+        rewardsService.calculateRewardsForListOfUser(allUsers);
+        boolean firstTry = true;
+        while ((allUsers.size() != 0) &&
+                (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) <= TimeUnit.MINUTES.toSeconds(20))) {
+//            try {
+//                TimeUnit.MILLISECONDS.sleep(allUsers.size());
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
 
-        allUsers = userApi.getAllUsers(new Date().toString());
-
-        while (allUsers.size() != 0) {
-            allUsers.removeIf(user -> userApi.getUserByUserName(user.getUserName(), new Date().toString()).getUserRewards().size() > 0);
-            System.out.println("##############" + allUsers.size() + "###############" + TimeUnit.MILLISECONDS.toMinutes(stopWatch.getTime())+ "#######");
+            allUsers.removeIf(user -> userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()).getUserRewards().size() > 0);
+            System.out.println("##############" + allUsers.size() + "###############" + TimeUnit.MILLISECONDS.toMinutes(stopWatch.getTime()) + "#######");
+            if ((allUsers.size() != 0) && firstTry &&
+                    (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) > TimeUnit.MINUTES.toSeconds(15))){
+                rewardsService.calculateRewardsForListOfUser(allUsers);
+                firstTry = false;
+            }
         }
 
-        allUsers = userApi.getAllUsers(new Date().toString());
+
+        allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
 
         for (User user : allUsers) {
             assertTrue(user.getUserRewards().size() > 0);
