@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  microservice_gps:
+    build: ./gps-api
+    ports:
+      - "8083:8083"
+    container_name: "tourguideGpsApi"
+
+  microservice_reward:
+    build: ./reword-api
+    ports:
+      - "8082:8082"
+    container_name: "tourguideRewardApi"
+
+  microservice_users:
+    build: ./user-api
+    ports:
+      - "8081:8081"
+    container_name: "tourguideUserApi"
+
+  microservice_tourguide:
+    build: ./TourGuide
+    container_name: "tourguideMainApi"
