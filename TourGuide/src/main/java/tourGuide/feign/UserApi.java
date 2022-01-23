@@ -29,10 +29,10 @@ public interface UserApi {
     void initUserByAddVisitedLocation(@PathVariable String timeStamp, @RequestBody Attraction attractionDto) ;
 
     @GetMapping("/users/rewards/{timeStamp}")
-    List<UserReward> getUserRewords(@PathVariable String timeStamp, @RequestBody User user);
+    List<UserReward> getUserReward(@PathVariable String timeStamp, @RequestBody User user);
 
     @GetMapping("/users/rewards/{userName}/{timeStamp}")
-    List<UserReward> getUserRewordsById(@PathVariable String userName, @PathVariable String timeStamp);
+    List<UserReward> getUserRewardsById(@PathVariable String userName, @PathVariable String timeStamp);
 
     @GetMapping("/users/visitedLocations/{timeStamp}")
     List<VisitedLocation> getVisitedLocations(@PathVariable String timeStamp, @RequestBody User user);

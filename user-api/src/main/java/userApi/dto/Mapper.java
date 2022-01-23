@@ -74,12 +74,12 @@ public class Mapper {
         return new Location(location.latitude, location.longitude);
     }
 
-    public UserReward toUserReword(UserRewardDto userRewardDto) {
+    public UserReward toUserReward(UserRewardDto userRewardDto) {
         return new UserReward(toVisitedLocation(userRewardDto.getVisitedLocation()),
                 toAttraction(userRewardDto.getAttraction()), userRewardDto.getRewardPoints());
     }
 
-    public List<UserRewardDto> toUserRewordListDto(List<UserReward> UserRewardList) {
+    public List<UserRewardDto> toUserRewardListDto(List<UserReward> UserRewardList) {
         List<UserRewardDto> userRewardDtoList = new ArrayList<>();
         for (UserReward ur : UserRewardList) {
             userRewardDtoList.add(new UserRewardDto(toVisitedLocationDto(ur.getVisitedLocation()), toAttractionDto(ur.getAttraction()), ur.getRewardPoints()));

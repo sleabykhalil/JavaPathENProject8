@@ -4,11 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import tourGuide.feign.GpsApi;
-import tourGuide.feign.RewordApi;
+import tourGuide.feign.RewardApi;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.helper.DateTimeHelper;
 
-import java.util.Date;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -18,7 +17,7 @@ public class FeignTest {
     @Autowired
     GpsApi gpsApi;
     @Autowired
-    RewordApi rewordApi;
+    RewardApi rewardApi;
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
     @Test
@@ -30,11 +29,11 @@ public class FeignTest {
     }
 
     @Test
-    void rewordApi_getRewordPoints() {
+    void rewardApi_getRewardPoints() {
         String attractionId = UUID.randomUUID().toString();
         String userId = UUID.randomUUID().toString();
 
-        int result = rewordApi.getRewardPoints(dateTimeHelper.getTimeStamp(), attractionId, userId);
+        int result = rewardApi.getRewardPoints(dateTimeHelper.getTimeStamp(), attractionId, userId);
 
         assertThat(result).isNotNull();
     }

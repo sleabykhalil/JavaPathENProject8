@@ -57,7 +57,7 @@ public class TourGuideController {
 
     @RequestMapping("/getRewards")
     public String getRewards(@RequestParam String userName) {
-        return JsonStream.serialize(userApi.getUserRewordsById(userName, dateTimeHelper.getTimeStamp()));
+        return JsonStream.serialize(userApi.getUserRewardsById(userName, dateTimeHelper.getTimeStamp()));
     }
 
     @RequestMapping("/getAllCurrentLocations")

@@ -2,6 +2,8 @@
 /TourGuide/build/
 /user-api/.gradle/
 /user-api/build/
+/reward-api/.gradle/
+/reward-api/build/
 /reword-api/.gradle/
 /reword-api/build/
 /gps-api/.gradle/

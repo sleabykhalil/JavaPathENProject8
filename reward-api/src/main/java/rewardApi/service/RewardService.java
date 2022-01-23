@@ -1,4 +1,4 @@
-package rewordApi.service;
+package rewardApi.service;
 
 import org.springframework.stereotype.Service;
 import rewardCentral.RewardCentral;
@@ -6,7 +6,7 @@ import rewardCentral.RewardCentral;
 import java.util.UUID;
 
 @Service
-public class RewordService {
+public class RewardService {
     private final RewardCentral rewardsCentral = new RewardCentral();
 
   /*  private static final double STATUTE_MILES_PER_NAUTICAL_MILE = 1.15077945;
@@ -17,7 +17,7 @@ public class RewordService {
     private final GpsUtil gpsUtil = new GpsUtil();
     private final RewardCentral rewardsCentral = new RewardCentral();
 
-*//*    public  RewordService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
+*//*    public  RewardService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
         this.gpsUtil = gpsUtil;
         this.rewardsCentral = rewardCentral;
     }*//*
@@ -68,7 +68,7 @@ public class RewordService {
         return !(getDistance(attractions.get(0), attractions.get(1)) > attractionProximityRange);
     }*/
 
-    public int getRewordPoints(String userId, String attractionId) {
+    public int getRewardPoints(String userId, String attractionId) {
         return rewardsCentral.getAttractionRewardPoints(UUID.fromString(userId),UUID.fromString(attractionId));
     }
 }
