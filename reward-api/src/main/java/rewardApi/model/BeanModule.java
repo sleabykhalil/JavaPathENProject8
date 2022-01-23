@@ -1,4 +1,4 @@
-package rewordApi.model;
+package rewardApi.model;
 
 import gpsUtil.GpsUtil;
 import org.springframework.context.annotation.Bean;

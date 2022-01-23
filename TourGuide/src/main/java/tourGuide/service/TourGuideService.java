@@ -1,6 +1,5 @@
 package tourGuide.service;
 
-import gpsUtil.GpsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +20,15 @@ import tripPricer.TripPricer;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 @Service
 @Lazy
 public class TourGuideService {
     private Logger logger = LoggerFactory.getLogger(TourGuideService.class);
-    private final GpsUtil gpsUtil;
     private final RewardsService rewardsService;
     private final TripPricer tripPricer = new TripPricer();
     public final Tracker tracker;
@@ -39,12 +39,11 @@ public class TourGuideService {
     ExecutorService executorService = Executors.newFixedThreadPool(20);
 
     @Autowired
-    public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService, GpsApi gpsApi, UserApi userApi) {
+    public TourGuideService(RewardsService rewardsService, GpsApi gpsApi, UserApi userApi) {
 
         this.gpsApi = gpsApi;
         this.userApi = userApi;
 
-        this.gpsUtil = gpsUtil;
         this.rewardsService = rewardsService;
 
         if (testMode) {
@@ -96,13 +95,7 @@ public class TourGuideService {
             completableFuture = completableFuture.thenCombine(CompletableFuture.supplyAsync(
                     () -> trackUserLocation(user), executorService), (x, y) -> null);
         }
-/*        while (true) {
-            if (completableFuture.isDone()) {
-                logger.info("tracking all user done");
-                System.out.println("I am in service but fin");
-                break;
-            }
-        }*/
+
         return completableFuture;
     }
 

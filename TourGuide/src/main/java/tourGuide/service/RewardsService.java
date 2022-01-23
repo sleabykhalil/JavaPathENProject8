@@ -3,7 +3,7 @@ package tourGuide.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tourGuide.feign.GpsApi;
-import tourGuide.feign.RewordApi;
+import tourGuide.feign.RewardApi;
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.AttractionVisitedLocationPair;
 import tourGuide.feign.dto.UserDte.User;
@@ -14,9 +14,10 @@ import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.helper.DateTimeHelper;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,10 +28,9 @@ public class RewardsService {
     private int defaultProximityBuffer = 10;
     private int proximityBuffer = defaultProximityBuffer;
     private int attractionProximityRange = 200;
-    // private final GpsUtil gpsUtil;
-    //private final RewardCentral rewardsCentral;
+
     GpsApi gpsApi;
-    RewordApi rewordApi;
+    RewardApi rewardApi;
     UserApi userApi;
     ExecutorService executorService = Executors.newFixedThreadPool(1000);
     // ExecutorService apiExecutorService = Executors.newFixedThreadPool(10);
@@ -38,12 +38,10 @@ public class RewardsService {
 
 
     @Autowired
-    public RewardsService(GpsApi gpsApi, RewordApi rewordApi, UserApi userApi) {
+    public RewardsService(GpsApi gpsApi, RewardApi rewardApi, UserApi userApi) {
         this.gpsApi = gpsApi;
-        this.rewordApi = rewordApi;
+        this.rewardApi = rewardApi;
         this.userApi = userApi;
-        // this.gpsUtil = gpsUtil;
-        //this.rewardsCentral = rewardCentral;
     }
 
     public void setProximityBuffer(int proximityBuffer) {
@@ -54,14 +52,6 @@ public class RewardsService {
         proximityBuffer = defaultProximityBuffer;
     }
 
-    /*    public CompletableFuture calculateRewardsForAllUser(List<User> userList) {
-            CompletableFuture completableFuture = CompletableFuture.supplyAsync(() -> null);
-            for (User user : userList) {
-                completableFuture = completableFuture.thenCombine(CompletableFuture.supplyAsync(() -> calculateRewards(user), cpuBound),
-                        (x, y) -> null);
-            }
-            return completableFuture;
-        }*/
     private List<AttractionVisitedLocationPair> getAttVlPairList(List<Attraction> attractionList, User user) {
         List<AttractionVisitedLocationPair> attractionVisitedLocationPairs = new ArrayList<>();
         List<Attraction> attractions = attractionList.parallelStream().
@@ -85,11 +75,11 @@ public class RewardsService {
         return attractionVisitedLocationPairs;
     }
 
-    private List<UserReward> getUserRewordList(List<AttractionVisitedLocationPair> attVlPairList, User user) {
+    private List<UserReward> getUserRewardList(List<AttractionVisitedLocationPair> attVlPairList, User user) {
         List<UserReward> userRewards = new ArrayList<>();
         for (AttractionVisitedLocationPair attVlPair : attVlPairList) {
             userRewards.add(new UserReward(attVlPair.getVisitedLocation(), attVlPair.getAttraction(),
-                    rewordApi.getRewardPoints(dateTimeHelper.getTimeStamp(), user.getUserId().toString(), attVlPair.getAttraction().getAttractionId().toString())));
+                    rewardApi.getRewardPoints(dateTimeHelper.getTimeStamp(), user.getUserId().toString(), attVlPair.getAttraction().getAttractionId().toString())));
         }
         return userRewards;
     }
@@ -100,9 +90,9 @@ public class RewardsService {
 
         CompletableFuture<List<AttractionVisitedLocationPair>> attVlPairCF = attractionListCF.thenApply((attractionList) -> getAttVlPairList(attractionList, user));
 
-        CompletableFuture<List<UserReward>> userRewordListCF = attVlPairCF.thenApply((attVlPairList) -> getUserRewordList(attVlPairList, user));
+        CompletableFuture<List<UserReward>> userRewardListCF = attVlPairCF.thenApply((attVlPairList) -> getUserRewardList(attVlPairList, user));
 
-        CompletableFuture<List<UserReward>> addListOfUserRewardsCF = userRewordListCF.thenApply(userRewards -> {
+        CompletableFuture<List<UserReward>> addListOfUserRewardsCF = userRewardListCF.thenApply(userRewards -> {
             if (userRewards.size() > 0)
                 return userApi.addUserRewardList(dateTimeHelper.getTimeStamp(), user.getUserName(), userRewards);
             return userRewards;
@@ -121,11 +111,11 @@ public class RewardsService {
         return completableFuture;
     }
 
-    private UserReward getUserReword(User user, VisitedLocation visitedLocation, Attraction attraction) {
+    private UserReward getUserReward(User user, VisitedLocation visitedLocation, Attraction attraction) {
         if (user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
             if (nearAttraction(visitedLocation, attraction)) {
                 UserReward userReward = (new UserReward(visitedLocation, attraction,
-                        rewordApi.getRewardPoints(dateTimeHelper.getTimeStamp(), user.getUserId().toString(), attraction.getAttractionId().toString())));
+                        rewardApi.getRewardPoints(dateTimeHelper.getTimeStamp(), user.getUserId().toString(), attraction.getAttractionId().toString())));
                 return userReward;
             }
         }
@@ -139,10 +129,6 @@ public class RewardsService {
     private boolean nearAttraction(VisitedLocation visitedLocation, Attraction attraction) {
         return getDistance(attraction, visitedLocation.location) > proximityBuffer ? false : true;
     }
-
-/*    private int getRewardPoints(Attraction attraction, User user) {
-        return rewardsCentral.getAttractionRewardPoints(attraction.attractionId, user.getUserId());
-    }*/
 
     public double getDistance(Location loc1, Location loc2) {
         double lat1 = Math.toRadians(loc1.latitude);

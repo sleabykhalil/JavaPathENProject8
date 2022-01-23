@@ -56,7 +56,7 @@ public class UserController {
         userService.addVisitedLocationForTest(mapper.toAttraction(attractionDto));
     }
     @GetMapping("/users/rewards/{timeStamp}")
-    public List<UserReward> getUserRewords(@PathVariable String timeStamp, @RequestBody User user) {
+    public List<UserReward> getUserRewards(@PathVariable String timeStamp, @RequestBody User user) {
         logger.info("/users/rewards/timeStamp{}", timeStamp);
         if (!(user == null)) {
             return userService.getUserRewards(user);
@@ -65,7 +65,7 @@ public class UserController {
     }
 
     @GetMapping("/users/rewards/{userName}/{timeStamp}")
-    public List<UserReward> getUserRewordsById(@PathVariable String userName, @PathVariable String timeStamp) {
+    public List<UserReward> getUserRewardsById(@PathVariable String userName, @PathVariable String timeStamp) {
         logger.info("/users/rewards/userName{}/timeStamp{}", userName, timeStamp);
         if (userName != null) {
             return userService.getUserRewards(userName);
@@ -95,7 +95,7 @@ public class UserController {
     @PostMapping("/users/addReward/{userName}/{timeStamp}")
     public void addUserReward(@PathVariable String timeStamp, @PathVariable String userName, @RequestBody UserRewardDto userRewardDto) {
         logger.info("/users/addReward/userName{}/timeStamp{}", userName, timeStamp);
-        UserReward userReward = mapper.toUserReword(userRewardDto);
+        UserReward userReward = mapper.toUserReward(userRewardDto);
         userService.addUserReward(userName, userReward);
     }
 
@@ -103,6 +103,6 @@ public class UserController {
     public List<UserRewardDto> addUserRewardList(@PathVariable String timeStamp, @PathVariable String userName, @RequestBody List<UserRewardDto> userRewardDto) {
         logger.info("/users/addRewardList/userName{}/timeStamp{}", userName, timeStamp);
         List<UserReward> userRewards = mapper.toUserRewardList(userRewardDto);
-       return mapper.toUserRewordListDto( userService.addUserRewardList(userName, userRewards));
+       return mapper.toUserRewardListDto( userService.addUserRewardList(userName, userRewards));
     }
 }

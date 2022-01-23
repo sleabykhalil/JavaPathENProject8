@@ -8,7 +8,7 @@
 FROM openjdk:8-jdk-alpine
 
 # Refer to Maven build -> finalName
-ARG JAR_FILE=build/libs/reword-api-1.0-SNAPSHOT.jar
+ARG JAR_FILE=build/libs/reward-api-1.0-SNAPSHOT.jar
 
 # cd /opt/app
 WORKDIR /opt/app

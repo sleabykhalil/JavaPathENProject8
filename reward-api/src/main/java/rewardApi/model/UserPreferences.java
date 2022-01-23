@@ -1,4 +1,4 @@
-package rewordApi.model;
+package rewardApi.model;
 
 import org.javamoney.moneta.Money;
 

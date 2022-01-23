@@ -1,13 +1,12 @@
 package tourGuide;
 
 import feign.RetryableException;
-import gpsUtil.GpsUtil;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import tourGuide.feign.GpsApi;
-import tourGuide.feign.RewordApi;
+import tourGuide.feign.RewardApi;
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDte.User;
 import tourGuide.feign.dto.gpsDto.Attraction;
@@ -16,7 +15,6 @@ import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 
-import java.net.BindException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -32,7 +30,7 @@ public class TestPerformance {
     @Autowired
     UserApi userApi;
     @Autowired
-    RewordApi rewordApi;
+    RewardApi rewardApi;
 
     DateTimeHelper dateTimeHelper = new DateTimeHelper();
     /*
@@ -58,11 +56,10 @@ public class TestPerformance {
     // @Ignore
     @Test
     public void highVolumeTrackLocation() {
-        GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsApi, rewordApi, userApi);
+        RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
         InternalTestHelper.setInternalUserNumber(100);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
+        TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
 
         List<User> allUsers;
         allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
@@ -87,14 +84,13 @@ public class TestPerformance {
     //@Ignore
     @Test
     public void highVolumeGetRewards() {
-        GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsApi, rewordApi, userApi);
+        RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
 
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
         InternalTestHelper.setInternalUserNumber(50);
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
+        TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
         Attraction attraction = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).get(0);
         List<User> allUsers;
         System.out.println("Start adding attraction for test");
@@ -108,7 +104,7 @@ public class TestPerformance {
         while ((allUsers.size() != 0) &&
                 (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) <= TimeUnit.MINUTES.toSeconds(20))) {
 
-            allUsers.removeIf(user -> userHasReword(user));
+            allUsers.removeIf(user -> userHasReward(user));
             System.out.println("##############" + allUsers.size() + "###############" + TimeUnit.MILLISECONDS.toMinutes(stopWatch.getTime()) + "#######");
             if ((allUsers.size() != 0) && firstTry &&
                     (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) > TimeUnit.MINUTES.toSeconds(15))) {
@@ -129,7 +125,7 @@ public class TestPerformance {
         assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 
-    private boolean userHasReword(User user) {
+    private boolean userHasReward(User user) {
         try {
             return userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()).getUserRewards().size() > 0;
         } catch (RetryableException ex) {

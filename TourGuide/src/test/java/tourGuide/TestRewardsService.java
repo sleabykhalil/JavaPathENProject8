@@ -4,7 +4,7 @@ import gpsUtil.GpsUtil;
 import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.Test;
 import tourGuide.feign.GpsApi;
-import tourGuide.feign.RewordApi;
+import tourGuide.feign.RewardApi;
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDte.User;
 import tourGuide.feign.dto.UserDte.UserReward;
@@ -20,20 +20,20 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestRewardsService {
     GpsApi gpsApi;
     UserApi userApi;
-    RewordApi rewordApi;
+    RewardApi rewardApi;
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
     @Test
     public void userGetRewards() {
-        GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsApi, rewordApi, userApi);
+        RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
 
         InternalTestHelper.setInternalUserNumber(0);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
+        TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         Attraction attraction = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).get(0);
@@ -44,26 +44,25 @@ public class TestRewardsService {
         assertEquals(1, userRewards.size());
     }
 
-    @Test
+    @Test //need to verify
     public void isWithinAttractionProximity() {
-//        GpsUtil gpsUtil = new GpsUtil();
-//        RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-//        Attraction attraction = gpsApi.getAllAttraction().get(0);
-//        assertTrue(rewordApi.isWithinAttractionProximity(attraction, attraction));
+        RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
+        Attraction attraction = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).get(0);
+        assertTrue(rewardsService.isWithinAttractionProximity(attraction, attraction));
     }
 
     @Ignore // Needs fixed - can throw ConcurrentModificationException
     @Test
     public void nearAllAttractions() {
         GpsUtil gpsUtil = new GpsUtil();
-        RewardsService rewardsService = new RewardsService(gpsApi, rewordApi, userApi);
+        RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
         rewardsService.setProximityBuffer(Integer.MAX_VALUE);
 
         InternalTestHelper.setInternalUserNumber(1);
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, gpsApi, userApi);
+        TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
 
         rewardsService.calculateRewards(userApi.getAllUsers(dateTimeHelper.getTimeStamp()).get(0));
-        List<UserReward> userRewards = userApi.getUserRewords(dateTimeHelper.getTimeStamp(), userApi.getAllUsers(new Date().toString()).get(0));
+        List<UserReward> userRewards = userApi.getUserReward(dateTimeHelper.getTimeStamp(), userApi.getAllUsers(new Date().toString()).get(0));
         tourGuideService.tracker.stopTracking();
 
         assertEquals(gpsUtil.getAttractions().size(), userRewards.size());

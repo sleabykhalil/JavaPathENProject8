@@ -9,5 +9,5 @@
 
 rootProject.name = 'TourGuide'
 include 'gps-api'
-include 'reword-api'
+include 'reward-api'
 include 'user-api'
