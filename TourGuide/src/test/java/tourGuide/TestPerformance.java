@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -136,24 +137,18 @@ public class TestPerformance {
     }
 
     @Test
-    public void testThread() {
+    public void testRestartExecutorService() {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
+        final int[] i = {0,0};
         executorService.submit(() -> {
-            int i = 0;
-            while (i < 1000000) {
-                System.out.print(i++);
-            }
+            i[0]++;
         });
         executorService.shutdownNow();
         executorService = Executors.newSingleThreadExecutor();
         executorService.submit(() -> {
-            int i = 0;
-            System.out.print("###################################################################");
-
-            while (i < 1000000) {
-                System.out.print(i++);
-            }
+            i[1]++;
         });
-
+        assertEquals(1, i[0]);
+        assertEquals(1, i[1]);
     }
 }
