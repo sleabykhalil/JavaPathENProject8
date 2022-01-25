@@ -106,7 +106,7 @@ public class TestPerformance {
                 (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) <= TimeUnit.MINUTES.toSeconds(20))) {
 
             allUsers.removeIf(user -> userHasReward(user));
-            System.out.println("##############" + allUsers.size() + "###############" + TimeUnit.MILLISECONDS.toMinutes(stopWatch.getTime()) + "#######");
+           // System.out.println("##############" + allUsers.size() + "###############" + TimeUnit.MILLISECONDS.toMinutes(stopWatch.getTime()) + "#######");
             if ((allUsers.size() != 0) && firstTry &&
                     (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) > TimeUnit.MINUTES.toSeconds(15))) {
                 rewardsService.calculateRewardsForListOfUser(allUsers);
