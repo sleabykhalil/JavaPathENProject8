@@ -36,7 +36,7 @@ public class TourGuideService {
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
     GpsApi gpsApi;
     UserApi userApi;
-    ExecutorService executorService = Executors.newFixedThreadPool(20);
+    ExecutorService executorService = Executors.newFixedThreadPool(1000);
 
     @Autowired
     public TourGuideService(RewardsService rewardsService, GpsApi gpsApi, UserApi userApi) {
