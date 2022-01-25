@@ -99,7 +99,7 @@ public class TestPerformance {
         System.out.println("Add attraction is done");
 
         allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
-        rewardsService.calculateRewardsForListOfUser(allUsers);
+        //rewardsService.calculateRewardsForListOfUser(allUsers);
         boolean firstTry = true;
         while ((allUsers.size() != 0) &&
                 (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) <= TimeUnit.MINUTES.toSeconds(20))) {
