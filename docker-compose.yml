@@ -19,6 +19,6 @@ services:
       - "8081:8081"
     container_name: "tourguideUserApi"
 
-  microservice_tourguide:
-    build: ./TourGuide
-    container_name: "tourguideMainApi"
+#  microservice_tourguide:
+#    build: ./TourGuide
+#    container_name: "tourguideMainApi"
