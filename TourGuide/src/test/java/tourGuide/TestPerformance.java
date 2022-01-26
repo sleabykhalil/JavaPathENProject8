@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -53,7 +54,6 @@ public class TestPerformance {
      *          assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
      */
 
-    // @Ignore
     @Test
     public void highVolumeTrackLocation() {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
@@ -81,7 +81,6 @@ public class TestPerformance {
         assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 
-    //@Ignore
     @Test
     public void highVolumeGetRewards() {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
@@ -92,20 +91,20 @@ public class TestPerformance {
         stopWatch.start();
         TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
         Attraction attraction = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).get(0);
-        List<User> allUsers;
+
         System.out.println("Start adding attraction for test");
         userApi.initUserByAddVisitedLocation(dateTimeHelper.getTimeStamp(), attraction);
-
         System.out.println("Add attraction is done");
 
+        List<User> allUsers;
         allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
         rewardsService.calculateRewardsForListOfUser(allUsers);
+
         boolean firstTry = true;
         while ((allUsers.size() != 0) &&
                 (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) <= TimeUnit.MINUTES.toSeconds(20))) {
 
             allUsers.removeIf(user -> userHasReward(user));
-            System.out.println("##############" + allUsers.size() + "###############" + TimeUnit.MILLISECONDS.toMinutes(stopWatch.getTime()) + "#######");
             if ((allUsers.size() != 0) && firstTry &&
                     (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) > TimeUnit.MINUTES.toSeconds(15))) {
                 rewardsService.calculateRewardsForListOfUser(allUsers);
@@ -114,7 +113,6 @@ public class TestPerformance {
         }
 
         allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
-
         for (User user : allUsers) {
             assertTrue(user.getUserRewards().size() > 0);
         }
@@ -136,24 +134,18 @@ public class TestPerformance {
     }
 
     @Test
-    public void testThread() {
+    public void testRestartExecutorService() {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
+        final int[] i = {0,0};
         executorService.submit(() -> {
-            int i = 0;
-            while (i < 1000000) {
-                System.out.print(i++);
-            }
+            i[0]++;
         });
         executorService.shutdownNow();
         executorService = Executors.newSingleThreadExecutor();
         executorService.submit(() -> {
-            int i = 0;
-            System.out.print("###################################################################");
-
-            while (i < 1000000) {
-                System.out.print(i++);
-            }
+            i[1]++;
         });
-
+        assertEquals(1, i[0]);
+        assertEquals(1, i[1]);
     }
 }
