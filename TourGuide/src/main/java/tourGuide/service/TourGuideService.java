@@ -43,7 +43,6 @@ public class TourGuideService {
 
         this.gpsApi = gpsApi;
         this.userApi = userApi;
-
         this.rewardsService = rewardsService;
 
         if (testMode) {

@@ -16,10 +16,7 @@ import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -82,7 +79,7 @@ public class TestPerformance {
     }
 
     @Test
-    public void highVolumeGetRewards() {
+    public void highVolumeGetRewards() throws ExecutionException, InterruptedException {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
 
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
@@ -101,12 +98,12 @@ public class TestPerformance {
         rewardsService.calculateRewardsForListOfUser(allUsers);
 
         boolean firstTry = true;
-        while ((allUsers.size() != 0) &&
-                (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) <= TimeUnit.MINUTES.toSeconds(20))) {
+        while ((allUsers.size() != 0) ||
+                (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) <= TimeUnit.MINUTES.toSeconds(15))) {
 
             allUsers.removeIf(user -> userHasReward(user));
             if ((allUsers.size() != 0) && firstTry &&
-                    (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) > TimeUnit.MINUTES.toSeconds(15))) {
+                    (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) > TimeUnit.MINUTES.toSeconds(10))) {
                 rewardsService.calculateRewardsForListOfUser(allUsers);
                 firstTry = false;
             }
@@ -127,10 +124,11 @@ public class TestPerformance {
         try {
             return userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()).getUserRewards().size() > 0;
         } catch (RetryableException ex) {
-            Boolean secondTry = userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()).getUserRewards().size() > 0;
+            //Boolean secondTry = userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()).getUserRewards().size() > 0;
             ex.printStackTrace();
-            return secondTry;
+            //return secondTry;
         }
+        return false;
     }
 
     @Test
