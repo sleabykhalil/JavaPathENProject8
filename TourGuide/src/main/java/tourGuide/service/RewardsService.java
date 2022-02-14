@@ -13,8 +13,7 @@ import tourGuide.feign.dto.gpsDto.Location;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.helper.DateTimeHelper;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,12 +52,12 @@ public class RewardsService {
     }
 
     private List<AttractionVisitedLocationPair> getAttVlPairList(List<Attraction> attractionList, User user) {
-        List<AttractionVisitedLocationPair> attractionVisitedLocationPairs = new ArrayList<>();
+
+        Map<String, AttractionVisitedLocationPair> attractionVisitedLocationPairs = new HashMap<>();
         List<Attraction> attractions = attractionList.parallelStream().
-                filter(attraction -> user.
-                        getUserRewards().
+                filter(attraction -> userApi.getUserRewardsById(user.getUserName(), dateTimeHelper.getTimeStamp()).
                         stream().parallel().
-                        map(UserReward::getAttraction).
+                        map(UserReward::getAttraction).collect(Collectors.toList()).stream().
                         map(Attraction::getAttractionName).
                         collect(Collectors.toList()).
                         contains(attraction.attractionName)).collect(Collectors.toList());
@@ -67,12 +66,13 @@ public class RewardsService {
 
         for (Attraction attraction : attractionList) {
             for (VisitedLocation visitedlocation : user.getVisitedLocations()) {
-                if (nearAttraction(visitedlocation, attraction)) {
-                    attractionVisitedLocationPairs.add(new AttractionVisitedLocationPair(attraction, visitedlocation));
+                if ((nearAttraction(visitedlocation, attraction))) {
+                    attractionVisitedLocationPairs.putIfAbsent(attraction.getAttractionName(), new AttractionVisitedLocationPair(attraction, visitedlocation));
                 }
             }
         }
-        return attractionVisitedLocationPairs;
+        System.out.print(attractionVisitedLocationPairs.size());
+        return new ArrayList<>(attractionVisitedLocationPairs.values());
     }
 
     private List<UserReward> getUserRewardList(List<AttractionVisitedLocationPair> attVlPairList, User user) {
