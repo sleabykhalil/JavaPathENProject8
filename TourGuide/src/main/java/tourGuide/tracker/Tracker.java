@@ -8,7 +8,9 @@ import tourGuide.feign.dto.UserDte.User;
 import tourGuide.helper.DateTimeHelper;
 import tourGuide.service.TourGuideService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,8 +39,9 @@ public class Tracker {
         executorService.shutdownNow();
         //executorService.shutdown();
     }
-    public void startTracking(){
-        this.executorService=Executors.newSingleThreadExecutor();
+
+    public void startTracking() {
+        this.executorService = Executors.newSingleThreadExecutor();
         executorService.submit(this::runTracking);
         stop = false;
         logger.debug("restart tracker");
@@ -52,6 +55,7 @@ public class Tracker {
                 logger.debug("Tracker stopping");
                 break;
             }
+
 
             List<User> users = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
             logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
