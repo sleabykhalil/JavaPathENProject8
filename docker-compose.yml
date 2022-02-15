@@ -15,57 +15,58 @@ networks:
 services:
   microservice_gps:
     build: ./gps-api
-    #ports:
-    #  - "8083:8083"
     expose:
       - 8083
-    #container_name: "tourguideGpsApi"
     networks:
       - traefik-net
     deploy:
       #mode: replicated
-      replicas: 2
+      replicas: 6
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-net"
       - "traefik.port=80"
-      - "traefik.http.routers.demo1.rule=Host(`gps.localhost`)"
+      - "traefik.http.routers.gps.rule=Host(`gps.localhost`)"
 
   microservice_reward:
     build: ./reward-api
-    ports:
-      - "8082:8082"
-    container_name: "tourguideRewardApi"
+    expose:
+      - 8082
+    networks:
+      - traefik-net
+    deploy:
+      #mode: replicated
+      replicas: 3
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-net"
       - "traefik.port=80"
-      - "traefik.http.routers.demo1.rule=Host(`reward.localhost`)"
+      - "traefik.http.routers.reward.rule=Host(`reward.localhost`)"
 
   microservice_users:
     build: ./user-api
-    ports:
-      - "8081:8081"
-    #container_name: "tourguideUserApi"
+    expose:
+      - 8081
+    networks:
+      - traefik-net
     labels:
-      - traefik.backend=users
-      - "traefik.frontend.rule=PathPrefixStrip:/users"
-
-#  microservice_tourguide:
-#    build: ./TourGuide
-#    container_name: "tourguideMainApi"
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      - "traefik.port=80"
+      - "traefik.http.routers.user.rule=Host(`user.localhost`)"
 
   traefik:
     #image: traefik:v1.7.14-alpine
-    image: traefik:v2.3.0
+#    image: traefik:v2.3.0
+    image: traefik
     command:
       - "--api.insecure=true"
       - "--providers.docker"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
     ports:
-      - "80:80"
-      - "8080:8080"
+      - "81:80"
+      - "28081:8080"
     networks:
       - traefik-net
     labels:
