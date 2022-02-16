@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 @Service
@@ -88,7 +89,7 @@ public class RewardsService {
 
     public CompletableFuture calculateRewards(User user) {
 
-        CompletableFuture<List<Attraction>> attractionListCF = CompletableFuture.supplyAsync(() -> gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()), executorService);
+/*        CompletableFuture<List<Attraction>> attractionListCF = CompletableFuture.supplyAsync(() -> gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()), executorService);
 
         CompletableFuture<List<AttractionVisitedLocationPair>> attVlPairCF = attractionListCF.thenApply((attractionList) -> getAttVlPairList(attractionList, user));
 
@@ -99,7 +100,28 @@ public class RewardsService {
                 userApi.addUserRewardList(dateTimeHelper.getTimeStamp(), user.getUserName(), userRewards);
             }
         });
-        return addListOfUserRewardsCF;
+        return addListOfUserRewardsCF;*/
+        List<VisitedLocation> userLocations = user.getVisitedLocations();
+        List<Attraction> attractions = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp());
+        return CompletableFuture.runAsync(() -> {
+            for (VisitedLocation visitedLocation : userLocations) {
+                for (Attraction attraction : attractions) {
+                    if (user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
+                        if (nearAttraction(visitedLocation, attraction)) {
+                           /* user.addUserReward(new UserReward(visitedLocation, attraction
+                                    , rewardApi.getRewardPoints(dateTimeHelper.getTimeStamp()
+                                    , String.valueOf(user.getUserId())
+                                    , String.valueOf(attraction.getAttractionId()))));*/
+                            userApi.addUserReward(dateTimeHelper.getTimeStamp(), user.getUserName()
+                                    , new UserReward(visitedLocation, attraction, rewardApi.getRewardPoints(dateTimeHelper.getTimeStamp()
+                                            , String.valueOf(user.getUserId())
+                                            , String.valueOf(attraction.getAttractionId()))));
+                        }
+                    }
+                }
+            }
+        }, executorService);
+
     }
 
     public void calculateRewardsForListOfUser(List<User> users) throws InterruptedException {

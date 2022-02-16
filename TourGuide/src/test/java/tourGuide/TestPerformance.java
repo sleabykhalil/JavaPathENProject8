@@ -78,7 +78,7 @@ public class TestPerformance {
                 System.out.println("Number of tracked users = " + allUsers.size());
                 break;
             } else {
-                Thread.sleep(Math.min(allUsers.size(), 1000));
+                Thread.sleep(3000);
                 System.out.println("Number of tracked users = " + userApi.getAllUsers(dateTimeHelper.getTimeStamp()).stream()
                         .filter(user -> user.getVisitedLocations().size() > 3).collect(Collectors.toList()).size());
 
