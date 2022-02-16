@@ -54,7 +54,6 @@ public class Tracker {
                 break;
             }
 
-
             List<User> users = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
             logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
             stopWatch.start();

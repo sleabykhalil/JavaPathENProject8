@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 
 @Service
@@ -36,7 +37,13 @@ public class TourGuideService {
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
     GpsApi gpsApi;
     UserApi userApi;
-    ExecutorService executorService = Executors.newFixedThreadPool(100);
+    ExecutorService executorService = Executors.newFixedThreadPool(300);
+
+    private Map<String, Boolean> trackedUserMap = new HashMap<>();
+
+    public Map<String, Boolean> getTrackedUserMap() {
+        return trackedUserMap;
+    }
 
     @Autowired
     public TourGuideService(RewardsService rewardsService, GpsApi gpsApi, UserApi userApi) {
@@ -82,12 +89,20 @@ public class TourGuideService {
 
         VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString(), dateTimeHelper.getTimeStamp());
         userApi.addToVisitedLocations(dateTimeHelper.getTimeStamp(), user.getUserName(), visitedLocation.getTimeVisited().toString(), visitedLocation);
-        rewardsService.calculateRewards(user);
-
+        CompletableFuture cf = rewardsService.calculateRewards(user);
+        Future f = executorService.submit(() -> {
+            while (true) {
+                if (cf.isDone()) {
+                    trackedUserMap.putIfAbsent(user.getUserName(), true);
+                    break;
+                }
+            }
+        });
         return visitedLocation;
     }
 
     public CompletableFuture trackAllUserLocation(List<User> userList) {
+
         CompletableFuture completableFuture = CompletableFuture.supplyAsync(() -> null);
         for (User user : userList) {
             completableFuture = completableFuture.thenCombine(CompletableFuture.supplyAsync(

@@ -106,12 +106,24 @@ public class TestPerformance {
 
         List<User> allUsers;
         allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
-        rewardsService.calculateRewardsForListOfUser(allUsers);
+        int counter = 0;
+        while (true) {
+            if (tourGuideService.getTrackedUserMap().size() != allUsers.size()) {
+                Thread.sleep(10000);
+                if (counter != tourGuideService.getTrackedUserMap().size()) {
+                    counter = tourGuideService.getTrackedUserMap().size();
+                    System.out.println("Number of calculated users = " + counter);
+                }
+            } else
+                break;
+        }
+
+//        rewardsService.calculateRewardsForListOfUser(allUsers);
 
         boolean firstTry = true;
         List<UUID> allUsersHasRewords;
 
-        while ((allUsers.size() != 0) &&
+/*        while ((allUsers.size() != 0) &&
                 (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) <= TimeUnit.MINUTES.toSeconds(15))) {
             try {
 
@@ -134,7 +146,7 @@ public class TestPerformance {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-        }
+        }*/
 
         assertEquals((int) userApi.getAllUsers(dateTimeHelper.getTimeStamp()).stream()
                 .filter(user -> user.getUserRewards().size() > 0).count(), InternalTestHelper.getInternalUserNumber());

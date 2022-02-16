@@ -34,10 +34,9 @@ public class RewardsService {
     GpsApi gpsApi;
     RewardApi rewardApi;
     UserApi userApi;
-    ExecutorService executorService = Executors.newFixedThreadPool(300);
+    ExecutorService executorService = Executors.newFixedThreadPool(10000);
     // ExecutorService apiExecutorService = Executors.newFixedThreadPool(10);
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
-
 
     @Autowired
     public RewardsService(GpsApi gpsApi, RewardApi rewardApi, UserApi userApi) {
@@ -121,7 +120,6 @@ public class RewardsService {
                 }
             }
         }, executorService);
-
     }
 
     public void calculateRewardsForListOfUser(List<User> users) throws InterruptedException {
