@@ -8,7 +8,8 @@ import tourGuide.feign.dto.gpsDto.VisitedLocation;
 
 import java.util.List;
 
-@FeignClient(name = "GpsApi", url = "http://localhost:8083")
+//@FeignClient(name = "GpsApi", url = "http://localhost:8083")
+@FeignClient(name = "GpsApi", url = "http://gps.localhost:81")
 public interface GpsApi {
 
     @GetMapping("gps/attractions/{timeStamp}")
