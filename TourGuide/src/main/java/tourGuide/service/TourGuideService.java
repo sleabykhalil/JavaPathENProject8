@@ -35,6 +35,7 @@ public class TourGuideService {
     GpsApi gpsApi;
     UserApi userApi;
     ExecutorService executorService = Executors.newFixedThreadPool(300);
+    ExecutorService getRewardExecutorService = Executors.newFixedThreadPool(10000);
 
     private Map<String, Boolean> trackedUserMap = new ConcurrentHashMap<>();
 
@@ -87,7 +88,7 @@ public class TourGuideService {
         VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString(), dateTimeHelper.getTimeStamp());
         userApi.addToVisitedLocations(dateTimeHelper.getTimeStamp(), user.getUserName(), visitedLocation.getTimeVisited().toString(), visitedLocation);
         CompletableFuture cf = rewardsService.calculateRewards(user);
-        Future f = executorService.submit(() -> {
+        Future f = getRewardExecutorService.submit(() -> {
             while (true) {
                 if (cf.isDone()) {
                     trackedUserMap.putIfAbsent(user.getUserName(), true);

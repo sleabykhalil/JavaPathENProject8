@@ -99,9 +99,9 @@ public class TestPerformance {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
-        Attraction attraction = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).get(0);
-
         System.out.println("Start adding attraction for test");
+
+        Attraction attraction = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).get(0);
         userApi.initUserByAddVisitedLocation(dateTimeHelper.getTimeStamp(), attraction);
         System.out.println("Add attraction is done");
 
