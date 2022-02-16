@@ -13,7 +13,10 @@ import tourGuide.feign.dto.gpsDto.Location;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.helper.DateTimeHelper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -83,9 +86,9 @@ public class RewardsService {
         return userRewards;
     }
 
-    public void calculateRewards(User user) {
+    public CompletableFuture calculateRewards(User user) {
 
-        CompletableFuture<List<Attraction>> attractionListCF = CompletableFuture.supplyAsync(() -> gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()),executorService);
+        CompletableFuture<List<Attraction>> attractionListCF = CompletableFuture.supplyAsync(() -> gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()), executorService);
 
         CompletableFuture<List<AttractionVisitedLocationPair>> attVlPairCF = attractionListCF.thenApply((attractionList) -> getAttVlPairList(attractionList, user));
 
@@ -96,7 +99,7 @@ public class RewardsService {
                 userApi.addUserRewardList(dateTimeHelper.getTimeStamp(), user.getUserName(), userRewards);
             }
         });
-
+        return addListOfUserRewardsCF;
     }
 
     public void calculateRewardsForListOfUser(List<User> users) throws InterruptedException {
