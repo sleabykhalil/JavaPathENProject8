@@ -92,7 +92,7 @@ public class TestPerformance {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
 
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
-        InternalTestHelper.setInternalUserNumber(100000);
+        InternalTestHelper.setInternalUserNumber(1000);
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
@@ -156,19 +156,4 @@ public class TestPerformance {
         return false;
     }
 
-    @Test
-    public void testRestartExecutorService() {
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        final int[] i = {0, 0};
-        executorService.submit(() -> {
-            i[0]++;
-        });
-        executorService.shutdownNow();
-        executorService = Executors.newSingleThreadExecutor();
-        executorService.submit(() -> {
-            i[1]++;
-        });
-        assertEquals(1, i[0]);
-        assertEquals(1, i[1]);
-    }
 }
