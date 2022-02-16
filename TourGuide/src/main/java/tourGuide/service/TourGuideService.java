@@ -24,7 +24,7 @@ import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
 @Service
-@Lazy
+//@Lazy
 public class TourGuideService {
     private Logger logger = LoggerFactory.getLogger(TourGuideService.class);
     private final RewardsService rewardsService;
@@ -34,8 +34,8 @@ public class TourGuideService {
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
     GpsApi gpsApi;
     UserApi userApi;
-    ExecutorService executorService = Executors.newFixedThreadPool(300);
-    ExecutorService getRewardExecutorService = Executors.newFixedThreadPool(10000);
+    ExecutorService executorService = Executors.newScheduledThreadPool(300);
+    ExecutorService getRewardExecutorService = Executors.newScheduledThreadPool(300);
 
     private Map<String, Boolean> trackedUserMap = new ConcurrentHashMap<>();
 

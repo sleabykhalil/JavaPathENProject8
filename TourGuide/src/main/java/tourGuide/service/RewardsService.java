@@ -34,7 +34,7 @@ public class RewardsService {
     GpsApi gpsApi;
     RewardApi rewardApi;
     UserApi userApi;
-    ExecutorService executorService = Executors.newFixedThreadPool(10000);
+    ExecutorService executorService = Executors.newScheduledThreadPool(10000);
     // ExecutorService apiExecutorService = Executors.newFixedThreadPool(10);
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
