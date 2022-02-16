@@ -18,7 +18,9 @@ services:
     expose:
       - 8083
     networks:
-      - traefik-net
+      traefik-net:
+        aliases:
+          - gps.localhost
     deploy:
       #mode: replicated
       replicas: 6
@@ -33,7 +35,9 @@ services:
     expose:
       - 8082
     networks:
-      - traefik-net
+      traefik-net:
+        aliases:
+          - reward.localhost
     deploy:
       #mode: replicated
       replicas: 3
@@ -48,7 +52,9 @@ services:
     expose:
       - 8081
     networks:
-      - traefik-net
+      traefik-net:
+        aliases:
+          - user.localhost
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-net"
@@ -68,7 +74,11 @@ services:
       - "81:80"
       - "28081:8080"
     networks:
-      - traefik-net
+      traefik-net:
+        aliases:
+          - gps.localhost
+          - user.localhost
+          - reward.localhost
     labels:
       - "traefik.http.routers.dashboard.rule=Host(`dash.localhost`)"
       - "traefik.docker.network=traefik-net"
