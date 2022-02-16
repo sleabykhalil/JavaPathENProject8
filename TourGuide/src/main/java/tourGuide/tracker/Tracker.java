@@ -65,7 +65,7 @@ public class Tracker {
             CompletableFuture completableFuture = tourGuideService.trackAllUserLocation(users);
             while (true) {
                 if (completableFuture.isDone()) {
-                    logger.debug("Tracker stop completableFuture of tracking is done.");
+                    logger.debug("Tracking is done.");
                     stopWatch.stop();
                     break;
                 }

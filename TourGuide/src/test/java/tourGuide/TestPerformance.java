@@ -76,7 +76,7 @@ public class TestPerformance {
                 System.out.println("Number of tracked users = " + allUsers.size());
                 break;
             } else {
-                Thread.sleep(Math.max( allUsers.size(),1000));
+                Thread.sleep(Math.max(allUsers.size(), 1000));
                 System.out.println("Number of tracked users = " + userApi.getAllUsers(dateTimeHelper.getTimeStamp()).stream()
                         .filter(user -> user.getVisitedLocations().size() > 3).collect(Collectors.toList()).size());
 
@@ -111,21 +111,26 @@ public class TestPerformance {
 
         while ((allUsers.size() != 0) &&
                 (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) <= TimeUnit.MINUTES.toSeconds(15))) {
+            try {
 
-            if (allUsers.size() > 0) {
-                Thread.sleep(Math.max( allUsers.size(),10000));
 
-                allUsersHasRewords = userApi.getAllUsers(dateTimeHelper.getTimeStamp())
-                        .stream().filter(user -> user.getUserRewards().size() > 0).map(User::getUserId).collect(Collectors.toList());
-                List<UUID> finalAllUsersHasRewords = allUsersHasRewords;
+                if (allUsers.size() > 0) {
+                    Thread.sleep(Math.max(allUsers.size(), 10000));
 
-                allUsers.removeIf(user -> finalAllUsersHasRewords.contains(user.getUserId()));
-                System.out.println("Number of calculated users = " +  allUsersHasRewords.size());
-            }
-            if ((allUsers.size() != 0) && firstTry &&
-                    (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) > TimeUnit.MINUTES.toSeconds(10))) {
-                rewardsService.calculateRewardsForListOfUser(allUsers);
-                firstTry = false;
+                    allUsersHasRewords = userApi.getAllUsers(dateTimeHelper.getTimeStamp())
+                            .stream().filter(user -> user.getUserRewards().size() > 0).map(User::getUserId).collect(Collectors.toList());
+                    List<UUID> finalAllUsersHasRewords = allUsersHasRewords;
+
+                    allUsers.removeIf(user -> finalAllUsersHasRewords.contains(user.getUserId()));
+                    System.out.println("Number of calculated users = " + allUsersHasRewords.size());
+                }
+                if ((allUsers.size() != 0) && firstTry &&
+                        (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) > TimeUnit.MINUTES.toSeconds(10))) {
+                    rewardsService.calculateRewardsForListOfUser(allUsers);
+                    firstTry = false;
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
 
