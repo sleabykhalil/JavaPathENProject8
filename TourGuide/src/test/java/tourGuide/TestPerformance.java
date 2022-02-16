@@ -70,17 +70,18 @@ public class TestPerformance {
 
         CompletableFuture completableFuture = new CompletableFuture();
         completableFuture = tourGuideService.trackAllUserLocation(allUsers);
-
+        int counter = 0;
         while (true) {
-            if (completableFuture.isDone()) {
+            if (completableFuture.isDone() || counter ==allUsers.size() ) {
                 stopWatch.stop();
                 tourGuideService.tracker.stopTracking();
                 System.out.println("Number of tracked users = " + allUsers.size());
                 break;
             } else {
                 Thread.sleep(3000);
-                System.out.println("Number of tracked users = " + userApi.getAllUsers(dateTimeHelper.getTimeStamp()).stream()
-                        .filter(user -> user.getVisitedLocations().size() > 3).collect(Collectors.toList()).size());
+                counter = userApi.getAllUsers(dateTimeHelper.getTimeStamp()).stream()
+                        .filter(user -> user.getVisitedLocations().size() > 3).collect(Collectors.toList()).size();
+                System.out.println("Number of tracked users = " +counter );
 
             }
         }

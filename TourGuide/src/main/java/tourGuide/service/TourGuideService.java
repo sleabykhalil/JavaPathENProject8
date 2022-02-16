@@ -20,10 +20,7 @@ import tripPricer.TripPricer;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
 @Service
@@ -39,7 +36,7 @@ public class TourGuideService {
     UserApi userApi;
     ExecutorService executorService = Executors.newFixedThreadPool(300);
 
-    private Map<String, Boolean> trackedUserMap = new HashMap<>();
+    private Map<String, Boolean> trackedUserMap = new ConcurrentHashMap<>();
 
     public Map<String, Boolean> getTrackedUserMap() {
         return trackedUserMap;
