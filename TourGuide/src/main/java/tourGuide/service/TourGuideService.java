@@ -33,8 +33,8 @@ public class TourGuideService {
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
     GpsApi gpsApi;
     UserApi userApi;
-    ExecutorService executorService = Executors.newScheduledThreadPool(100);
-    ExecutorService getRewardExecutorService = Executors.newScheduledThreadPool(100);
+    ExecutorService executorService = Executors.newFixedThreadPool(250);
+    ExecutorService getRewardExecutorService = Executors.newFixedThreadPool(500);
 
     private Map<String, Boolean> calculatedRewardForUserMap = new ConcurrentHashMap<>();
     private Map<String, Boolean> trackUserMap = new ConcurrentHashMap<>();
