@@ -109,8 +109,8 @@ public class RewardsService {
 
         if (userRewardList.size() > 0) {
             userApi.addUserRewardList(dateTimeHelper.getTimeStamp(), user.getUserName(), userRewardList);
+            calculatedRewardForUserMap.putIfAbsent(user.getUserName(), true);
         }
-        calculatedRewardForUserMap.putIfAbsent(user.getUserName(), true);
 /*        CompletableFuture<List<Attraction>> attractionListCF = CompletableFuture.supplyAsync(() -> gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()), executorService);
 
         CompletableFuture<List<AttractionVisitedLocationPair>> attVlPairCF = attractionListCF.thenApply((attractionList) -> getAttVlPairList(attractionList, user));

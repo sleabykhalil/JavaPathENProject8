@@ -3,6 +3,7 @@ package tourGuide.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import tourGuide.feign.GpsApi;
 import tourGuide.feign.UserApi;
@@ -23,7 +24,7 @@ import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
 @Service
-//@Lazy
+@Lazy
 public class TourGuideService {
     private Logger logger = LoggerFactory.getLogger(TourGuideService.class);
     private final RewardsService rewardsService;
@@ -33,7 +34,7 @@ public class TourGuideService {
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
     GpsApi gpsApi;
     UserApi userApi;
-    ExecutorService executorService = Executors.newFixedThreadPool(30);
+    ExecutorService executorService = Executors.newFixedThreadPool(100);
     ExecutorService getRewardExecutorService = Executors.newFixedThreadPool(1500);
 
     private Map<String, Boolean> trackUserMap = new ConcurrentHashMap<>();
@@ -91,7 +92,7 @@ public class TourGuideService {
         VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString(), dateTimeHelper.getTimeStamp());
         userApi.addToVisitedLocations(dateTimeHelper.getTimeStamp(), user.getUserName(), visitedLocation.getTimeVisited().toString(), visitedLocation);
 //        rewardsService.calculateRewards(user);
-        Future f = getRewardExecutorService.submit(() -> {rewardsService.calculateRewards(user);});
+        getRewardExecutorService.submit(() -> {rewardsService.calculateRewards(user);});
         trackUserMap.putIfAbsent(user.getUserName(), true);
         return visitedLocation;
     }

@@ -98,15 +98,15 @@ public class TestPerformance {
         InternalTestHelper.setInternalUserNumber(100000);
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
         System.out.println("Start adding attraction for test");
-
         Attraction attraction = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).get(0);
         userApi.initUserByAddVisitedLocation(dateTimeHelper.getTimeStamp(), attraction);
         System.out.println("Add attraction is done");
-
         List<User> allUsers;
         allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
+
+        TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
+
         int counter = 0;
         while (true) {
             if (tourGuideService.getCalculatedRewardForUserMap().size() < allUsers.size()) {
