@@ -56,11 +56,10 @@ public class TestPerformance {
      */
 
     @Test
-    @Ignore
     public void highVolumeTrackLocation() throws InterruptedException {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-        InternalTestHelper.setInternalUserNumber(100000);
+        InternalTestHelper.setInternalUserNumber(100);
         TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
 
         List<User> allUsers;
@@ -99,15 +98,18 @@ public class TestPerformance {
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
         InternalTestHelper.setInternalUserNumber(100000);
         StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
+        TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
+
         System.out.println("Start adding attraction for test");
         Attraction attraction = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).get(0);
         userApi.initUserByAddVisitedLocation(dateTimeHelper.getTimeStamp(), attraction);
         System.out.println("Add attraction is done");
+        stopWatch.start();
+
         List<User> allUsers;
         allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
 
-        TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
+        tourGuideService.calculateRewardForPerfTest(allUsers);
 
         int counter = 0;
         while (true) {
@@ -165,11 +167,11 @@ public class TestPerformance {
 
         System.out.println("highVolumeGetRewards: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
 
-        int usersGerRewardsCount =(int) userApi.getAllUsers(dateTimeHelper.getTimeStamp()).stream()
+        int usersGerRewardsCount = (int) userApi.getAllUsers(dateTimeHelper.getTimeStamp()).stream()
                 .filter(user -> user.getUserRewards().size() > 0).count();
         System.out.println("Number of calculated users = " + usersGerRewardsCount);
 
-        assertEquals( usersGerRewardsCount , InternalTestHelper.getInternalUserNumber());
+        assertEquals(usersGerRewardsCount, InternalTestHelper.getInternalUserNumber());
         assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 

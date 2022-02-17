@@ -107,7 +107,13 @@ public class TourGuideService {
 
         return completableFuture;
     }
+    public void calculateRewardForPerfTest(List<User> userList) {
 
+        for (User user : userList) {
+            getRewardExecutorService.submit(() -> {rewardsService.calculateRewards(user);});
+        }
+
+    }
     public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
         List<Attraction> nearbyAttractions = new ArrayList<>();
         for (Attraction attraction : gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp())) {
