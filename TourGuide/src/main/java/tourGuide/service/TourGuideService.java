@@ -35,7 +35,7 @@ public class TourGuideService {
     GpsApi gpsApi;
     UserApi userApi;
     ExecutorService executorService = Executors.newFixedThreadPool(100);
-    ExecutorService getRewardExecutorService = Executors.newFixedThreadPool(1500);
+    ExecutorService getRewardExecutorService = Executors.newFixedThreadPool(600);
 
     private Map<String, Boolean> trackUserMap = new ConcurrentHashMap<>();
 
