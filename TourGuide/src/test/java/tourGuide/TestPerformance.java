@@ -151,19 +151,23 @@ public class TestPerformance {
             }
         }*/
 
-        assertEquals((int) userApi.getAllUsers(dateTimeHelper.getTimeStamp()).stream()
-                .filter(user -> user.getUserRewards().size() > 0).count(), InternalTestHelper.getInternalUserNumber());
 
 //        allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
 //        for (User user : allUsers) {
 //            assertTrue(user.getUserRewards().size() > 0);
 //        }
-        System.out.println("Number of calculated users = " + (InternalTestHelper.getInternalUserNumber() - allUsers.size()));
+        //System.out.println("Number of calculated users = " + (InternalTestHelper.getInternalUserNumber() - allUsers.size()));
 
         stopWatch.stop();
         tourGuideService.tracker.stopTracking();
 
         System.out.println("highVolumeGetRewards: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
+
+        int usersGerRewardsCount =(int) userApi.getAllUsers(dateTimeHelper.getTimeStamp()).stream()
+                .filter(user -> user.getUserRewards().size() > 0).count();
+        System.out.println("Number of calculated users = " + usersGerRewardsCount);
+
+        assertEquals( usersGerRewardsCount , InternalTestHelper.getInternalUserNumber());
         assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 
