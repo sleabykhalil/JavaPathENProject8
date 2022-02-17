@@ -59,7 +59,7 @@ public class TestPerformance {
     public void highVolumeTrackLocation() throws InterruptedException {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-        InternalTestHelper.setInternalUserNumber(100);
+        InternalTestHelper.setInternalUserNumber(100000);
         TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
 
         List<User> allUsers;
@@ -73,17 +73,18 @@ public class TestPerformance {
         int counter = 0;
         while (true) {
             if (completableFuture.isDone() || counter >= allUsers.size()) {
+                System.out.println("Number of tracked users = " + allUsers.size());
                 stopWatch.stop();
                 tourGuideService.tracker.stopTracking();
-                System.out.println("Number of tracked users = " + allUsers.size());
                 break;
             } else {
-                Thread.sleep(3000);
+                Thread.sleep(10000);
 //                counter = userApi.getAllUsers(dateTimeHelper.getTimeStamp()).stream()
 //                        .filter(user -> user.getVisitedLocations().size() > 3).collect(Collectors.toList()).size();
-                counter = tourGuideService.getTrackUserMap().size();
-                System.out.println("Number of tracked users = " + counter);
-
+                if (counter != tourGuideService.getTrackUserMap().size() ) {
+                    counter != tourGuideService.getTrackUserMap().size();
+                    System.out.println("Number of tracked users = " + counter);
+                }
             }
         }
         System.out.println("highVolumeTrackLocation: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
