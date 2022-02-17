@@ -90,7 +90,7 @@ public class TourGuideService {
 
         VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString(), dateTimeHelper.getTimeStamp());
         userApi.addToVisitedLocations(dateTimeHelper.getTimeStamp(), user.getUserName(), visitedLocation.getTimeVisited().toString(), visitedLocation);
-        CompletableFuture cf = rewardsService.calculateRewards(user);
+        rewardsService.calculateRewards(user);
 /*        Future f = getRewardExecutorService.submit(() -> {
             while (true) {
                 if (cf.isDone()) {
