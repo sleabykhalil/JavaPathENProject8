@@ -3,7 +3,6 @@ package tourGuide.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import tourGuide.feign.GpsApi;
 import tourGuide.feign.UserApi;
@@ -34,13 +33,18 @@ public class TourGuideService {
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
     GpsApi gpsApi;
     UserApi userApi;
-    ExecutorService executorService = Executors.newScheduledThreadPool(300);
-    ExecutorService getRewardExecutorService = Executors.newScheduledThreadPool(300);
+    ExecutorService executorService = Executors.newScheduledThreadPool(100);
+    ExecutorService getRewardExecutorService = Executors.newScheduledThreadPool(100);
 
-    private Map<String, Boolean> trackedUserMap = new ConcurrentHashMap<>();
+    private Map<String, Boolean> calculatedRewardForUserMap = new ConcurrentHashMap<>();
+    private Map<String, Boolean> trackUserMap = new ConcurrentHashMap<>();
 
-    public Map<String, Boolean> getTrackedUserMap() {
-        return trackedUserMap;
+    public Map<String, Boolean> getTrackUserMap() {
+        return trackUserMap;
+    }
+
+    public Map<String, Boolean> getCalculatedRewardForUserMap() {
+        return calculatedRewardForUserMap;
     }
 
     @Autowired
@@ -91,11 +95,12 @@ public class TourGuideService {
         Future f = getRewardExecutorService.submit(() -> {
             while (true) {
                 if (cf.isDone()) {
-                    trackedUserMap.putIfAbsent(user.getUserName(), true);
+                    calculatedRewardForUserMap.putIfAbsent(user.getUserName(), true);
                     break;
                 }
             }
         });
+        trackUserMap.putIfAbsent(user.getUserName(), true);
         return visitedLocation;
     }
 

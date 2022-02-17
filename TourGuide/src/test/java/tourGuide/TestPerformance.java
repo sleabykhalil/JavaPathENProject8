@@ -20,7 +20,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -72,16 +71,17 @@ public class TestPerformance {
         completableFuture = tourGuideService.trackAllUserLocation(allUsers);
         int counter = 0;
         while (true) {
-            if (completableFuture.isDone() || counter ==allUsers.size() ) {
+            if (completableFuture.isDone() || counter > allUsers.size()) {
                 stopWatch.stop();
                 tourGuideService.tracker.stopTracking();
                 System.out.println("Number of tracked users = " + allUsers.size());
                 break;
             } else {
                 Thread.sleep(3000);
-                counter = userApi.getAllUsers(dateTimeHelper.getTimeStamp()).stream()
-                        .filter(user -> user.getVisitedLocations().size() > 3).collect(Collectors.toList()).size();
-                System.out.println("Number of tracked users = " +counter );
+//                counter = userApi.getAllUsers(dateTimeHelper.getTimeStamp()).stream()
+//                        .filter(user -> user.getVisitedLocations().size() > 3).collect(Collectors.toList()).size();
+                counter = tourGuideService.getTrackUserMap().size();
+                System.out.println("Number of tracked users = " + counter);
 
             }
         }
@@ -109,10 +109,10 @@ public class TestPerformance {
         allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
         int counter = 0;
         while (true) {
-            if (tourGuideService.getTrackedUserMap().size() != allUsers.size()) {
+            if (tourGuideService.getCalculatedRewardForUserMap().size() != allUsers.size()) {
                 Thread.sleep(10000);
-                if (counter != tourGuideService.getTrackedUserMap().size()) {
-                    counter = tourGuideService.getTrackedUserMap().size();
+                if (counter != tourGuideService.getCalculatedRewardForUserMap().size()) {
+                    counter = tourGuideService.getCalculatedRewardForUserMap().size();
                     System.out.println("Number of calculated users = " + counter);
                 }
             } else
