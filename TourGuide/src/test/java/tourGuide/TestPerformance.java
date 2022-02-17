@@ -59,7 +59,7 @@ public class TestPerformance {
     public void highVolumeTrackLocation() throws InterruptedException {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-        InternalTestHelper.setInternalUserNumber(100);
+        InternalTestHelper.setInternalUserNumber(100000);
         TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
 
         List<User> allUsers;
