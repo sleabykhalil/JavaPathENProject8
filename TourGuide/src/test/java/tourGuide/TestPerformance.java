@@ -71,7 +71,7 @@ public class TestPerformance {
         completableFuture = tourGuideService.trackAllUserLocation(allUsers);
         int counter = 0;
         while (true) {
-            if (completableFuture.isDone() || counter > allUsers.size()) {
+            if (completableFuture.isDone() || counter >= allUsers.size()) {
                 stopWatch.stop();
                 tourGuideService.tracker.stopTracking();
                 System.out.println("Number of tracked users = " + allUsers.size());
@@ -109,14 +109,16 @@ public class TestPerformance {
         allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
         int counter = 0;
         while (true) {
-            if (tourGuideService.getCalculatedRewardForUserMap().size() != allUsers.size()) {
+            if (tourGuideService.getCalculatedRewardForUserMap().size() < allUsers.size()) {
                 Thread.sleep(10000);
                 if (counter != tourGuideService.getCalculatedRewardForUserMap().size()) {
                     counter = tourGuideService.getCalculatedRewardForUserMap().size();
                     System.out.println("Number of calculated users = " + counter);
                 }
-            } else
+            } else {
+                System.out.println("Number of calculated users = " + counter);
                 break;
+            }
         }
 
 //        rewardsService.calculateRewardsForListOfUser(allUsers);
