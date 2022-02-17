@@ -62,13 +62,21 @@ public class RewardsService {
     private List<AttractionVisitedLocationPair> getAttVlPairList(List<Attraction> attractionList, User user) {
 
         Map<String, AttractionVisitedLocationPair> attractionVisitedLocationPairs = new HashMap<>();
-        List<Attraction> attractions = attractionList.parallelStream().
+       /* List<Attraction> attractions = attractionList.parallelStream().
                 filter(attraction -> userApi.getUserRewardsById(user.getUserName(), dateTimeHelper.getTimeStamp()).
                         stream().parallel().
                         map(UserReward::getAttraction).collect(Collectors.toList()).stream().
                         map(Attraction::getAttractionName).
                         collect(Collectors.toList()).
+                        contains(attraction.attractionName)).collect(Collectors.toList());*/
+        List<Attraction> attractions = attractionList.parallelStream().
+                filter(attraction -> user.getUserRewards().
+                        stream().parallel().
+                        map(UserReward::getAttraction).collect(Collectors.toList()).stream().
+                        map(Attraction::getAttractionName).
+                        collect(Collectors.toList()).
                         contains(attraction.attractionName)).collect(Collectors.toList());
+
         attractionList.removeAll(attractions);
 
 
