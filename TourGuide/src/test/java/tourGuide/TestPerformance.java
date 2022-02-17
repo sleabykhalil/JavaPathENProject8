@@ -78,11 +78,11 @@ public class TestPerformance {
                 tourGuideService.tracker.stopTracking();
                 break;
             } else {
-                Thread.sleep(10000);
+                Thread.sleep(15000);
 //                counter = userApi.getAllUsers(dateTimeHelper.getTimeStamp()).stream()
 //                        .filter(user -> user.getVisitedLocations().size() > 3).collect(Collectors.toList()).size();
                 if (counter != tourGuideService.getTrackUserMap().size() ) {
-                    counter != tourGuideService.getTrackUserMap().size();
+                    counter = tourGuideService.getTrackUserMap().size();
                     System.out.println("Number of tracked users = " + counter);
                 }
             }
@@ -115,7 +115,7 @@ public class TestPerformance {
         int counter = 0;
         while (true) {
             if (tourGuideService.getCalculatedRewardForUserMap().size() < allUsers.size()) {
-                Thread.sleep(10000);
+                Thread.sleep(15000);
                 if (counter != tourGuideService.getCalculatedRewardForUserMap().size()) {
                     counter = tourGuideService.getCalculatedRewardForUserMap().size();
                     System.out.println("Number of calculated users = " + counter);
