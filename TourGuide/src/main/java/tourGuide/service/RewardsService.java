@@ -100,7 +100,7 @@ public class RewardsService {
         return userRewards;
     }
 
-    public CompletableFuture calculateRewards(User user) {
+    public void calculateRewards(User user) {
 
         CompletableFuture<List<Attraction>> attractionListCF = CompletableFuture.supplyAsync(() -> gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()), executorService);
 
@@ -114,7 +114,7 @@ public class RewardsService {
             }
             calculatedRewardForUserMap.putIfAbsent(user.getUserName(),true);
         });
-        return addListOfUserRewardsCF;
+        //return addListOfUserRewardsCF;
      /*   List<VisitedLocation> userLocations = user.getVisitedLocations();
         List<Attraction> attractions = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp());
         return CompletableFuture.runAsync(() -> {
