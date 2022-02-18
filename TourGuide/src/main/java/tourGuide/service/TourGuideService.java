@@ -37,7 +37,8 @@ public class TourGuideService {
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
     GpsApi gpsApi;
     UserApi userApi;
-    ExecutorService executorService = Executors.newFixedThreadPool(100);
+
+    ExecutorService trackUserExecutorService = Executors.newFixedThreadPool(100);
     ExecutorService getRewardExecutorService = Executors.newFixedThreadPool(600);
 
     private Map<String, Boolean> trackUserMap = new ConcurrentHashMap<>();
@@ -50,6 +51,13 @@ public class TourGuideService {
         return rewardsService.getCalculatedRewardForUserMap();
     }
 
+    public ExecutorService getTrackUserExecutorService() {
+        return trackUserExecutorService;
+    }
+
+    public ExecutorService getGetRewardExecutorService() {
+        return getRewardExecutorService;
+    }
     @Autowired
     public TourGuideService(RewardsService rewardsService, GpsApi gpsApi, UserApi userApi) {
 
@@ -106,7 +114,7 @@ public class TourGuideService {
         CompletableFuture completableFuture = CompletableFuture.supplyAsync(() -> null);
         for (User user : userList) {
             completableFuture = completableFuture.thenCombine(CompletableFuture.supplyAsync(
-                    () -> trackUserLocation(user), executorService), (x, y) -> null);
+                    () -> trackUserLocation(user), trackUserExecutorService), (x, y) -> null);
         }
 
         return completableFuture;

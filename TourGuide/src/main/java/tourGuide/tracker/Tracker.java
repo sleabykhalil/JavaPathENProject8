@@ -35,7 +35,8 @@ public class Tracker {
     public void stopTracking() {
         stop = true;
         executorService.shutdownNow();
-        //executorService.shutdown();
+        tourGuideService.getTrackUserExecutorService().shutdownNow();
+        tourGuideService.getGetRewardExecutorService().shutdownNow();
     }
 
     public void startTracking() {
