@@ -20,7 +20,10 @@ import tripPricer.TripPricer;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 @Service
@@ -91,8 +94,9 @@ public class TourGuideService {
 
         VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString(), dateTimeHelper.getTimeStamp());
         userApi.addToVisitedLocations(dateTimeHelper.getTimeStamp(), user.getUserName(), visitedLocation.getTimeVisited().toString(), visitedLocation);
-//        rewardsService.calculateRewards(user);
-        getRewardExecutorService.submit(() -> {rewardsService.calculateRewards(user);});
+        getRewardExecutorService.submit(() -> {
+            rewardsService.calculateRewards(user);
+        });
         trackUserMap.putIfAbsent(user.getUserName(), true);
         return visitedLocation;
     }
@@ -107,13 +111,17 @@ public class TourGuideService {
 
         return completableFuture;
     }
+
     public void calculateRewardForPerfTest(List<User> userList) {
 
         for (User user : userList) {
-            getRewardExecutorService.submit(() -> {rewardsService.calculateRewards(user);});
+            getRewardExecutorService.submit(() -> {
+                rewardsService.calculateRewards(user);
+            });
         }
 
     }
+
     public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
         List<Attraction> nearbyAttractions = new ArrayList<>();
         for (Attraction attraction : gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp())) {

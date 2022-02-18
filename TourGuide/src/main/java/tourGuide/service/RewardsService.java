@@ -62,13 +62,6 @@ public class RewardsService {
     private List<AttractionVisitedLocationPair> getAttVlPairList(List<Attraction> attractionList, User user) {
 
         Map<String, AttractionVisitedLocationPair> attractionVisitedLocationPairs = new HashMap<>();
-       /* List<Attraction> attractions = attractionList.parallelStream().
-                filter(attraction -> userApi.getUserRewardsById(user.getUserName(), dateTimeHelper.getTimeStamp()).
-                        stream().parallel().
-                        map(UserReward::getAttraction).collect(Collectors.toList()).stream().
-                        map(Attraction::getAttractionName).
-                        collect(Collectors.toList()).
-                        contains(attraction.attractionName)).collect(Collectors.toList());*/
         List<Attraction> attractions = attractionList.parallelStream().
                 filter(attraction -> user.getUserRewards().
                         stream().parallel().
@@ -87,7 +80,6 @@ public class RewardsService {
                 }
             }
         }
-//        System.out.print(attractionVisitedLocationPairs.size());
         return new ArrayList<>(attractionVisitedLocationPairs.values());
     }
 
@@ -111,51 +103,10 @@ public class RewardsService {
         CompletableFuture<Void> addListOfUserRewardsCF = userRewardListCF.thenAccept(userRewards -> {
             if (userRewards.size() > 0) {
                 userApi.addUserRewardList(dateTimeHelper.getTimeStamp(), user.getUserName(), userRewards);
-                calculatedRewardForUserMap.putIfAbsent(user.getUserName(),true);
+                calculatedRewardForUserMap.putIfAbsent(user.getUserName(), true);
             }
 
         });
-        //return addListOfUserRewardsCF;
-     /*   List<VisitedLocation> userLocations = user.getVisitedLocations();
-        List<Attraction> attractions = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp());
-        return CompletableFuture.runAsync(() -> {
-            for (VisitedLocation visitedLocation : userLocations) {
-                for (Attraction attraction : attractions) {
-                    if (user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
-                        if (nearAttraction(visitedLocation, attraction)) {
-                           *//* user.addUserReward(new UserReward(visitedLocation, attraction
-                                    , rewardApi.getRewardPoints(dateTimeHelper.getTimeStamp()
-                                    , String.valueOf(user.getUserId())
-                                    , String.valueOf(attraction.getAttractionId()))));*//*
-                            userApi.addUserReward(dateTimeHelper.getTimeStamp(), user.getUserName()
-                                    , new UserReward(visitedLocation, attraction, rewardApi.getRewardPoints(dateTimeHelper.getTimeStamp()
-                                            , String.valueOf(user.getUserId())
-                                            , String.valueOf(attraction.getAttractionId()))));
-                        }
-                    }
-                }
-            }
-        }, executorService);*/
-    }
-
-    public void calculateRewardsForListOfUser(List<User> users) throws InterruptedException {
-        CompletableFuture<List<UserReward>> completableFuture = CompletableFuture.supplyAsync(() -> null);
-        for (User user : users) {
-            completableFuture = completableFuture.thenCombine(CompletableFuture.runAsync(() -> calculateRewards(user)
-                    , executorService), (x, y) -> null);
-        }
-
-    }
-
-    private UserReward getUserReward(User user, VisitedLocation visitedLocation, Attraction attraction) {
-        if (user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
-            if (nearAttraction(visitedLocation, attraction)) {
-                UserReward userReward = (new UserReward(visitedLocation, attraction,
-                        rewardApi.getRewardPoints(dateTimeHelper.getTimeStamp(), user.getUserId().toString(), attraction.getAttractionId().toString())));
-                return userReward;
-            }
-        }
-        return null;
     }
 
     public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
