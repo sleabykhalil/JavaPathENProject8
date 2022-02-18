@@ -57,7 +57,16 @@ public class TestCaculateRewardsPerformance {
         //given
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
-        InternalTestHelper.setInternalUserNumber(100000);
+        int numberOfUsers = 100;
+        if (System.getProperty("numberOfUsers")!= null && !System.getProperty("numberOfUsers").isEmpty()) {
+            try {
+                System.out.println("Users number pass from command line =" + System.getProperty("numberOfUsers"));
+                numberOfUsers = Integer.parseInt(System.getProperty("numberOfUsers"));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        InternalTestHelper.setInternalUserNumber(numberOfUsers);
         TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
 
         System.out.println("Start adding attraction for test");

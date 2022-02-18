@@ -47,13 +47,13 @@ dependencyManagement {
 }
 
 test {
+    systemProperties = [ numberOfUsers:System.getProperty('numberOfUsers')]
     useJUnitPlatform()
     testLogging {
         outputs.upToDateWhen {false}
         showStandardStreams = true
     }
 }
-
 
 jacoco {
     toolVersion = "0.8.4"
