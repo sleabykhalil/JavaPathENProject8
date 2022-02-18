@@ -84,7 +84,7 @@ public class TestCaculateRewardsPerformance {
         int counter = 0;
         while (true) {
             if (tourGuideService.getCalculatedRewardForUserMap().size() < allUsers.size()) {
-                Thread.sleep(10000);
+                Thread.sleep(Math.max(Math.min(allUsers.size(),10000),1000));
                 if (counter != tourGuideService.getCalculatedRewardForUserMap().size()) {
                     counter = tourGuideService.getCalculatedRewardForUserMap().size();
                     System.out.println("Number of calculated users = " + counter);
