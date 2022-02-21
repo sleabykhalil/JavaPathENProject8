@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tripPricer.Provider;
-import userApi.dto.UserRewardDto;
-import userApi.dto.VisitedLocationDto;
 import userApi.model.User;
 import userApi.model.UserReward;
 import userApi.repository.UserRepository;

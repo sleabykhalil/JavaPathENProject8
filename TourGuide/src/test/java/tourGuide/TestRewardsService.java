@@ -75,7 +75,7 @@ public class TestRewardsService {
         assertTrue(rewardsService.isWithinAttractionProximity(attraction, attraction));
     }
 
-    //  @Ignore // Needs fixed - can throw ConcurrentModificationException
+
     @Test
     public void nearAllAttractions() throws ExecutionException, InterruptedException {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
@@ -83,13 +83,13 @@ public class TestRewardsService {
 
         InternalTestHelper.setInternalUserNumber(1);
         TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
+        Thread.sleep(20000);//until trucking finished
         User user = userApi.getAllUsers(dateTimeHelper.getTimeStamp()).get(0);
-        //rewardsService.calculateRewards(user).get();
         rewardsService.calculateRewards(user);
-        List<UserReward> userRewards = userApi.getUserRewardsById(user.getUserName(), dateTimeHelper.getTimeStamp());
+        User userAfterCalculate = userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp());
         tourGuideService.tracker.stopTracking();
 
-        assertEquals(gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).size(), userRewards.size());
+        assertEquals(gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).size(), userAfterCalculate.getUserRewards().size());
     }
 
 }

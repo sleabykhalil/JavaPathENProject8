@@ -27,7 +27,7 @@ public class Mapper {
         return user;
     }
 
-    private List<Provider> toTripDeals(List<ProviderDto> tripDeals) {
+    public List<Provider> toTripDeals(List<ProviderDto> tripDeals) {
         List<Provider> providerList = new ArrayList<>();
         for (ProviderDto td : tripDeals) {
             providerList.add(new Provider(td.getTripId(), td.getName(), td.getPrice()));

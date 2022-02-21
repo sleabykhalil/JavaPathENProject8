@@ -10,6 +10,7 @@ import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDte.User;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
+import tourGuide.feign.dto.tripPricerDto.ProviderDto;
 import tourGuide.helper.DateTimeHelper;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
@@ -79,6 +80,7 @@ public class TestTourGuideService {
 
         assertEquals(user, retrivedUser);
         assertEquals(user2, retrivedUser2);
+
     }
 
     @Test

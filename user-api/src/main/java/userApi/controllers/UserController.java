@@ -80,8 +80,10 @@ public class UserController {
     }
 
     @PostMapping("/users/tripDeals/{userName}/{timeStamp}")
-    public void setTripDeals(@PathVariable String userName, @PathVariable String timeStamp, @RequestBody List<Provider> providers) {
+    public void setTripDeals(@PathVariable String userName, @PathVariable String timeStamp, @RequestBody List<ProviderDto> providerDtoList) {
         logger.info("/users/tripDeals/userName{}/timeStamp{}", userName, timeStamp);
+        List<Provider> providers = new ArrayList<>();
+        providers = mapper.toTripDeals(providerDtoList);
         userService.setTripDeals(userName, providers);
     }
 

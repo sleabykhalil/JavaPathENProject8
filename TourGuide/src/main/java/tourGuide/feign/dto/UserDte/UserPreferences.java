@@ -114,6 +114,38 @@ public class UserPreferences {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserPreferences)) return false;
+
+        UserPreferences that = (UserPreferences) o;
+
+        if (getAttractionProximity() != that.getAttractionProximity()) return false;
+        if (getTripDuration() != that.getTripDuration()) return false;
+        if (getTicketQuantity() != that.getTicketQuantity()) return false;
+        if (getNumberOfAdults() != that.getNumberOfAdults()) return false;
+        if (getNumberOfChildren() != that.getNumberOfChildren()) return false;
+        if (getCurrency() != null ? !getCurrency().equals(that.getCurrency()) : that.getCurrency() != null)
+            return false;
+        if (getLowerPricePoint() != null ? !getLowerPricePoint().equals(that.getLowerPricePoint()) : that.getLowerPricePoint() != null)
+            return false;
+        return getHighPricePoint() != null ? getHighPricePoint().equals(that.getHighPricePoint()) : that.getHighPricePoint() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getAttractionProximity();
+        result = 31 * result + (getCurrency() != null ? getCurrency().hashCode() : 0);
+        result = 31 * result + (getLowerPricePoint() != null ? getLowerPricePoint().hashCode() : 0);
+        result = 31 * result + (getHighPricePoint() != null ? getHighPricePoint().hashCode() : 0);
+        result = 31 * result + getTripDuration();
+        result = 31 * result + getTicketQuantity();
+        result = 31 * result + getNumberOfAdults();
+        result = 31 * result + getNumberOfChildren();
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "UserPreferences{" +
                 "attractionProximity=" + attractionProximity +

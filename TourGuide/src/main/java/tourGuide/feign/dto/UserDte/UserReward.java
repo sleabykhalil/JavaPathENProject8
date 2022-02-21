@@ -47,6 +47,27 @@ public class UserReward {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserReward)) return false;
+
+        UserReward that = (UserReward) o;
+
+        if (getRewardPoints() != that.getRewardPoints()) return false;
+        if (getVisitedLocation() != null ? !getVisitedLocation().equals(that.getVisitedLocation()) : that.getVisitedLocation() != null)
+            return false;
+        return getAttraction() != null ? getAttraction().equals(that.getAttraction()) : that.getAttraction() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getVisitedLocation() != null ? getVisitedLocation().hashCode() : 0;
+        result = 31 * result + (getAttraction() != null ? getAttraction().hashCode() : 0);
+        result = 31 * result + getRewardPoints();
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "UserReward{" +
                 "visitedLocation=" + visitedLocation +
