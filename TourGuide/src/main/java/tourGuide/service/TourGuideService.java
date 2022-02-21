@@ -82,7 +82,6 @@ public class TourGuideService {
 
         VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString(), dateTimeHelper.getTimeStamp());
         userApi.addToVisitedLocations(dateTimeHelper.getTimeStamp(), user.getUserName(), visitedLocation.getTimeVisited().toString(), visitedLocation);
-
         rewardsService.calculateRewards(user);
 
         return visitedLocation;

@@ -55,7 +55,8 @@ public class TestRewardsService {
         stopWatch.start();
 
         tourGuideService.trackUserLocation(userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()));
-        rewardsService.calculateRewards(userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp())).get();
+        //rewardsService.calculateRewards(userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp())).get();
+        rewardsService.calculateRewards(userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()));
         int userRewardsSize;
         do {
             userRewardsSize = userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()).getUserRewards().size();
@@ -83,7 +84,8 @@ public class TestRewardsService {
         InternalTestHelper.setInternalUserNumber(1);
         TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
         User user = userApi.getAllUsers(dateTimeHelper.getTimeStamp()).get(0);
-        rewardsService.calculateRewards(user).get();
+        //rewardsService.calculateRewards(user).get();
+        rewardsService.calculateRewards(user);
         List<UserReward> userRewards = userApi.getUserRewardsById(user.getUserName(), dateTimeHelper.getTimeStamp());
         tourGuideService.tracker.stopTracking();
 

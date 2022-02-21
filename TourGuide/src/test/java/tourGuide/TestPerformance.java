@@ -16,7 +16,11 @@ import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -52,7 +56,7 @@ public class TestPerformance {
      */
 
     @Test
-    public void highVolumeTrackLocation() {
+    public void highVolumeTrackLocation() throws InterruptedException {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
         InternalTestHelper.setInternalUserNumber(100000);
@@ -66,11 +70,18 @@ public class TestPerformance {
 
         CompletableFuture completableFuture = new CompletableFuture();
         completableFuture = tourGuideService.trackAllUserLocation(allUsers);
+
         while (true) {
             if (completableFuture.isDone()) {
                 stopWatch.stop();
                 tourGuideService.tracker.stopTracking();
+                System.out.println("Number of tracked users = " + allUsers.size());
                 break;
+            } else {
+                Thread.sleep(3000);
+                System.out.println("Number of tracked users = " + userApi.getAllUsers(dateTimeHelper.getTimeStamp()).stream()
+                        .filter(user -> user.getVisitedLocations().size() > 3).collect(Collectors.toList()).size());
+
             }
         }
         System.out.println("highVolumeTrackLocation: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
@@ -98,21 +109,42 @@ public class TestPerformance {
         rewardsService.calculateRewardsForListOfUser(allUsers);
 
         boolean firstTry = true;
-        while ((allUsers.size() != 0) ||
-                (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) <= TimeUnit.MINUTES.toSeconds(15))) {
+        List<UUID> allUsersHasRewords;
 
-            allUsers.removeIf(user -> userHasReward(user));
-            if ((allUsers.size() != 0) && firstTry &&
-                    (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) > TimeUnit.MINUTES.toSeconds(10))) {
-                rewardsService.calculateRewardsForListOfUser(allUsers);
-                firstTry = false;
+        while ((allUsers.size() != 0) &&
+                (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) <= TimeUnit.MINUTES.toSeconds(15))) {
+            try {
+
+
+                if (allUsers.size() > 0) {
+                    Thread.sleep(Math.max(allUsers.size(), 10000));
+
+                    allUsersHasRewords = userApi.getAllUsers(dateTimeHelper.getTimeStamp())
+                            .stream().filter(user -> user.getUserRewards().size() > 0).map(User::getUserId).collect(Collectors.toList());
+                    List<UUID> finalAllUsersHasRewords = allUsersHasRewords;
+
+                    allUsers.removeIf(user -> finalAllUsersHasRewords.contains(user.getUserId()));
+                    System.out.println("Number of calculated users = " + allUsersHasRewords.size());
+                }
+                if ((allUsers.size() != 0) && firstTry &&
+                        (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) > TimeUnit.MINUTES.toSeconds(10))) {
+                    rewardsService.calculateRewardsForListOfUser(allUsers);
+                    firstTry = false;
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
 
-        allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
-        for (User user : allUsers) {
-            assertTrue(user.getUserRewards().size() > 0);
-        }
+        assertEquals((int) userApi.getAllUsers(dateTimeHelper.getTimeStamp()).stream()
+                .filter(user -> user.getUserRewards().size() > 0).count(), InternalTestHelper.getInternalUserNumber());
+
+//        allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
+//        for (User user : allUsers) {
+//            assertTrue(user.getUserRewards().size() > 0);
+//        }
+        System.out.println("Number of calculated users = " + (InternalTestHelper.getInternalUserNumber() - allUsers.size()));
+
         stopWatch.stop();
         tourGuideService.tracker.stopTracking();
 
@@ -131,19 +163,4 @@ public class TestPerformance {
         return false;
     }
 
-    @Test
-    public void testRestartExecutorService() {
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        final int[] i = {0,0};
-        executorService.submit(() -> {
-            i[0]++;
-        });
-        executorService.shutdownNow();
-        executorService = Executors.newSingleThreadExecutor();
-        executorService.submit(() -> {
-            i[1]++;
-        });
-        assertEquals(1, i[0]);
-        assertEquals(1, i[1]);
-    }
 }

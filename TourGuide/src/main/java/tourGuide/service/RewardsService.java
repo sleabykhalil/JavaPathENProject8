@@ -13,10 +13,14 @@ import tourGuide.feign.dto.gpsDto.Location;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.helper.DateTimeHelper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,11 +31,10 @@ public class RewardsService {
     private int defaultProximityBuffer = 10;
     private int proximityBuffer = defaultProximityBuffer;
     private int attractionProximityRange = 200;
-
     GpsApi gpsApi;
     RewardApi rewardApi;
     UserApi userApi;
-    ExecutorService executorService = Executors.newFixedThreadPool(100);
+    ExecutorService executorService = Executors.newFixedThreadPool(300);
     // ExecutorService apiExecutorService = Executors.newFixedThreadPool(10);
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
@@ -71,7 +74,7 @@ public class RewardsService {
                 }
             }
         }
-        System.out.print(attractionVisitedLocationPairs.size());
+//        System.out.print(attractionVisitedLocationPairs.size());
         return new ArrayList<>(attractionVisitedLocationPairs.values());
     }
 
@@ -84,31 +87,50 @@ public class RewardsService {
         return userRewards;
     }
 
-    public CompletableFuture<List<UserReward>> calculateRewards(User user) {
+    public CompletableFuture calculateRewards(User user) {
 
-        CompletableFuture<List<Attraction>> attractionListCF = CompletableFuture.supplyAsync(() -> gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()), executorService);
+/*        CompletableFuture<List<Attraction>> attractionListCF = CompletableFuture.supplyAsync(() -> gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()), executorService);
 
         CompletableFuture<List<AttractionVisitedLocationPair>> attVlPairCF = attractionListCF.thenApply((attractionList) -> getAttVlPairList(attractionList, user));
 
         CompletableFuture<List<UserReward>> userRewardListCF = attVlPairCF.thenApply((attVlPairList) -> getUserRewardList(attVlPairList, user));
 
-        CompletableFuture<List<UserReward>> addListOfUserRewardsCF = userRewardListCF.thenApply(userRewards -> {
-            if (userRewards.size() > 0)
-                return userApi.addUserRewardList(dateTimeHelper.getTimeStamp(), user.getUserName(), userRewards);
-            return userRewards;
+        CompletableFuture<Void> addListOfUserRewardsCF = userRewardListCF.thenAccept(userRewards -> {
+            if (userRewards.size() > 0) {
+                userApi.addUserRewardList(dateTimeHelper.getTimeStamp(), user.getUserName(), userRewards);
+            }
         });
+        return addListOfUserRewardsCF;*/
+        List<VisitedLocation> userLocations = user.getVisitedLocations();
+        List<Attraction> attractions = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp());
+        return CompletableFuture.runAsync(() -> {
+            for (VisitedLocation visitedLocation : userLocations) {
+                for (Attraction attraction : attractions) {
+                    if (user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
+                        if (nearAttraction(visitedLocation, attraction)) {
+                           /* user.addUserReward(new UserReward(visitedLocation, attraction
+                                    , rewardApi.getRewardPoints(dateTimeHelper.getTimeStamp()
+                                    , String.valueOf(user.getUserId())
+                                    , String.valueOf(attraction.getAttractionId()))));*/
+                            userApi.addUserReward(dateTimeHelper.getTimeStamp(), user.getUserName()
+                                    , new UserReward(visitedLocation, attraction, rewardApi.getRewardPoints(dateTimeHelper.getTimeStamp()
+                                            , String.valueOf(user.getUserId())
+                                            , String.valueOf(attraction.getAttractionId()))));
+                        }
+                    }
+                }
+            }
+        }, executorService);
 
-        return addListOfUserRewardsCF;
     }
 
-    public CompletableFuture<List<UserReward>> calculateRewardsForListOfUser(List<User> users) {
+    public void calculateRewardsForListOfUser(List<User> users) throws InterruptedException {
         CompletableFuture<List<UserReward>> completableFuture = CompletableFuture.supplyAsync(() -> null);
         for (User user : users) {
-            completableFuture = completableFuture.thenCombine(CompletableFuture.supplyAsync(() -> calculateRewards(user)
+            completableFuture = completableFuture.thenCombine(CompletableFuture.runAsync(() -> calculateRewards(user)
                     , executorService), (x, y) -> null);
         }
 
-        return completableFuture;
     }
 
     private UserReward getUserReward(User user, VisitedLocation visitedLocation, Attraction attraction) {
