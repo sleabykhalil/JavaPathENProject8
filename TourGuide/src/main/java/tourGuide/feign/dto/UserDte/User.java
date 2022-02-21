@@ -26,6 +26,45 @@ public class User {
         this.emailAddress = emailAddress;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+
+        User user = (User) o;
+
+        if (getUserId() != null ? !getUserId().equals(user.getUserId()) : user.getUserId() != null) return false;
+        if (getUserName() != null ? !getUserName().equals(user.getUserName()) : user.getUserName() != null)
+            return false;
+        if (getPhoneNumber() != null ? !getPhoneNumber().equals(user.getPhoneNumber()) : user.getPhoneNumber() != null)
+            return false;
+        if (getEmailAddress() != null ? !getEmailAddress().equals(user.getEmailAddress()) : user.getEmailAddress() != null)
+            return false;
+        if (getLatestLocationTimestamp() != null ? !getLatestLocationTimestamp().equals(user.getLatestLocationTimestamp()) : user.getLatestLocationTimestamp() != null)
+            return false;
+        if (getVisitedLocations() != null ? !getVisitedLocations().equals(user.getVisitedLocations()) : user.getVisitedLocations() != null)
+            return false;
+        if (getUserRewards() != null ? !getUserRewards().equals(user.getUserRewards()) : user.getUserRewards() != null)
+            return false;
+        if (getUserPreferences() != null ? !getUserPreferences().equals(user.getUserPreferences()) : user.getUserPreferences() != null)
+            return false;
+        return getTripDeals() != null ? getTripDeals().equals(user.getTripDeals()) : user.getTripDeals() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getUserId() != null ? getUserId().hashCode() : 0;
+        result = 31 * result + (getUserName() != null ? getUserName().hashCode() : 0);
+        result = 31 * result + (getPhoneNumber() != null ? getPhoneNumber().hashCode() : 0);
+        result = 31 * result + (getEmailAddress() != null ? getEmailAddress().hashCode() : 0);
+        result = 31 * result + (getLatestLocationTimestamp() != null ? getLatestLocationTimestamp().hashCode() : 0);
+        result = 31 * result + (getVisitedLocations() != null ? getVisitedLocations().hashCode() : 0);
+        result = 31 * result + (getUserRewards() != null ? getUserRewards().hashCode() : 0);
+        result = 31 * result + (getUserPreferences() != null ? getUserPreferences().hashCode() : 0);
+        result = 31 * result + (getTripDeals() != null ? getTripDeals().hashCode() : 0);
+        return result;
+    }
+
     public UUID getUserId() {
         return userId;
     }

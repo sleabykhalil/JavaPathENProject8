@@ -11,6 +11,8 @@ import tourGuide.feign.dto.UserDte.User;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.Location;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
+import tourGuide.feign.dto.mapper.ProviderMapper;
+import tourGuide.feign.dto.tripPricerDto.ProviderDto;
 import tourGuide.helper.DateTimeHelper;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.tracker.Tracker;
@@ -38,6 +40,7 @@ public class TourGuideService {
     GpsApi gpsApi;
     UserApi userApi;
 
+    ProviderMapper providerMapper = new ProviderMapper();
     ExecutorService trackUserExecutorService = Executors.newFixedThreadPool(100);
     ExecutorService getRewardExecutorService = Executors.newFixedThreadPool(600);
 
@@ -58,6 +61,7 @@ public class TourGuideService {
     public ExecutorService getGetRewardExecutorService() {
         return getRewardExecutorService;
     }
+
     @Autowired
     public TourGuideService(RewardsService rewardsService, GpsApi gpsApi, UserApi userApi) {
 
@@ -94,7 +98,10 @@ public class TourGuideService {
         int cumulatativeRewardPoints = user.getUserRewards().stream().mapToInt(i -> i.getRewardPoints()).sum();
         List<Provider> providers = tripPricer.getPrice(tripPricerApiKey, user.getUserId(), user.getUserPreferences().getNumberOfAdults(),
                 user.getUserPreferences().getNumberOfChildren(), user.getUserPreferences().getTripDuration(), cumulatativeRewardPoints);
-        user.setTripDeals(providers);
+        //user.setTripDeals(providers);
+        userApi.setTripDeals(user.getUserName()
+                , dateTimeHelper.getTimeStamp()
+                , providerMapper.providerListToProviderDtoList(providers));
         return providers;
     }
 
@@ -118,16 +125,6 @@ public class TourGuideService {
         }
 
         return completableFuture;
-    }
-
-    public void calculateRewardForPerfTest(List<User> userList) {
-
-        for (User user : userList) {
-            getRewardExecutorService.submit(() -> {
-                rewardsService.calculateRewards(user);
-            });
-        }
-
     }
 
     public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
@@ -194,4 +191,13 @@ public class TourGuideService {
         return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
     }
 
+    public void calculateRewardForPerfTest(List<User> userList) {
+
+        for (User user : userList) {
+            getRewardExecutorService.submit(() -> {
+                rewardsService.calculateRewards(user);
+            });
+        }
+
+    }
 }

@@ -6,6 +6,7 @@ import tourGuide.feign.dto.UserDte.User;
 import tourGuide.feign.dto.UserDte.UserReward;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
+import tourGuide.feign.dto.tripPricerDto.ProviderDto;
 import tripPricer.Provider;
 
 import java.util.List;
@@ -39,7 +40,7 @@ public interface UserApi {
     List<VisitedLocation> getVisitedLocations(@PathVariable String timeStamp, @RequestBody User user);
 
     @PostMapping("/users/tripDeals/{userName}/{timeStamp}")
-    void setTripDeals(@PathVariable String userName, @PathVariable String timeStamp, @RequestBody List<Provider> providers);
+    void setTripDeals(@PathVariable String userName, @PathVariable String timeStamp, @RequestBody List<ProviderDto> providers);
 
     @PostMapping("/users/addVisitedLocation/{timeStamp}")
     void addToVisitedLocations(@PathVariable String timeStamp, @RequestParam String userName, @RequestParam String visitDate, @RequestBody VisitedLocation visitedLocation);
