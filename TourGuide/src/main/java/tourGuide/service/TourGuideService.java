@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
@@ -36,8 +37,27 @@ public class TourGuideService {
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
     GpsApi gpsApi;
     UserApi userApi;
-    ExecutorService executorService = Executors.newFixedThreadPool(100);
 
+    ExecutorService trackUserExecutorService = Executors.newFixedThreadPool(100);
+    ExecutorService getRewardExecutorService = Executors.newFixedThreadPool(600);
+
+    private Map<String, Boolean> trackUserMap = new ConcurrentHashMap<>();
+
+    public Map<String, Boolean> getTrackUserMap() {
+        return trackUserMap;
+    }
+
+    public Map<String, Boolean> getCalculatedRewardForUserMap() {
+        return rewardsService.getCalculatedRewardForUserMap();
+    }
+
+    public ExecutorService getTrackUserExecutorService() {
+        return trackUserExecutorService;
+    }
+
+    public ExecutorService getGetRewardExecutorService() {
+        return getRewardExecutorService;
+    }
     @Autowired
     public TourGuideService(RewardsService rewardsService, GpsApi gpsApi, UserApi userApi) {
 
@@ -82,19 +102,32 @@ public class TourGuideService {
 
         VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString(), dateTimeHelper.getTimeStamp());
         userApi.addToVisitedLocations(dateTimeHelper.getTimeStamp(), user.getUserName(), visitedLocation.getTimeVisited().toString(), visitedLocation);
-        rewardsService.calculateRewards(user);
-
+        getRewardExecutorService.submit(() -> {
+            rewardsService.calculateRewards(user);
+        });
+        trackUserMap.putIfAbsent(user.getUserName(), true);
         return visitedLocation;
     }
 
     public CompletableFuture trackAllUserLocation(List<User> userList) {
+
         CompletableFuture completableFuture = CompletableFuture.supplyAsync(() -> null);
         for (User user : userList) {
             completableFuture = completableFuture.thenCombine(CompletableFuture.supplyAsync(
-                    () -> trackUserLocation(user), executorService), (x, y) -> null);
+                    () -> trackUserLocation(user), trackUserExecutorService), (x, y) -> null);
         }
 
         return completableFuture;
+    }
+
+    public void calculateRewardForPerfTest(List<User> userList) {
+
+        for (User user : userList) {
+            getRewardExecutorService.submit(() -> {
+                rewardsService.calculateRewards(user);
+            });
+        }
+
     }
 
     public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
