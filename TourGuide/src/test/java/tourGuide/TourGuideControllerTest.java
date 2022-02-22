@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import tourGuide.feign.UserApi;
@@ -24,8 +25,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
-@ExtendWith(MockitoExtension.class)
+//@ExtendWith(SpringExtension.class)
+//@ExtendWith(MockitoExtension.class)
 class TourGuideControllerTest {
 
     @Mock
@@ -53,6 +54,7 @@ class TourGuideControllerTest {
                 "jon@tourGuide.com");
         when(userApiMock.getUserByUserName(eq("jon"), any()))
                 .thenReturn(user);
+        userApiMock.addUser(dateTimeHelperTimeStamp, user);
         UserPreferences userPreferences = new UserPreferences(10,
                 Money.of(10, currency),
                 Money.of(100, currency),
@@ -63,8 +65,8 @@ class TourGuideControllerTest {
         user.setUserPreferences(userPreferences);
         when(userApiMock.addUser(any(), eq(user))).thenReturn(user);
         //when
-        String result = tourGuideControllerUnderTest.addUserPreferences("jon", userPreferences);
+        User result = tourGuideControllerUnderTest.addUserPreferences("jon", userPreferences);
         //then
-        assertThat(result).isEqualTo(JsonStream.serialize(user));
+        assertThat(result.getUserPreferences()).isEqualTo(userPreferences);
     }
 }

@@ -31,10 +31,10 @@ public class UserRepository {
         if (!user.getUserName().isEmpty()) {
             if (!internalUserMap.containsKey(user.getUserName())) {
                 internalUserMap.put(user.getUserName(), user);
-                return user;
             } else {
                 internalUserMap.replace(user.getUserName(), user);
             }
+            return user;
         }
         return null;
     }
