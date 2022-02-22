@@ -1,33 +1,29 @@
 package tourGuide;
 
-import java.util.Date;
-import java.util.List;
-
+import com.jsoniter.output.JsonStream;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.jsoniter.output.JsonStream;
-
+import org.springframework.web.bind.annotation.*;
 import tourGuide.feign.UserApi;
+import tourGuide.feign.dto.UserDte.User;
+import tourGuide.feign.dto.UserDte.UserPreferences;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.helper.DateTimeHelper;
 import tourGuide.service.TourGuideService;
-
 import tripPricer.Provider;
+
+import java.util.Date;
+import java.util.List;
 
 @RestController
 @Lazy
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TourGuideController {
+    private final TourGuideService tourGuideService;
+    private final UserApi userApi;
 
-    @Autowired
-    TourGuideService tourGuideService;
-
-    @Autowired
-    UserApi userApi;
-    private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
+    DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
     @RequestMapping("/")
     public String index() {
@@ -36,7 +32,7 @@ public class TourGuideController {
 
     @RequestMapping("/getLocation")
     public String getLocation(@RequestParam String userName) {
-        VisitedLocation visitedLocation = tourGuideService.getUserLocation(userApi.getUserByUserName(userName,dateTimeHelper.getTimeStamp()));
+        VisitedLocation visitedLocation = tourGuideService.getUserLocation(userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp()));
         return JsonStream.serialize(visitedLocation.location);
     }
 
@@ -77,8 +73,16 @@ public class TourGuideController {
 
     @RequestMapping("/getTripDeals")
     public String getTripDeals(@RequestParam String userName) {
-        List<Provider> providers = tourGuideService.getTripDeals(userApi.getUserByUserName(userName,dateTimeHelper.getTimeStamp()));
+        List<Provider> providers = tourGuideService.getTripDeals(userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp()));
         return JsonStream.serialize(providers);
+    }
+
+    @PutMapping("/users/addUserPreferences")
+    public String addUserPreferences(@RequestParam String userName, @RequestBody UserPreferences userPreferences) {
+        User user = userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp());
+        user.setUserPreferences(userPreferences);
+        return JsonStream.serialize(userApi.addUser(dateTimeHelper.getTimeStamp(), user));
+        // return JsonStream.serialize(providers);
     }
 
 }

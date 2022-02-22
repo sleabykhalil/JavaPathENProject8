@@ -1,7 +1,6 @@
 package tourGuide;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.javamoney.moneta.FastMoney;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -13,7 +12,7 @@ import java.util.Locale;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = {"tourGuide","tourGuide.feign"})
+@EnableFeignClients(basePackages = {"tourGuide", "tourGuide.feign"})
 public class Application {
 
     public static void main(String[] args) {
@@ -22,12 +21,16 @@ public class Application {
     }
 
     @Bean
-    public  ObjectMapper objectMapper() {
+    public ObjectMapper objectMapper() {
 
         ObjectMapper mapper = new ObjectMapper()
                 .registerModule(new MoneyModule());
-                   //     .withMonetaryAmount(FastMoney::of));
+        //     .withMonetaryAmount(FastMoney::of));
         return mapper;
     }
 
+//    @Bean
+//    public MoneyModule moneyModule() {
+//        return new MoneyModule();
+//    }
 }
