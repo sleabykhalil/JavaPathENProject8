@@ -72,9 +72,10 @@ public class TourGuideController {
     }
 
     @RequestMapping("/getTripDeals")
-    public String getTripDeals(@RequestParam String userName) {
+    public List<Provider> getTripDeals(@RequestParam String userName) {
         List<Provider> providers = tourGuideService.getTripDeals(userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp()));
-        return JsonStream.serialize(providers);
+//        return JsonStream.serialize(providers);
+        return providers;
     }
 
     @PutMapping("/users/addUserPreferences")

@@ -1,6 +1,7 @@
 package tourGuide;
 
 import jdk.nashorn.internal.ir.annotations.Ignore;
+import org.javamoney.moneta.Money;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,6 +9,7 @@ import tourGuide.feign.GpsApi;
 import tourGuide.feign.RewardApi;
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDte.User;
+import tourGuide.feign.dto.UserDte.UserPreferences;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.feign.dto.tripPricerDto.ProviderDto;
@@ -17,6 +19,8 @@ import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tripPricer.Provider;
 
+import javax.money.CurrencyUnit;
+import javax.money.Monetary;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -33,6 +37,7 @@ public class TestTourGuideService {
     @Autowired
     RewardApi rewardApi;
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
+    CurrencyUnit currency = Monetary.getCurrency("USD");
 
     @Test
     public void getUserLocation() {
@@ -155,6 +160,30 @@ public class TestTourGuideService {
         tourGuideService.tracker.stopTracking();
 
         assertEquals(10, providers.size());
+    }
+
+    @Test
+    public void getTripDealsWithUserPreferences() {
+        RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
+        InternalTestHelper.setInternalUserNumber(0);
+        TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
+
+        User user1 = new User(UUID.randomUUID(), "jon000", "000", "jon@tourGuide.com");
+        UserPreferences userPreferences = new UserPreferences(10,
+                Money.of(10, currency),
+                Money.of(100, currency),
+                0,
+                1,
+                0,
+                0);
+        user1.setUserPreferences(userPreferences);
+        userApi.addUser(dateTimeHelper.getTimeStamp(), user1);
+
+        List<Provider> user1Providers = tourGuideService.getTripDeals(user1);
+
+        tourGuideService.tracker.stopTracking();
+
+        assertEquals(0.99, user1Providers.get(0).price);
     }
 
 }
