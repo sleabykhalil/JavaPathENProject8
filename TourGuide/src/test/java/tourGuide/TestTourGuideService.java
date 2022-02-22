@@ -1,16 +1,15 @@
 package tourGuide;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.javamoney.moneta.Money;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import tourGuide.dto.NearByAttractionDto;
 import tourGuide.feign.GpsApi;
 import tourGuide.feign.RewardApi;
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDto.User;
 import tourGuide.feign.dto.UserDto.UserPreferences;
-import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.helper.DateTimeHelper;
 import tourGuide.helper.InternalTestHelper;
@@ -24,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -126,9 +126,9 @@ public class TestTourGuideService {
         assertEquals(user.getUserId(), visitedLocation.userId);
     }
 
-    @Ignore // Not yet implemented
+
     @Test
-    public void getNearbyAttractions() {
+    public void getTopFiveNearByAttractions() {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
         InternalTestHelper.setInternalUserNumber(0);
         TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
@@ -138,11 +138,12 @@ public class TestTourGuideService {
 
         VisitedLocation visitedLocation = null;
         visitedLocation = tourGuideService.trackUserLocation(user);
-        List<Attraction> attractions = tourGuideService.getTopFiveNearByAttractions(visitedLocation);
+
+        NearByAttractionDto nearByAttractionDto = tourGuideService.getTopFiveNearByAttractions(user);
 
         tourGuideService.tracker.stopTracking();
 
-        assertEquals(5, attractions.size());
+        assertThat(nearByAttractionDto.getPotentialAttractions().size()).isEqualTo(5);
     }
 
     @Test

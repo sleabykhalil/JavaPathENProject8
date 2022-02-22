@@ -5,10 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.*;
+import tourGuide.dto.NearByAttractionDto;
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDto.User;
 import tourGuide.feign.dto.UserDto.UserPreferences;
-import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.helper.DateTimeHelper;
 import tourGuide.service.TourGuideService;
@@ -47,9 +47,10 @@ public class TourGuideController {
     // The reward points for visiting each Attraction.
     //    Note: Attraction reward points can be gathered from RewardsCentral
     @RequestMapping("/getNearbyAttractions")
-    public List<Attraction> getNearbyAttractions(@RequestParam String userName) {
-        VisitedLocation visitedLocation = tourGuideService.getUserLocation(userApi.getUserByUserName(userName, new Date().toString()));
-        return tourGuideService.getTopFiveNearByAttractions(visitedLocation);
+    public NearByAttractionDto getNearbyAttractions(@RequestParam String userName) {
+
+        User user = userApi.getUserByUserName(userName, new Date().toString());
+        return tourGuideService.getTopFiveNearByAttractions(user);
 //        return JsonStream.serialize(tourGuideService.getNearByAttractions(visitedLocation));
     }
 

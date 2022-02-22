@@ -131,4 +131,9 @@ public class RewardsService {
         return statuteMiles;
     }
 
+    public int calculateRewardsForPotentialAttraction(Attraction attraction, User user) {
+        return rewardApi.getRewardPoints(dateTimeHelper.getTimeStamp(),
+                user.getUserId().toString(),
+                attraction.getAttractionId().toString());
+    }
 }
