@@ -20,14 +20,14 @@ public class Application {
         SpringApplication.run(Application.class, args);
     }
 
-    @Bean
-    public ObjectMapper objectMapper() {
-
-        ObjectMapper mapper = new ObjectMapper()
-                .registerModule(new MoneyModule());
-        //     .withMonetaryAmount(FastMoney::of));
-        return mapper;
-    }
+//    @Bean
+//    public ObjectMapper objectMapper() {
+//
+//        ObjectMapper mapper = new ObjectMapper()
+//                .registerModule(new MoneyModule());
+//        //     .withMonetaryAmount(FastMoney::of));
+//        return mapper;
+//    }
 
 //    @Bean
 //    public MoneyModule moneyModule() {

@@ -13,9 +13,9 @@ public class UserPreferences {
 
     /* @JsonSerialize(converter = MoneyJsonConverters.ToString.class)
      @JsonDeserialize(converter = MoneyJsonConverters.FromString.class)*/
-    @JsonIgnore //todo must be removed after find solution for json
+//    @JsonIgnore //todo must be removed after find solution for json
     private Money lowerPricePoint = Money.of(0, currency);
-    @JsonIgnore //todo must be removed after find solution for json
+//    @JsonIgnore //todo must be removed after find solution for json
     private Money highPricePoint = Money.of(Integer.MAX_VALUE, currency);
     private int tripDuration = 1;
     private int ticketQuantity = 1;

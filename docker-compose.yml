@@ -23,7 +23,8 @@ services:
           - gps.localhost
     deploy:
       #mode: replicated
-      replicas: 6
+      replicas: 1
+#      replicas: 6
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-net"
@@ -40,7 +41,8 @@ services:
           - reward.localhost
     deploy:
       #mode: replicated
-      replicas: 3
+      replicas: 1
+#      replicas: 3
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-net"

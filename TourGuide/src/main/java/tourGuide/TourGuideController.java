@@ -78,11 +78,12 @@ public class TourGuideController {
     }
 
     @PutMapping("/users/addUserPreferences")
-    public String addUserPreferences(@RequestParam String userName, @RequestBody UserPreferences userPreferences) {
+    public User addUserPreferences(@RequestParam String userName, @RequestBody UserPreferences userPreferences) {
         User user = userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp());
         user.setUserPreferences(userPreferences);
-        return JsonStream.serialize(userApi.addUser(dateTimeHelper.getTimeStamp(), user));
-        // return JsonStream.serialize(providers);
+        user = userApi.addUser(dateTimeHelper.getTimeStamp(), user);
+        return user;
+//        return JsonStream.serialize(user);
     }
 
 }
