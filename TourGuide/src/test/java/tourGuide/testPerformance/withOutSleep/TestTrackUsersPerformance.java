@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import tourGuide.feign.GpsApi;
 import tourGuide.feign.RewardApi;
 import tourGuide.feign.UserApi;
-import tourGuide.feign.dto.UserDte.User;
+import tourGuide.feign.dto.UserDto.User;
 import tourGuide.helper.DateTimeHelper;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;

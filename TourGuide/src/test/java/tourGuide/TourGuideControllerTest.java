@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import tourGuide.feign.UserApi;
-import tourGuide.feign.dto.UserDte.User;
-import tourGuide.feign.dto.UserDte.UserPreferences;
+import tourGuide.feign.dto.UserDto.User;
+import tourGuide.feign.dto.UserDto.UserPreferences;
 import tourGuide.service.TourGuideService;
 import tripPricer.Provider;
 

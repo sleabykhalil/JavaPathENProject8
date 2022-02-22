@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import tourGuide.feign.GpsApi;
 import tourGuide.feign.UserApi;
-import tourGuide.feign.dto.UserDte.User;
+import tourGuide.feign.dto.UserDto.User;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.Location;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;

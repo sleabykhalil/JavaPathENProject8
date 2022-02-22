@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import tourGuide.TourGuideController;
 import tourGuide.feign.UserApi;
-import tourGuide.feign.dto.UserDte.User;
-import tourGuide.feign.dto.UserDte.UserPreferences;
+import tourGuide.feign.dto.UserDto.User;
+import tourGuide.feign.dto.UserDto.UserPreferences;
 import tourGuide.service.TourGuideService;
 import tripPricer.Provider;
 
