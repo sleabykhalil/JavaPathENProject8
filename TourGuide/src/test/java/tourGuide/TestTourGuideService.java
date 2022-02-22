@@ -12,7 +12,6 @@ import tourGuide.feign.dto.UserDte.User;
 import tourGuide.feign.dto.UserDte.UserPreferences;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
-import tourGuide.feign.dto.tripPricerDto.ProviderDto;
 import tourGuide.helper.DateTimeHelper;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
@@ -139,7 +138,7 @@ public class TestTourGuideService {
 
         VisitedLocation visitedLocation = null;
         visitedLocation = tourGuideService.trackUserLocation(user);
-        List<Attraction> attractions = tourGuideService.getNearByAttractions(visitedLocation);
+        List<Attraction> attractions = tourGuideService.getTopFiveNearByAttractions(visitedLocation);
 
         tourGuideService.tracker.stopTracking();
 

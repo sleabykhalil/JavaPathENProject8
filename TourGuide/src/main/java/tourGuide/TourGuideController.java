@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDte.User;
 import tourGuide.feign.dto.UserDte.UserPreferences;
+import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.helper.DateTimeHelper;
 import tourGuide.service.TourGuideService;
@@ -46,9 +47,10 @@ public class TourGuideController {
     // The reward points for visiting each Attraction.
     //    Note: Attraction reward points can be gathered from RewardsCentral
     @RequestMapping("/getNearbyAttractions")
-    public String getNearbyAttractions(@RequestParam String userName) {
+    public List<Attraction> getNearbyAttractions(@RequestParam String userName) {
         VisitedLocation visitedLocation = tourGuideService.getUserLocation(userApi.getUserByUserName(userName, new Date().toString()));
-        return JsonStream.serialize(tourGuideService.getNearByAttractions(visitedLocation));
+        return tourGuideService.getTopFiveNearByAttractions(visitedLocation);
+//        return JsonStream.serialize(tourGuideService.getNearByAttractions(visitedLocation));
     }
 
     @RequestMapping("/getRewards")

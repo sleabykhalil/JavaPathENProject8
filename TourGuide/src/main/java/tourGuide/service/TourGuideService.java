@@ -12,7 +12,6 @@ import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.Location;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.feign.dto.mapper.ProviderMapper;
-import tourGuide.feign.dto.tripPricerDto.ProviderDto;
 import tourGuide.helper.DateTimeHelper;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.tracker.Tracker;
@@ -136,6 +135,22 @@ public class TourGuideService {
         }
 
         return nearbyAttractions;
+    }
+
+    public List<Attraction> getTopFiveNearByAttractions(VisitedLocation visitedLocation) {
+        Map<Double, Attraction> attractionTreeMap = new TreeMap<>();
+        List<Attraction> nearbyAttractions = new ArrayList<>();
+        getAttractionTreeMap(visitedLocation, attractionTreeMap);
+        for (int i = 0; i < Math.min(5, attractionTreeMap.size()); i++) {
+            nearbyAttractions.add(attractionTreeMap.get(attractionTreeMap.keySet().iterator().next()));
+        }
+        return nearbyAttractions;
+    }
+
+    private void getAttractionTreeMap(VisitedLocation visitedLocation, Map<Double, Attraction> attractionTreeMap) {
+        for (Attraction attraction : gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp())) {
+            attractionTreeMap.putIfAbsent(rewardsService.getDistance(attraction, visitedLocation.location), attraction);
+        }
     }
 
     private void addShutDownHook() {
