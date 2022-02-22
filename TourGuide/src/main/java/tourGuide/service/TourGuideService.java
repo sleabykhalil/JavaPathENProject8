@@ -5,9 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import tourGuide.dto.NearByAttractionDto;
+import tourGuide.dto.PotentialAttraction;
 import tourGuide.feign.GpsApi;
 import tourGuide.feign.UserApi;
-import tourGuide.feign.dto.UserDte.User;
+import tourGuide.feign.dto.UserDto.User;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.Location;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
@@ -137,17 +139,31 @@ public class TourGuideService {
         return nearbyAttractions;
     }
 
-    public List<Attraction> getTopFiveNearByAttractions(VisitedLocation visitedLocation) {
+    public NearByAttractionDto getTopFiveNearByAttractions(User user) {
+        VisitedLocation visitedLocation = getUserLocation(user);
         Map<Double, Attraction> attractionTreeMap = new TreeMap<>();
-        List<Attraction> nearbyAttractions = new ArrayList<>();
+        List<PotentialAttraction> potentialAttractions = new ArrayList<>();
         getAttractionTreeMap(visitedLocation, attractionTreeMap);
-        for (int i = 0; i < Math.min(5, attractionTreeMap.size()); i++) {
-            nearbyAttractions.add(attractionTreeMap.get(attractionTreeMap.keySet().iterator().next()));
+        int counter = 0;
+        for (Map.Entry<Double, Attraction> entry : attractionTreeMap.entrySet()) {
+
+            Attraction attraction = entry.getValue();
+            PotentialAttraction potentialAttraction = new PotentialAttraction(attraction.getAttractionName(),
+                    attraction.getLatitude(), attraction.getLongitude(),
+                    entry.getKey(), rewardsService.calculateRewardsForPotentialAttraction(attraction, user));
+            potentialAttractions.add(potentialAttraction);
+            counter++;
+            if (counter >= 5) {
+                break;
+            }
         }
-        return nearbyAttractions;
+
+        return new NearByAttractionDto(visitedLocation.getLocation().longitude,
+                visitedLocation.getLocation().latitude,
+                potentialAttractions);
     }
 
-    private void getAttractionTreeMap(VisitedLocation visitedLocation, Map<Double, Attraction> attractionTreeMap) {
+    public void getAttractionTreeMap(VisitedLocation visitedLocation, Map<Double, Attraction> attractionTreeMap) {
         for (Attraction attraction : gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp())) {
             attractionTreeMap.putIfAbsent(rewardsService.getDistance(attraction, visitedLocation.location), attraction);
         }
@@ -207,12 +223,10 @@ public class TourGuideService {
     }
 
     public void calculateRewardForPerfTest(List<User> userList) {
-
         for (User user : userList) {
             getRewardExecutorService.submit(() -> {
                 rewardsService.calculateRewards(user);
             });
         }
-
     }
 }

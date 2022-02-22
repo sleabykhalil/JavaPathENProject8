@@ -1,6 +1,5 @@
 package tourGuide;
 
-import gpsUtil.GpsUtil;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import tourGuide.feign.GpsApi;
 import tourGuide.feign.RewardApi;
 import tourGuide.feign.UserApi;
-import tourGuide.feign.dto.UserDte.User;
-import tourGuide.feign.dto.UserDte.UserReward;
+import tourGuide.feign.dto.UserDto.User;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.helper.DateTimeHelper;
@@ -18,7 +16,6 @@ import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;

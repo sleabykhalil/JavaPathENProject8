@@ -4,7 +4,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tourGuide.feign.UserApi;
-import tourGuide.feign.dto.UserDte.User;
+import tourGuide.feign.dto.UserDto.User;
 import tourGuide.helper.DateTimeHelper;
 import tourGuide.service.TourGuideService;
 

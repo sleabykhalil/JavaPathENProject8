@@ -6,8 +6,8 @@ import tourGuide.feign.GpsApi;
 import tourGuide.feign.RewardApi;
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.AttractionVisitedLocationPair;
-import tourGuide.feign.dto.UserDte.User;
-import tourGuide.feign.dto.UserDte.UserReward;
+import tourGuide.feign.dto.UserDto.User;
+import tourGuide.feign.dto.UserDto.UserReward;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.Location;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
@@ -131,4 +131,9 @@ public class RewardsService {
         return statuteMiles;
     }
 
+    public int calculateRewardsForPotentialAttraction(Attraction attraction, User user) {
+        return rewardApi.getRewardPoints(dateTimeHelper.getTimeStamp(),
+                user.getUserId().toString(),
+                attraction.getAttractionId().toString());
+    }
 }

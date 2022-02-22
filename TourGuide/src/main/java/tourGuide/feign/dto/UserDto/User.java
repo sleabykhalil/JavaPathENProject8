@@ -1,4 +1,4 @@
-package tourGuide.feign.dto.UserDte;
+package tourGuide.feign.dto.UserDto;
 
 import com.jsoniter.annotation.JsonIgnore;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;

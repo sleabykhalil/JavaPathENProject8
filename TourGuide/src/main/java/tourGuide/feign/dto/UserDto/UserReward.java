@@ -1,4 +1,4 @@
-package tourGuide.feign.dto.UserDte;
+package tourGuide.feign.dto.UserDto;
 
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
