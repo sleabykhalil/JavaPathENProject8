@@ -1,10 +1,7 @@
 package tourGuide.feign.dto.UserDte;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.jsoniter.annotation.JsonIgnore;
 import org.javamoney.moneta.Money;
-
 
 import javax.money.CurrencyUnit;
 import javax.money.Monetary;
@@ -14,9 +11,11 @@ public class UserPreferences {
     //@JsonIgnore
     private CurrencyUnit currency = Monetary.getCurrency("USD");
 
-   /* @JsonSerialize(converter = MoneyJsonConverters.ToString.class)
-    @JsonDeserialize(converter = MoneyJsonConverters.FromString.class)*/
+    /* @JsonSerialize(converter = MoneyJsonConverters.ToString.class)
+     @JsonDeserialize(converter = MoneyJsonConverters.FromString.class)*/
+    @JsonIgnore //todo must be removed after find solution for json
     private Money lowerPricePoint = Money.of(0, currency);
+    @JsonIgnore //todo must be removed after find solution for json
     private Money highPricePoint = Money.of(Integer.MAX_VALUE, currency);
     private int tripDuration = 1;
     private int ticketQuantity = 1;
@@ -31,6 +30,7 @@ public class UserPreferences {
         this.attractionProximity = attractionProximity;
     }
 
+    @JsonIgnore
     public CurrencyUnit getCurrency() {
         return currency;
     }
@@ -39,6 +39,7 @@ public class UserPreferences {
         this.currency = currency;
     }
 
+    @JsonIgnore
     public Money getLowerPricePoint() {
         return lowerPricePoint;
     }
@@ -47,6 +48,7 @@ public class UserPreferences {
         this.lowerPricePoint = lowerPricePoint;
     }
 
+    @JsonIgnore
     public Money getHighPricePoint() {
         return highPricePoint;
     }

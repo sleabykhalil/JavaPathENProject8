@@ -1,5 +1,6 @@
 package tourGuide.feign.dto.UserDte;
 
+import com.jsoniter.annotation.JsonIgnore;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tripPricer.Provider;
 
@@ -119,6 +120,7 @@ public class User {
         return userRewards;
     }
 
+    @JsonIgnore
     public UserPreferences getUserPreferences() {
         return userPreferences;
     }

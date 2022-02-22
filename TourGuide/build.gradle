@@ -34,10 +34,16 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    // https://mvnrepository.com/artifact/org.mockito/mockito-core
+    testImplementation 'org.mockito:mockito-core:4.3.1'
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.22'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 /*
     testImplementation 'junit:junit:4.13.2'
 */
-
 }
 
 dependencyManagement {
@@ -47,10 +53,10 @@ dependencyManagement {
 }
 
 test {
-    systemProperties = [ numberOfUsers:System.getProperty('numberOfUsers')]
+    systemProperties = [numberOfUsers: System.getProperty('numberOfUsers')]
     useJUnitPlatform()
     testLogging {
-        outputs.upToDateWhen {false}
+        outputs.upToDateWhen { false }
         showStandardStreams = true
     }
 }
