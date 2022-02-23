@@ -139,7 +139,7 @@ public class TestTourGuideService {
         VisitedLocation visitedLocation = null;
         visitedLocation = tourGuideService.trackUserLocation(user);
 
-        NearByAttractionDto nearByAttractionDto = tourGuideService.getTopFiveNearByAttractions(user);
+        NearByAttractionDto nearByAttractionDto = tourGuideService.getTopFiveNearByAttractions(user.getUserName());
 
         tourGuideService.tracker.stopTracking();
 

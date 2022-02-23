@@ -10,6 +10,7 @@ import tourGuide.dto.PotentialAttraction;
 import tourGuide.feign.GpsApi;
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDto.User;
+import tourGuide.feign.dto.UserDto.UserPreferences;
 import tourGuide.feign.dto.gpsDto.Attraction;
 import tourGuide.feign.dto.gpsDto.Location;
 import tourGuide.feign.dto.gpsDto.VisitedLocation;
@@ -27,6 +28,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
@@ -139,7 +141,8 @@ public class TourGuideService {
         return nearbyAttractions;
     }
 
-    public NearByAttractionDto getTopFiveNearByAttractions(User user) {
+    public NearByAttractionDto getTopFiveNearByAttractions(String userName) {
+        User user = userApi.getUserByUserName(userName, new Date().toString());
         VisitedLocation visitedLocation = getUserLocation(user);
         Map<Double, Attraction> attractionTreeMap = new TreeMap<>();
         List<PotentialAttraction> potentialAttractions = new ArrayList<>();
@@ -228,5 +231,22 @@ public class TourGuideService {
                 rewardsService.calculateRewards(user);
             });
         }
+    }
+
+    public Map<UUID, Location> getCurrentLocationsMap() {
+        List<User> allUser = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
+        Map<UUID, Location> userMap = new HashMap<>();
+        allUser.parallelStream().map(user->userMap.putIfAbsent(user.getUserId(), getUserLocation(user).getLocation()));
+        allUser.forEach(user -> {
+            userMap.putIfAbsent(user.getUserId(), getUserLocation(user).getLocation());
+        });
+        return userMap;
+    }
+
+    public User addUserPreferences(String userName, UserPreferences userPreferences) {
+        User user = userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp());
+        user.setUserPreferences(userPreferences);
+        user = userApi.addUser(dateTimeHelper.getTimeStamp(), user);
+        return user;
     }
 }
