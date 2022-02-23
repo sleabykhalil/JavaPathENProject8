@@ -1,16 +1,27 @@
 package tourGuide.service;
 
-import java.util.List;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tourGuide.feign.GpsApi;
+import tourGuide.feign.RewardApi;
+import tourGuide.feign.UserApi;
+import tourGuide.feign.dto.AttractionVisitedLocationPair;
+import tourGuide.feign.dto.UserDto.User;
+import tourGuide.feign.dto.UserDto.UserReward;
+import tourGuide.feign.dto.gpsDto.Attraction;
+import tourGuide.feign.dto.gpsDto.Location;
+import tourGuide.feign.dto.gpsDto.VisitedLocation;
+import tourGuide.helper.DateTimeHelper;
 
-import gpsUtil.GpsUtil;
-import gpsUtil.location.Attraction;
-import gpsUtil.location.Location;
-import gpsUtil.location.VisitedLocation;
-import rewardCentral.RewardCentral;
-import tourGuide.user.User;
-import tourGuide.user.UserReward;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @Service
 public class RewardsService {
@@ -20,12 +31,24 @@ public class RewardsService {
     private int defaultProximityBuffer = 10;
     private int proximityBuffer = defaultProximityBuffer;
     private int attractionProximityRange = 200;
-    private final GpsUtil gpsUtil;
-    private final RewardCentral rewardsCentral;
+    GpsApi gpsApi;
+    RewardApi rewardApi;
+    UserApi userApi;
+    ExecutorService executorService = Executors.newFixedThreadPool(1000);
+    // ExecutorService apiExecutorService = Executors.newFixedThreadPool(10);
+    private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
-    public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
-        this.gpsUtil = gpsUtil;
-        this.rewardsCentral = rewardCentral;
+    private Map<String, Boolean> calculatedRewardForUserMap = new ConcurrentHashMap<>();
+
+    @Autowired
+    public RewardsService(GpsApi gpsApi, RewardApi rewardApi, UserApi userApi) {
+        this.gpsApi = gpsApi;
+        this.rewardApi = rewardApi;
+        this.userApi = userApi;
+    }
+
+    public Map<String, Boolean> getCalculatedRewardForUserMap() {
+        return calculatedRewardForUserMap;
     }
 
     public void setProximityBuffer(int proximityBuffer) {
@@ -36,19 +59,54 @@ public class RewardsService {
         proximityBuffer = defaultProximityBuffer;
     }
 
-    public void calculateRewards(User user) {
-        List<VisitedLocation> userLocations = user.getVisitedLocations();
-        List<Attraction> attractions = gpsUtil.getAttractions();
+    private List<AttractionVisitedLocationPair> getAttVlPairList(List<Attraction> attractionList, User user) {
 
-        for (VisitedLocation visitedLocation : userLocations) {
-            for (Attraction attraction : attractions) {
-                if (user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
-                    if (nearAttraction(visitedLocation, attraction)) {
-                        user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
-                    }
+        Map<String, AttractionVisitedLocationPair> attractionVisitedLocationPairs = new HashMap<>();
+        List<Attraction> attractions = attractionList.parallelStream().
+                filter(attraction -> user.getUserRewards().
+                        stream().parallel().
+                        map(UserReward::getAttraction).collect(Collectors.toList()).stream().
+                        map(Attraction::getAttractionName).
+                        collect(Collectors.toList()).
+                        contains(attraction.attractionName)).collect(Collectors.toList());
+
+        attractionList.removeAll(attractions);
+
+
+        for (Attraction attraction : attractionList) {
+            for (VisitedLocation visitedlocation : user.getVisitedLocations()) {
+                if ((nearAttraction(visitedlocation, attraction))) {
+                    attractionVisitedLocationPairs.putIfAbsent(attraction.getAttractionName(), new AttractionVisitedLocationPair(attraction, visitedlocation));
                 }
             }
         }
+        return new ArrayList<>(attractionVisitedLocationPairs.values());
+    }
+
+    private List<UserReward> getUserRewardList(List<AttractionVisitedLocationPair> attVlPairList, User user) {
+        List<UserReward> userRewards = new ArrayList<>();
+        for (AttractionVisitedLocationPair attVlPair : attVlPairList) {
+            userRewards.add(new UserReward(attVlPair.getVisitedLocation(), attVlPair.getAttraction(),
+                    rewardApi.getRewardPoints(dateTimeHelper.getTimeStamp(), user.getUserId().toString(), attVlPair.getAttraction().getAttractionId().toString())));
+        }
+        return userRewards;
+    }
+
+    public void calculateRewards(User user) {
+
+        CompletableFuture<List<Attraction>> attractionListCF = CompletableFuture.supplyAsync(() -> gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()), executorService);
+
+        CompletableFuture<List<AttractionVisitedLocationPair>> attVlPairCF = attractionListCF.thenApply((attractionList) -> getAttVlPairList(attractionList, user));
+
+        CompletableFuture<List<UserReward>> userRewardListCF = attVlPairCF.thenApply((attVlPairList) -> getUserRewardList(attVlPairList, user));
+
+        CompletableFuture<Void> addListOfUserRewardsCF = userRewardListCF.thenAccept(userRewards -> {
+            if (userRewards.size() > 0) {
+                userApi.addUserRewardList(dateTimeHelper.getTimeStamp(), user.getUserName(), userRewards);
+                calculatedRewardForUserMap.putIfAbsent(user.getUserName(), true);
+            }
+
+        });
     }
 
     public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
@@ -57,10 +115,6 @@ public class RewardsService {
 
     private boolean nearAttraction(VisitedLocation visitedLocation, Attraction attraction) {
         return getDistance(attraction, visitedLocation.location) > proximityBuffer ? false : true;
-    }
-
-    private int getRewardPoints(Attraction attraction, User user) {
-        return rewardsCentral.getAttractionRewardPoints(attraction.attractionId, user.getUserId());
     }
 
     public double getDistance(Location loc1, Location loc2) {
@@ -77,4 +131,9 @@ public class RewardsService {
         return statuteMiles;
     }
 
+    public int calculateRewardsForPotentialAttraction(Attraction attraction, User user) {
+        return rewardApi.getRewardPoints(dateTimeHelper.getTimeStamp(),
+                user.getUserId().toString(),
+                attraction.getAttractionId().toString());
+    }
 }

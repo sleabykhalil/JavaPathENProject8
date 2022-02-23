@@ -1,104 +1,175 @@
 package tourGuide.service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-
-import gpsUtil.GpsUtil;
-import gpsUtil.location.Attraction;
-import gpsUtil.location.Location;
-import gpsUtil.location.VisitedLocation;
+import tourGuide.dto.NearByAttractionDto;
+import tourGuide.dto.PotentialAttraction;
+import tourGuide.feign.GpsApi;
+import tourGuide.feign.UserApi;
+import tourGuide.feign.dto.UserDto.User;
+import tourGuide.feign.dto.UserDto.UserPreferences;
+import tourGuide.feign.dto.gpsDto.Attraction;
+import tourGuide.feign.dto.gpsDto.Location;
+import tourGuide.feign.dto.gpsDto.VisitedLocation;
+import tourGuide.feign.dto.mapper.ProviderMapper;
+import tourGuide.helper.DateTimeHelper;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.tracker.Tracker;
-import tourGuide.user.User;
-import tourGuide.user.UserReward;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 @Service
+@Lazy
 public class TourGuideService {
     private Logger logger = LoggerFactory.getLogger(TourGuideService.class);
-    private final GpsUtil gpsUtil;
     private final RewardsService rewardsService;
     private final TripPricer tripPricer = new TripPricer();
     public final Tracker tracker;
     boolean testMode = true;
+    private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
+    GpsApi gpsApi;
+    UserApi userApi;
 
-    public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
-        this.gpsUtil = gpsUtil;
+    ProviderMapper providerMapper = new ProviderMapper();
+    ExecutorService trackUserExecutorService = Executors.newFixedThreadPool(100);
+    ExecutorService getRewardExecutorService = Executors.newFixedThreadPool(600);
+
+    private Map<String, Boolean> trackUserMap = new ConcurrentHashMap<>();
+
+    public Map<String, Boolean> getTrackUserMap() {
+        return trackUserMap;
+    }
+
+    public Map<String, Boolean> getCalculatedRewardForUserMap() {
+        return rewardsService.getCalculatedRewardForUserMap();
+    }
+
+    public ExecutorService getTrackUserExecutorService() {
+        return trackUserExecutorService;
+    }
+
+    public ExecutorService getGetRewardExecutorService() {
+        return getRewardExecutorService;
+    }
+
+    @Autowired
+    public TourGuideService(RewardsService rewardsService, GpsApi gpsApi, UserApi userApi) {
+
+        this.gpsApi = gpsApi;
+        this.userApi = userApi;
         this.rewardsService = rewardsService;
 
         if (testMode) {
             logger.info("TestMode enabled");
             logger.debug("Initializing users");
-            initializeInternalUsers();
+            userApi.initUser(dateTimeHelper.getTimeStamp(), InternalTestHelper.getInternalUserNumber());
+            //initializeInternalUsers();
             logger.debug("Finished initializing users");
         }
-        tracker = new Tracker(this);
+        tracker = new Tracker(this, userApi);
         addShutDownHook();
     }
 
-    public List<UserReward> getUserRewards(User user) {
-        return user.getUserRewards();
-    }
 
     public VisitedLocation getUserLocation(User user) {
-        VisitedLocation visitedLocation = (user.getVisitedLocations().size() > 0) ?
-                user.getLastVisitedLocation() :
+        VisitedLocation visitedLocation = null;
+        visitedLocation = (user.getVisitedLocations().size() > 0) ?
+                getLastVisitedLocation(user.getVisitedLocations()) :
                 trackUserLocation(user);
         return visitedLocation;
     }
 
-    public User getUser(String userName) {
-        return internalUserMap.get(userName);
+    private VisitedLocation getLastVisitedLocation(List<VisitedLocation> visitedLocations) {
+        return visitedLocations.get(visitedLocations.size() - 1);
     }
 
-    public List<User> getAllUsers() {
-        return internalUserMap.values().stream().collect(Collectors.toList());
-    }
-
-    public void addUser(User user) {
-        if (!internalUserMap.containsKey(user.getUserName())) {
-            internalUserMap.put(user.getUserName(), user);
-        }
-    }
 
     public List<Provider> getTripDeals(User user) {
         int cumulatativeRewardPoints = user.getUserRewards().stream().mapToInt(i -> i.getRewardPoints()).sum();
         List<Provider> providers = tripPricer.getPrice(tripPricerApiKey, user.getUserId(), user.getUserPreferences().getNumberOfAdults(),
                 user.getUserPreferences().getNumberOfChildren(), user.getUserPreferences().getTripDuration(), cumulatativeRewardPoints);
-        user.setTripDeals(providers);
+        //user.setTripDeals(providers);
+        userApi.setTripDeals(user.getUserName()
+                , dateTimeHelper.getTimeStamp()
+                , providerMapper.providerListToProviderDtoList(providers));
         return providers;
     }
 
     public VisitedLocation trackUserLocation(User user) {
-        VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
-        user.addToVisitedLocations(visitedLocation);
-        rewardsService.calculateRewards(user);
+
+        VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString(), dateTimeHelper.getTimeStamp());
+        userApi.addToVisitedLocations(dateTimeHelper.getTimeStamp(), user.getUserName(), visitedLocation.getTimeVisited().toString(), visitedLocation);
+        getRewardExecutorService.submit(() -> {
+            rewardsService.calculateRewards(user);
+        });
+        trackUserMap.putIfAbsent(user.getUserName(), true);
         return visitedLocation;
+    }
+
+    public CompletableFuture trackAllUserLocation(List<User> userList) {
+
+        CompletableFuture completableFuture = CompletableFuture.supplyAsync(() -> null);
+        for (User user : userList) {
+            completableFuture = completableFuture.thenCombine(CompletableFuture.supplyAsync(
+                    () -> trackUserLocation(user), trackUserExecutorService), (x, y) -> null);
+        }
+
+        return completableFuture;
     }
 
     public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
         List<Attraction> nearbyAttractions = new ArrayList<>();
-        for (Attraction attraction : gpsUtil.getAttractions()) {
+        for (Attraction attraction : gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp())) {
             if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
                 nearbyAttractions.add(attraction);
             }
         }
 
         return nearbyAttractions;
+    }
+
+    public NearByAttractionDto getTopFiveNearByAttractions(String userName) {
+        User user = userApi.getUserByUserName(userName, new Date().toString());
+        VisitedLocation visitedLocation = getUserLocation(user);
+        Map<Double, Attraction> attractionTreeMap = new TreeMap<>();
+        List<PotentialAttraction> potentialAttractions = new ArrayList<>();
+        getAttractionTreeMap(visitedLocation, attractionTreeMap);
+        int counter = 0;
+        for (Map.Entry<Double, Attraction> entry : attractionTreeMap.entrySet()) {
+
+            Attraction attraction = entry.getValue();
+            PotentialAttraction potentialAttraction = new PotentialAttraction(attraction.getAttractionName(),
+                    attraction.getLatitude(), attraction.getLongitude(),
+                    entry.getKey(), rewardsService.calculateRewardsForPotentialAttraction(attraction, user));
+            potentialAttractions.add(potentialAttraction);
+            counter++;
+            if (counter >= 5) {
+                break;
+            }
+        }
+
+        return new NearByAttractionDto(visitedLocation.getLocation().longitude,
+                visitedLocation.getLocation().latitude,
+                potentialAttractions);
+    }
+
+    public void getAttractionTreeMap(VisitedLocation visitedLocation, Map<Double, Attraction> attractionTreeMap) {
+        for (Attraction attraction : gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp())) {
+            attractionTreeMap.putIfAbsent(rewardsService.getDistance(attraction, visitedLocation.location), attraction);
+        }
     }
 
     private void addShutDownHook() {
@@ -154,4 +225,28 @@ public class TourGuideService {
         return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
     }
 
+    public void calculateRewardForPerfTest(List<User> userList) {
+        for (User user : userList) {
+            getRewardExecutorService.submit(() -> {
+                rewardsService.calculateRewards(user);
+            });
+        }
+    }
+
+    public Map<UUID, Location> getCurrentLocationsMap() {
+        List<User> allUser = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
+        Map<UUID, Location> userMap = new HashMap<>();
+        allUser.parallelStream().map(user->userMap.putIfAbsent(user.getUserId(), getUserLocation(user).getLocation()));
+        allUser.forEach(user -> {
+            userMap.putIfAbsent(user.getUserId(), getUserLocation(user).getLocation());
+        });
+        return userMap;
+    }
+
+    public User addUserPreferences(String userName, UserPreferences userPreferences) {
+        User user = userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp());
+        user.setUserPreferences(userPreferences);
+        user = userApi.addUser(dateTimeHelper.getTimeStamp(), user);
+        return user;
+    }
 }

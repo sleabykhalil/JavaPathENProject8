@@ -1,24 +1,31 @@
 package tourGuide;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.jsoniter.output.JsonStream;
-
-import gpsUtil.location.VisitedLocation;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.web.bind.annotation.*;
+import tourGuide.dto.NearByAttractionDto;
+import tourGuide.feign.UserApi;
+import tourGuide.feign.dto.UserDto.User;
+import tourGuide.feign.dto.UserDto.UserPreferences;
+import tourGuide.feign.dto.UserDto.UserReward;
+import tourGuide.feign.dto.gpsDto.Location;
+import tourGuide.feign.dto.gpsDto.VisitedLocation;
+import tourGuide.helper.DateTimeHelper;
 import tourGuide.service.TourGuideService;
-import tourGuide.user.User;
 import tripPricer.Provider;
 
-@RestController
-public class TourGuideController {
+import java.util.*;
 
-    @Autowired
-    TourGuideService tourGuideService;
+@RestController
+@Lazy
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class TourGuideController {
+    private final TourGuideService tourGuideService;
+    private final UserApi userApi;
+
+    DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
     @RequestMapping("/")
     public String index() {
@@ -26,12 +33,12 @@ public class TourGuideController {
     }
 
     @RequestMapping("/getLocation")
-    public String getLocation(@RequestParam String userName) {
-        VisitedLocation visitedLocation = tourGuideService.getUserLocation(getUser(userName));
-        return JsonStream.serialize(visitedLocation.location);
+    public Location getLocation(@RequestParam String userName) {
+        VisitedLocation visitedLocation = tourGuideService.getUserLocation(userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp()));
+        return visitedLocation.location;
     }
 
-    //  TODO: Change this method to no longer return a List of Attractions.
+    //  TO DO: Change this method to no longer return a List of Attractions.
     //  Instead: Get the closest five tourist attractions to the user - no matter how far away they are.
     //  Return a new JSON object that contains:
     // Name of Tourist attraction,
@@ -41,19 +48,18 @@ public class TourGuideController {
     // The reward points for visiting each Attraction.
     //    Note: Attraction reward points can be gathered from RewardsCentral
     @RequestMapping("/getNearbyAttractions")
-    public String getNearbyAttractions(@RequestParam String userName) {
-        VisitedLocation visitedLocation = tourGuideService.getUserLocation(getUser(userName));
-        return JsonStream.serialize(tourGuideService.getNearByAttractions(visitedLocation));
+    public NearByAttractionDto getNearbyAttractions(@RequestParam String userName) {
+        return tourGuideService.getTopFiveNearByAttractions(userName);
     }
 
     @RequestMapping("/getRewards")
-    public String getRewards(@RequestParam String userName) {
-        return JsonStream.serialize(tourGuideService.getUserRewards(getUser(userName)));
+    public List<UserReward> getRewards(@RequestParam String userName) {
+        return userApi.getUserRewardsById(userName, dateTimeHelper.getTimeStamp());
     }
 
     @RequestMapping("/getAllCurrentLocations")
-    public String getAllCurrentLocations() {
-        // TODO: Get a list of every user's most recent location as JSON
+    public Map<UUID, Location> getAllCurrentLocations() {
+        // TO DO: Get a list of every user's most recent location as JSON
         //- Note: does not use gpsUtil to query for their current location,
         //        but rather gathers the user's current location from their stored location history.
         //
@@ -62,19 +68,18 @@ public class TourGuideController {
         //        "019b04a9-067a-4c76-8817-ee75088c3822": {"longitude":-48.188821,"latitude":74.84371}
         //        ...
         //     }
-
-        return JsonStream.serialize("");
+        return tourGuideService.getCurrentLocationsMap();
     }
 
     @RequestMapping("/getTripDeals")
-    public String getTripDeals(@RequestParam String userName) {
-        List<Provider> providers = tourGuideService.getTripDeals(getUser(userName));
-        return JsonStream.serialize(providers);
+    public List<Provider> getTripDeals(@RequestParam String userName) {
+        return tourGuideService.getTripDeals(userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp()));
     }
 
-    private User getUser(String userName) {
-        return tourGuideService.getUser(userName);
-    }
+    @PutMapping("/users/addUserPreferences")
+    public User addUserPreferences(@RequestParam String userName, @RequestBody UserPreferences userPreferences) {
+        return tourGuideService.addUserPreferences(userName,userPreferences);
 
+    }
 
 }
