@@ -1,7 +1,5 @@
 package tourGuide.dto;
 
-import lombok.Builder;
-
 public class PotentialAttraction {
     String attractionName;
     double attractionLongitude;
@@ -9,7 +7,11 @@ public class PotentialAttraction {
     double distanceFromUserLocation;
     int potentialRewardPoints;
 
-    public PotentialAttraction(String attractionName, double attractionLongitude, double attractionLatitude, double distanceFromUserLocation, int potentialRewardPoints) {
+    public PotentialAttraction(String attractionName,
+                               double attractionLongitude,
+                               double attractionLatitude,
+                               double distanceFromUserLocation,
+                               int potentialRewardPoints) {
         this.attractionName = attractionName;
         this.attractionLongitude = attractionLongitude;
         this.attractionLatitude = attractionLatitude;
