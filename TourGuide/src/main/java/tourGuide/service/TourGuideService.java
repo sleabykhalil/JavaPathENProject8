@@ -21,14 +21,11 @@ import tourGuide.tracker.Tracker;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.IntStream;
 
 @Service
 @Lazy
@@ -109,7 +106,7 @@ public class TourGuideService {
 
     public VisitedLocation trackUserLocation(User user) {
 
-        VisitedLocation visitedLocation = gpsApi.getUserAttraction(user.getUserId().toString(), dateTimeHelper.getTimeStamp());
+        VisitedLocation visitedLocation = gpsApi.getUserLocation(user.getUserId().toString(), dateTimeHelper.getTimeStamp());
         userApi.addToVisitedLocations(dateTimeHelper.getTimeStamp(), user.getUserName(), visitedLocation.getTimeVisited().toString(), visitedLocation);
         getRewardExecutorService.submit(() -> {
             rewardsService.calculateRewards(user);
@@ -155,7 +152,7 @@ public class TourGuideService {
     }
 
     public void getAttractionTreeMap(VisitedLocation visitedLocation, Map<Double, Attraction> attractionTreeMap) {
-        for (Attraction attraction : gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp())) {
+        for (Attraction attraction : gpsApi.getAllAttractions(dateTimeHelper.getTimeStamp())) {
             attractionTreeMap.putIfAbsent(rewardsService.getDistance(attraction, visitedLocation.location), attraction);
         }
     }

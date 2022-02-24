@@ -43,7 +43,7 @@ public class TestRewardsService {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         userApi.addUser(dateTimeHelper.getTimeStamp(), user);
 
-        Attraction attraction = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).get(0);
+        Attraction attraction = gpsApi.getAllAttractions(dateTimeHelper.getTimeStamp()).get(0);
         userApi.addToVisitedLocations(dateTimeHelper.getTimeStamp(),
                 user.getUserName(),
                 dateTimeHelper.getTimeStamp(), new VisitedLocation(user.getUserId(), attraction, new Date()));
@@ -68,7 +68,7 @@ public class TestRewardsService {
     @Test //need to verify
     public void isWithinAttractionProximity() {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
-        Attraction attraction = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).get(0);
+        Attraction attraction = gpsApi.getAllAttractions(dateTimeHelper.getTimeStamp()).get(0);
         assertTrue(rewardsService.isWithinAttractionProximity(attraction, attraction));
     }
 
@@ -86,7 +86,7 @@ public class TestRewardsService {
         User userAfterCalculate = userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp());
         tourGuideService.tracker.stopTracking();
 
-        assertEquals(gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).size(), userAfterCalculate.getUserRewards().size());
+        assertEquals(gpsApi.getAllAttractions(dateTimeHelper.getTimeStamp()).size(), userAfterCalculate.getUserRewards().size());
     }
 
 }
