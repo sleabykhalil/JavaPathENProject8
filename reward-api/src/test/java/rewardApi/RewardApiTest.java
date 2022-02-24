@@ -1,11 +1,10 @@
-package gpsApi;
+package rewardApi;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class GpsApiTest {
-
+class RewardApiTest {
     @Test
     void contextLoads() {
     }

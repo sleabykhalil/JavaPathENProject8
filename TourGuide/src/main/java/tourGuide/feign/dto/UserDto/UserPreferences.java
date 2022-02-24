@@ -8,14 +8,9 @@ import javax.money.Monetary;
 
 public class UserPreferences {
     private int attractionProximity = Integer.MAX_VALUE;
-    //@JsonIgnore
     private CurrencyUnit currency = Monetary.getCurrency("USD");
 
-    /* @JsonSerialize(converter = MoneyJsonConverters.ToString.class)
-     @JsonDeserialize(converter = MoneyJsonConverters.FromString.class)*/
-//    @JsonIgnore //todo must be removed after find solution for json
     private Money lowerPricePoint = Money.of(0, currency);
-//    @JsonIgnore //todo must be removed after find solution for json
     private Money highPricePoint = Money.of(Integer.MAX_VALUE, currency);
     private int tripDuration = 1;
     private int ticketQuantity = 1;
