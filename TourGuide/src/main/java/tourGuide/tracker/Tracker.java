@@ -39,13 +39,6 @@ public class Tracker {
         tourGuideService.getGetRewardExecutorService().shutdownNow();
     }
 
-    public void startTracking() {
-        this.executorService = Executors.newSingleThreadExecutor();
-        executorService.submit(this::runTracking);
-        stop = false;
-        logger.debug("restart tracker");
-    }
-
     //@Override
     public void runTracking() {
         StopWatch stopWatch = new StopWatch();
@@ -58,8 +51,7 @@ public class Tracker {
             List<User> users = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
             logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
             stopWatch.start();
-            //users.forEach(u -> tourGuideService.trackUserLocation(u));
-            //tourGuideService.trackAllUserLocation(users);
+
             CompletableFuture completableFuture = tourGuideService.trackAllUserLocation(users);
             while (true) {
                 if (completableFuture.isDone()) {
