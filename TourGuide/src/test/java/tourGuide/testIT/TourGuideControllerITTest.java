@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import tourGuide.TourGuideController;
+import tourGuide.controller.TourGuideController;
 import tourGuide.dto.NearByAttractionDto;
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDto.User;

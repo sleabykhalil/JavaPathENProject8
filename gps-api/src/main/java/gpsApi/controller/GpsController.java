@@ -21,13 +21,13 @@ public class GpsController {
 
     @GetMapping("gps/attractions/{timeStamp}")
     public List<Attraction> getAllAttraction(@PathVariable String timeStamp) {
-        logger.info("gps/attractions/timeStamp ={}",timeStamp);
+        logger.info("gps/attractions/timeStamp ={}", timeStamp);
         return gpsService.getAttractions();
     }
 
     @GetMapping("gps/attraction/{userId}/{timeStamp}")
     public VisitedLocation getUserAttraction(@PathVariable String userId, @PathVariable String timeStamp) {
-        logger.info("gps/attractions/userId{}/timeStamp ={}",userId,timeStamp);
+        logger.info("gps/attractions/userId{}/timeStamp ={}", userId, timeStamp);
         return gpsService.getUserAttraction(userId);
     }
 }

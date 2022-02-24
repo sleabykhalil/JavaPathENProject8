@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import tourGuide.controller.TourGuideController;
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDto.User;
 import tourGuide.feign.dto.UserDto.UserPreferences;
@@ -19,7 +20,7 @@ import java.util.UUID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class TourGuideControllerTest {
@@ -47,9 +48,6 @@ class TourGuideControllerTest {
                 "jon",
                 "000",
                 "jon@tourGuide.com");
-        when(userApiMock.getUserByUserName(eq("jon"), any()))
-                .thenReturn(user);
-        userApiMock.addUser(dateTimeHelperTimeStamp, user);
         UserPreferences userPreferences = new UserPreferences(10,
                 Money.of(10, currency),
                 Money.of(100, currency),
@@ -58,38 +56,11 @@ class TourGuideControllerTest {
                 2,
                 2);
         user.setUserPreferences(userPreferences);
-        when(userApiMock.addUser(any(), eq(user))).thenReturn(user);
+        when(tourGuideServiceMocked.addUserPreferences(user.getUserName(), userPreferences)).thenReturn(user);
         //when
         User result = tourGuideControllerUnderTest.addUserPreferences("jon", userPreferences);
         //then
+        verify(tourGuideServiceMocked, times(1)).addUserPreferences(user.getUserName(), userPreferences);
         assertThat(result.getUserPreferences()).isEqualTo(userPreferences);
-    }
-
-    @Test
-    void getTripPriceAfterChangeUserPreferences() {
-        //given
-        User user = new User(UUID.randomUUID(),
-                "jon",
-                "000",
-                "jon@tourGuide.com");
-        when(userApiMock.getUserByUserName(eq("jon"), any()))
-                .thenReturn(user);
-        userApiMock.addUser(dateTimeHelperTimeStamp, user);
-        UserPreferences userPreferences = new UserPreferences(10,
-                Money.of(10, currency),
-                Money.of(100, currency),
-                0,
-                0,
-                0,
-                0);
-        user.setUserPreferences(userPreferences);
-        when(userApiMock.addUser(any(), eq(user))).thenReturn(user);
-        //when
-        User result = tourGuideControllerUnderTest.addUserPreferences("jon", userPreferences);
-        List<Provider> tripDeals = tourGuideControllerUnderTest.getTripDeals(user.getUserName());
-        //then
-        assertThat(result.getUserPreferences()).isEqualTo(userPreferences);
-        assertThat(tripDeals.get(0).price).isEqualTo(0.99);
-
     }
 }

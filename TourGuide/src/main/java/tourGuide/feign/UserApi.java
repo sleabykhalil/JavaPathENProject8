@@ -27,25 +27,16 @@ public interface UserApi {
     void initUser(@PathVariable String timeStamp, @RequestParam int internalUserNumber);
 
     @PostMapping("/users/initForTest/addVisitedLocation/{timeStamp}")
-    void initUserByAddVisitedLocation(@PathVariable String timeStamp, @RequestBody Attraction attractionDto) ;
-
-    @GetMapping("/users/rewards/{timeStamp}")
-    List<UserReward> getUserReward(@PathVariable String timeStamp, @RequestBody User user);
+    void initUserByAddVisitedLocation(@PathVariable String timeStamp, @RequestBody Attraction attractionDto);
 
     @GetMapping("/users/rewards/{userName}/{timeStamp}")
     List<UserReward> getUserRewardsById(@PathVariable String userName, @PathVariable String timeStamp);
-
-    @GetMapping("/users/visitedLocations/{timeStamp}")
-    List<VisitedLocation> getVisitedLocations(@PathVariable String timeStamp, @RequestBody User user);
 
     @PostMapping("/users/tripDeals/{userName}/{timeStamp}")
     void setTripDeals(@PathVariable String userName, @PathVariable String timeStamp, @RequestBody List<ProviderDto> providers);
 
     @PostMapping("/users/addVisitedLocation/{timeStamp}")
     void addToVisitedLocations(@PathVariable String timeStamp, @RequestParam String userName, @RequestParam String visitDate, @RequestBody VisitedLocation visitedLocation);
-
-    @PostMapping("/users/addReward/{userName}/{timeStamp}")
-    void addUserReward(@PathVariable String timeStamp, @PathVariable String userName, @RequestBody UserReward userReward);
 
     @PostMapping("/users/addRewardList/{userName}/{timeStamp}")
     List<UserReward> addUserRewardList(@PathVariable String timeStamp, @PathVariable String userName, @RequestBody List<UserReward> userRewardListDto);
