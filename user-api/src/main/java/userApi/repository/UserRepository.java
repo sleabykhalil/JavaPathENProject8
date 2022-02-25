@@ -21,12 +21,6 @@ public class UserRepository {
         }
     }
 
-    public void addUser(User user) {
-        if (!internalUserMap.containsKey(user.getUserName())) {
-            internalUserMap.put(user.getUserName(), user);
-        }
-    }
-
     public User save(User user) {
         if (!user.getUserName().isEmpty()) {
             if (!internalUserMap.containsKey(user.getUserName())) {

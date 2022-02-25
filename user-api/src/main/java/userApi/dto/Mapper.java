@@ -15,15 +15,10 @@ public class Mapper {
     public User userDtoToUser(UserDto userDto) {
         User user = new User(userDto.getUserId(), userDto.getUserName(), userDto.getPhoneNumber(), userDto.getEmailAddress(),
                 userDto.getLatestLocationTimestamp(),
-                toVisitedLocations(userDto.getVisitedLocations()),
-                toUserRewardList(userDto.getUserRewards()),
-                toUserPreferences(userDto.getUserPreferences()),
-                toTripDeals(userDto.getTripDeals()));
-/*        user.setLatestLocationTimestamp(userDto.getLatestLocationTimestamp());
-        user.setVisitedLocations(toVisitedLocations(userDto.getVisitedLocations()));
-        user.setUserRewards(toUserReward(userDto.getUserRewards()));
-        user.setUserPreferences(toUserPreferences(userDto.getUserPreferences()));
-        user.setTripDeals(toTripDeals(userDto.getTripDeals()));*/
+                userDto.getVisitedLocations() != null ? toVisitedLocations(userDto.getVisitedLocations()) : new ArrayList<>(),
+                userDto.getUserRewards() != null ? toUserRewardList(userDto.getUserRewards()) : new ArrayList<>(),
+                userDto.getUserPreferences() != null ? toUserPreferences(userDto.getUserPreferences()) : new UserPreferences(),
+                userDto.getTripDeals() != null ? toTripDeals(userDto.getTripDeals()) : new ArrayList<>());
         return user;
     }
 
@@ -70,8 +65,8 @@ public class Mapper {
         return visitedLocationList;
     }
 
-    private Location toLocation(LocationDto location) {
-        return new Location(location.latitude, location.longitude);
+    private Location toLocation(LocationDto locationDto) {
+        return locationDto != null ? new Location(locationDto.latitude, locationDto.longitude) : null;
     }
 
     public UserReward toUserReward(UserRewardDto userRewardDto) {

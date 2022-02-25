@@ -69,7 +69,7 @@ public class TestCaculateRewardsPerformance {
 
         System.out.println("Start adding attraction for test");
         Attraction attraction = gpsApi.getAllAttractions(dateTimeHelper.getTimeStamp()).get(0);
-        userApi.initUserByAddVisitedLocation(dateTimeHelper.getTimeStamp(), attraction);
+        userApi.addFirstAttractionForAllUser(dateTimeHelper.getTimeStamp(), attraction);
         System.out.println("Add attraction is done");
         List<User> allUsers;
         allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
