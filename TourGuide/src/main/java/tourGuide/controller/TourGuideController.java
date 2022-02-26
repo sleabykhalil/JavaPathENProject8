@@ -1,5 +1,9 @@
 package tourGuide.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -28,13 +32,16 @@ public class TourGuideController {
 
     DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
+    @Operation(summary = "Get greeting message")
     @RequestMapping("/")
     public String index() {
         return "Greetings from TourGuide!";
     }
 
+    @Operation(summary = "Get user location")
     @RequestMapping("/getLocation")
-    public Location getLocation(@RequestParam String userName) {
+    public Location getLocation(@Parameter(description = "username", required = true)
+                                @RequestParam String userName) {
         VisitedLocation visitedLocation = tourGuideService.getUserLocation(userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp()));
         return visitedLocation.location;
     }
@@ -48,16 +55,21 @@ public class TourGuideController {
     // The distance in miles between the user's location and each of the attractions.
     // The reward points for visiting each Attraction.
     //    Note: Attraction reward points can be gathered from RewardsCentral
+    @Operation(summary = "Get top 5 near by attraction for user by username")
     @RequestMapping("/getNearbyAttractions")
-    public NearByAttractionDto getNearbyAttractions(@RequestParam String userName) {
+    public NearByAttractionDto getNearbyAttractions(@Parameter(description = "username", required = true)
+                                                    @RequestParam String userName) {
         return tourGuideService.getTopFiveNearByAttractions(userName);
     }
 
+    @Operation(summary = "Get list of rewards for user by username")
     @RequestMapping("/getRewards")
-    public List<UserReward> getRewards(@RequestParam String userName) {
+    public List<UserReward> getRewards(@Parameter(description = "username", required = true)
+                                       @RequestParam String userName) {
         return userApi.getUserRewardsById(userName, dateTimeHelper.getTimeStamp());
     }
 
+    @Operation(summary = "Get all users")
     @RequestMapping("/getAllCurrentLocations")
     public Map<UUID, Location> getAllCurrentLocations() {
         // TO DO: Get a list of every user's most recent location as JSON
@@ -72,13 +84,20 @@ public class TourGuideController {
         return tourGuideService.getCurrentLocationsMap();
     }
 
-    @RequestMapping("/getTripDeals")
-    public List<Provider> getTripDeals(@RequestParam String userName) {
+    @Operation(summary = "Add trip deals to user by username")
+    @GetMapping("/getTripDeals")
+    public List<Provider> getTripDeals(@Parameter(description = "username", required = true)
+                                       @RequestParam String userName) {
         return tourGuideService.getTripDeals(userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp()));
     }
 
+    @Operation(summary = "Update preferences for user by username  ")
     @PutMapping("/users/addUserPreferences")
-    public User addUserPreferences(@RequestParam String userName, @RequestBody UserPreferences userPreferences) {
+    public User addUserPreferences(@Parameter(description = "username", required = true)
+                                   @RequestParam String userName,
+                                   @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User preferences to update",
+                                           required = true, content = @Content(schema = @Schema(implementation = UserPreferences.class)))
+                                   @RequestBody UserPreferences userPreferences) {
         return tourGuideService.addUserPreferences(userName, userPreferences);
 
     }
