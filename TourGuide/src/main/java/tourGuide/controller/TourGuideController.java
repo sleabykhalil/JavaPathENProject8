@@ -6,9 +6,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.*;
 import tourGuide.dto.NearByAttractionDto;
+import tourGuide.exception.ValidationException;
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDto.User;
 import tourGuide.feign.dto.UserDto.UserPreferences;
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@Lazy
+//@Lazy
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TourGuideController {
     private final TourGuideService tourGuideService;
@@ -33,16 +33,18 @@ public class TourGuideController {
     DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
     @Operation(summary = "Get greeting message")
-    @RequestMapping("/")
+    @GetMapping("/")
     public String index() {
         return "Greetings from TourGuide!";
     }
 
     @Operation(summary = "Get user location")
-    @RequestMapping("/getLocation")
+    @GetMapping("/getLocation")
     public Location getLocation(@Parameter(description = "username", required = true)
                                 @RequestParam String userName) {
-        VisitedLocation visitedLocation = tourGuideService.getUserLocation(userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp()));
+        User user = userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp());
+        if (user == null) throw new ValidationException("user with username =[" + userName + "] not found");
+        VisitedLocation visitedLocation = tourGuideService.getUserLocation(user);
         return visitedLocation.location;
     }
 
@@ -56,21 +58,23 @@ public class TourGuideController {
     // The reward points for visiting each Attraction.
     //    Note: Attraction reward points can be gathered from RewardsCentral
     @Operation(summary = "Get top 5 near by attraction for user by username")
-    @RequestMapping("/getNearbyAttractions")
+    @GetMapping("/getNearbyAttractions")
     public NearByAttractionDto getNearbyAttractions(@Parameter(description = "username", required = true)
                                                     @RequestParam String userName) {
         return tourGuideService.getTopFiveNearByAttractions(userName);
     }
 
     @Operation(summary = "Get list of rewards for user by username")
-    @RequestMapping("/getRewards")
+    @GetMapping("/getRewards")
     public List<UserReward> getRewards(@Parameter(description = "username", required = true)
                                        @RequestParam String userName) {
-        return userApi.getUserRewardsById(userName, dateTimeHelper.getTimeStamp());
+        List<UserReward> userRewards = userApi.getUserRewardsById(userName, dateTimeHelper.getTimeStamp());
+        if (userRewards == null) throw new ValidationException("user with username =[" + userName + "] not found");
+        return userRewards;
     }
 
     @Operation(summary = "Get all users")
-    @RequestMapping("/getAllCurrentLocations")
+    @GetMapping("/getAllCurrentLocations")
     public Map<UUID, Location> getAllCurrentLocations() {
         // TO DO: Get a list of every user's most recent location as JSON
         //- Note: does not use gpsUtil to query for their current location,
@@ -88,7 +92,9 @@ public class TourGuideController {
     @GetMapping("/getTripDeals")
     public List<Provider> getTripDeals(@Parameter(description = "username", required = true)
                                        @RequestParam String userName) {
-        return tourGuideService.getTripDeals(userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp()));
+        User user = userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp());
+        if (user == null) throw new ValidationException("user with username =[" + userName + "] not found");
+        return tourGuideService.getTripDeals(user);
     }
 
     @Operation(summary = "Update preferences for user by username  ")

@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import tourGuide.dto.NearByAttractionDto;
 import tourGuide.dto.PotentialAttraction;
+import tourGuide.exception.ValidationException;
 import tourGuide.feign.GpsApi;
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDto.User;
@@ -143,6 +144,7 @@ public class TourGuideService {
      */
     public NearByAttractionDto getTopFiveNearByAttractions(String userName) {
         User user = userApi.getUserByUserName(userName, new Date().toString());
+        if (user == null) throw new ValidationException("user with username =[" + userName + "] not found");
         VisitedLocation visitedLocation = getUserLocation(user);
         Map<Double, Attraction> attractionTreeMap = new TreeMap<>();
         List<PotentialAttraction> potentialAttractions = new ArrayList<>();
@@ -168,7 +170,6 @@ public class TourGuideService {
 
     /**
      * Get nearby attraction Map
-     *
      */
     private void getAttractionTreeMap(VisitedLocation visitedLocation, Map<Double, Attraction> attractionTreeMap) {
         for (Attraction attraction : gpsApi.getAllAttractions(dateTimeHelper.getTimeStamp())) {
@@ -208,6 +209,7 @@ public class TourGuideService {
      */
     public User addUserPreferences(String userName, UserPreferences userPreferences) {
         User user = userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp());
+        if (user == null) throw new ValidationException("user with username =[" + userName + "] not found");
         user.setUserPreferences(userPreferences);
         user = userApi.addUser(dateTimeHelper.getTimeStamp(), user);
         return user;
