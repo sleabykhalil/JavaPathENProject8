@@ -68,8 +68,8 @@ public class TestCaculateRewardsPerformance {
         TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
 
         System.out.println("Start adding attraction for test");
-        Attraction attraction = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).get(0);
-        userApi.initUserByAddVisitedLocation(dateTimeHelper.getTimeStamp(), attraction);
+        Attraction attraction = gpsApi.getAllAttractions(dateTimeHelper.getTimeStamp()).get(0);
+        userApi.addFirstAttractionForAllUser(dateTimeHelper.getTimeStamp(), attraction);
         System.out.println("Add attraction is done");
         List<User> allUsers;
         allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());

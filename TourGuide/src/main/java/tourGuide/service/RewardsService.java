@@ -94,7 +94,7 @@ public class RewardsService {
 
     public void calculateRewards(User user) {
 
-        CompletableFuture<List<Attraction>> attractionListCF = CompletableFuture.supplyAsync(() -> gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()), executorService);
+        CompletableFuture<List<Attraction>> attractionListCF = CompletableFuture.supplyAsync(() -> gpsApi.getAllAttractions(dateTimeHelper.getTimeStamp()), executorService);
 
         CompletableFuture<List<AttractionVisitedLocationPair>> attVlPairCF = attractionListCF.thenApply((attractionList) -> getAttVlPairList(attractionList, user));
 

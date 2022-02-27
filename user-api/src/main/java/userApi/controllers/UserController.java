@@ -1,6 +1,11 @@
 package userApi.controllers;
 
 import gpsUtil.location.VisitedLocation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,57 +20,50 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserController {
     private Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    @Autowired
-    UserService userService;
-    //@Autowired
-    Mapper mapper = new Mapper();
-//    @Autowired
-//    UserMapper userMapper;
+    private final UserService userService;
 
+    Mapper mapper = new Mapper();
+
+    @Operation(summary = "Get all users")
     @GetMapping("/users/{timeStamp}")
-    public List<User> getAllUsers(@PathVariable String timeStamp) {
-        logger.info("/users/timeStamp{}",timeStamp);
+    public List<User> getAllUsers(@Parameter(description = "TimeStamp", required = true)
+                                  @PathVariable String timeStamp) {
+        logger.info("/users/timeStamp{}", timeStamp);
         return userService.getAllUsers();
     }
 
+    @Operation(summary = "Get user by user name")
     @GetMapping("/users/{userName}/{timeStamp}")
-    public User getUserByUserName(@PathVariable String userName, @PathVariable String timeStamp) {
+    public User getUserByUserName(@Parameter(description = "username", required = true)
+                                  @PathVariable String userName,
+                                  @Parameter(description = "TimeStamp", required = true)
+                                  @PathVariable String timeStamp) {
         logger.info("/users/userName{}/timeStamp{}", userName, timeStamp);
         return userService.getUser(userName);
     }
 
+    @Operation(summary = "Add user")
     @PostMapping("/users/addUser/{timeStamp}")
-    public User addUser(@PathVariable String timeStamp, @RequestBody UserDto userDto) {
+    public User addUser(@Parameter(description = "TimeStamp", required = true)
+                        @PathVariable String timeStamp,
+                        @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "New user",
+                                required = true, content = @Content(schema = @Schema(implementation = UserDto.class)))
+                        @RequestBody UserDto userDto) {
         logger.info("/users/addUser/timeStamp{} userName={}", timeStamp, userDto.getUserName());
         User user = mapper.userDtoToUser(userDto);
         return userService.addUser(user);
     }
 
-
-    @PostMapping("/users/initForTest/{timeStamp}")
-    void initUser(@PathVariable String timeStamp, @RequestParam int internalUserNumber) {
-        logger.info("/users/initForTest/timeStamp{}", timeStamp);
-        userService.initializeInternalUsers(internalUserNumber);
-    }
-    @PostMapping("/users/initForTest/addVisitedLocation/{timeStamp}")
-    void initUserByAddVisitedLocation(@PathVariable String timeStamp, @RequestBody AttractionDto attractionDto) {
-        logger.info("/users/initForTest/addVisitedLocation/timeStamp{}", timeStamp);
-        userService.addVisitedLocationForTest(mapper.toAttraction(attractionDto));
-    }
-    @GetMapping("/users/rewards/{timeStamp}")
-    public List<UserReward> getUserRewards(@PathVariable String timeStamp, @RequestBody User user) {
-        logger.info("/users/rewards/timeStamp{}", timeStamp);
-        if (!(user == null)) {
-            return userService.getUserRewards(user);
-        }
-        return new ArrayList<>();
-    }
-
+    @Operation(summary = "Get list of user rewards by user id")
     @GetMapping("/users/rewards/{userName}/{timeStamp}")
-    public List<UserReward> getUserRewardsById(@PathVariable String userName, @PathVariable String timeStamp) {
+    public List<UserReward> getUserRewardsById(@Parameter(description = "username", required = true)
+                                               @PathVariable String userName,
+                                               @Parameter(description = "TimeStamp", required = true)
+                                               @PathVariable String timeStamp) {
         logger.info("/users/rewards/userName{}/timeStamp{}", userName, timeStamp);
         if (userName != null) {
             return userService.getUserRewards(userName);
@@ -73,38 +71,70 @@ public class UserController {
         return new ArrayList<>();
     }
 
-    @GetMapping("/users/visitedLocations/{timeStamp}")
-    public List<VisitedLocation> getVisitedLocations(@PathVariable String timeStamp, @RequestBody User user) {
-        logger.info("/users/visitedLocations/timeStamp{}", timeStamp);
-        return userService.getVisitedLocation(user);
-    }
-
+    @Operation(summary = "Set tripDeals to user by user name")
     @PostMapping("/users/tripDeals/{userName}/{timeStamp}")
-    public void setTripDeals(@PathVariable String userName, @PathVariable String timeStamp, @RequestBody List<ProviderDto> providerDtoList) {
+    public void setTripDeals(@Parameter(description = "username", required = true)
+                             @PathVariable String userName,
+                             @Parameter(description = "TimeStamp", required = true)
+                             @PathVariable String timeStamp,
+                             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "List of Provider to add",
+                                     required = true, content = @Content(schema = @Schema(implementation = ProviderDto.class)))
+                             @RequestBody List<ProviderDto> providerDtoList) {
         logger.info("/users/tripDeals/userName{}/timeStamp{}", userName, timeStamp);
         List<Provider> providers = new ArrayList<>();
         providers = mapper.toTripDeals(providerDtoList);
         userService.setTripDeals(userName, providers);
     }
 
+    @Operation(summary = "Add visited location to visited location list")
     @PostMapping("/users/addVisitedLocation/{timeStamp}")
-    public void addToVisitedLocations(@PathVariable String timeStamp, @RequestParam String userName, @RequestParam String visitDate, @RequestBody VisitedLocationDto visitedLocationDto) {
+    public void addToVisitedLocations(@Parameter(description = "TimeStamp", required = true)
+                                      @PathVariable String timeStamp,
+                                      @Parameter(description = "username", required = true)
+                                      @RequestParam String userName,
+                                      @Parameter(description = "visited date", required = false)
+                                      @RequestParam String visitDate,
+                                      @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "new visited location to add",
+                                              required = true, content = @Content(schema = @Schema(implementation = VisitedLocationDto.class)))
+                                      @RequestBody VisitedLocationDto visitedLocationDto) {
         logger.info("/users/addVisitedLocation/userName{}/timeStamp{}", userName, timeStamp);
         VisitedLocation visitedLocation = mapper.toVisitedLocation(visitedLocationDto);
         userService.addToVisitedLocations(userName, visitedLocation);
     }
 
-    @PostMapping("/users/addReward/{userName}/{timeStamp}")
-    public void addUserReward(@PathVariable String timeStamp, @PathVariable String userName, @RequestBody UserRewardDto userRewardDto) {
-        logger.info("/users/addReward/userName{}/timeStamp{}", userName, timeStamp);
-        UserReward userReward = mapper.toUserReward(userRewardDto);
-        userService.addUserReward(userName, userReward);
-    }
-
+    @Operation(summary = "Add user rewards list to user reward list by user name")
     @PostMapping("/users/addRewardList/{userName}/{timeStamp}")
-    public List<UserRewardDto> addUserRewardList(@PathVariable String timeStamp, @PathVariable String userName, @RequestBody List<UserRewardDto> userRewardDto) {
+    public List<UserRewardDto> addUserRewardList(@Parameter(description = "TimeStamp", required = true)
+                                                 @PathVariable String timeStamp,
+                                                 @Parameter(description = "username", required = true)
+                                                 @PathVariable String userName,
+                                                 @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "List of user reward to add",
+                                                         required = true, content = @Content(schema = @Schema(implementation = UserRewardDto.class)))
+                                                 @RequestBody List<UserRewardDto> userRewardDto) {
         logger.info("/users/addRewardList/userName{}/timeStamp{}", userName, timeStamp);
         List<UserReward> userRewards = mapper.toUserRewardList(userRewardDto);
-       return mapper.toUserRewardListDto( userService.addUserRewardList(userName, userRewards));
+        return mapper.toUserRewardListDto(userService.addUserRewardList(userName, userRewards));
+    }
+
+    //*****************************//
+    //***********For TEST**********//
+    //*****************************//
+
+    @Operation(summary = "Initialize List of user for test mode")
+    @PostMapping("/users/initForTest/{timeStamp}")
+    void initUser(@PathVariable String timeStamp, @RequestParam int internalUserNumber) {
+        logger.info("/users/initForTest/timeStamp{}", timeStamp);
+        userService.initializeInternalUsers(internalUserNumber);
+    }
+
+    @Operation(summary = "Add first attraction to all user for test mode")
+    @PostMapping("/users/initForTest/addVisitedLocation/{timeStamp}")
+    void addFirstAttractionForAllUser(@Parameter(description = "TimeStamp", required = true)
+                                      @PathVariable String timeStamp,
+                                      @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Attraction add to all user *for test only*",
+                                              required = true, content = @Content(schema = @Schema(implementation = AttractionDto.class)))
+                                      @RequestBody AttractionDto attractionDto) {
+        logger.info("/users/initForTest/addVisitedLocation/timeStamp{}", timeStamp);
+        userService.addVisitedLocationForTest(mapper.toAttraction(attractionDto));
     }
 }

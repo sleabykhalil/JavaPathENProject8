@@ -13,8 +13,8 @@ import java.util.List;
 public interface GpsApi {
 
     @GetMapping("gps/attractions/{timeStamp}")
-    List<Attraction> getAllAttraction(@PathVariable String timeStamp);
+    List<Attraction> getAllAttractions(@PathVariable String timeStamp);
 
     @GetMapping("gps/attraction/{userId}/{timeStamp}")
-    VisitedLocation getUserAttraction(@PathVariable String userId, @PathVariable String timeStamp);
+    VisitedLocation getUserLocation(@PathVariable String userId, @PathVariable String timeStamp);
 }
