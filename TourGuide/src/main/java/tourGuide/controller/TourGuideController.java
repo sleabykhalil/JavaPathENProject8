@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.*;
 import tourGuide.dto.NearByAttractionDto;
 import tourGuide.exception.ValidationException;
@@ -24,7 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-//@Lazy
+@Lazy
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TourGuideController {
     private final TourGuideService tourGuideService;
