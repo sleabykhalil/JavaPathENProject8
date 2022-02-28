@@ -9,7 +9,7 @@ import org.springframework.web.context.request.WebRequest;
 import tourGuide.exception.TechnicalException;
 import tourGuide.exception.ValidationException;
 
-import static java.time.LocalDateTime.now;
+import java.util.Date;
 
 @Slf4j
 @RestControllerAdvice
@@ -25,9 +25,9 @@ public class RestExceptionHandler {
 
 
     @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessage validationExceptionHandler(ValidationException ex, WebRequest request) {
-        return createValidationErrorMessage(ex, HttpStatus.BAD_REQUEST, request);
+        return createValidationErrorMessage(ex, HttpStatus.NOT_FOUND, request);
     }
 
     //All unknown errors unknown exception will be handled as TechnicalException
@@ -55,7 +55,7 @@ public class RestExceptionHandler {
 
     private ErrorMessage createErrorMessage(Throwable e, HttpStatus httpStatus, WebRequest request) {
         return ErrorMessage.builder()
-                .timestamp(now())
+                .timestamp(new Date())
                 .httpStatusCode(httpStatus.value())
                 .message(e.getMessage())
                 .description(request.getDescription(false))
