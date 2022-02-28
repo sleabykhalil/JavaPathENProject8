@@ -68,9 +68,12 @@ public class TourGuideController {
     @GetMapping("/getRewards")
     public List<UserReward> getRewards(@Parameter(description = "username", required = true)
                                        @RequestParam String userName) {
-        List<UserReward> userRewards = userApi.getUserRewardsById(userName, dateTimeHelper.getTimeStamp());
-        if (userRewards == null) throw new ValidationException("user with username =[" + userName + "] not found");
-        return userRewards;
+//        List<UserReward> userRewards = userApi.getUserRewardsById(userName, dateTimeHelper.getTimeStamp());
+//        if (userRewards == null) throw new ValidationException("user with username =[" + userName + "] not found");
+        User user = userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp());
+        if (user == null) throw new ValidationException("user with username =[" + userName + "] not found");
+
+        return user.getUserRewards();
     }
 
     @Operation(summary = "Get all users")

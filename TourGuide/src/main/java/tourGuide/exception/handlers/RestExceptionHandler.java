@@ -1,5 +1,6 @@
 package tourGuide.exception.handlers;
 
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,6 +31,12 @@ public class RestExceptionHandler {
         return createValidationErrorMessage(ex, HttpStatus.NOT_FOUND, request);
     }
 
+    @ExceptionHandler(FeignException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorMessage feignExceptionHandler(ValidationException ex, WebRequest request) {
+        return createFeignExceptionErrorMessage(ex, HttpStatus.INTERNAL_SERVER_ERROR, request);
+    }
+
     //All unknown errors unknown exception will be handled as TechnicalException
     @ExceptionHandler(Throwable.class)
     public ErrorMessage globalExceptionHandler(TechnicalException ex, WebRequest request) {
@@ -47,6 +54,14 @@ public class RestExceptionHandler {
     private ErrorMessage createValidationErrorMessage(Throwable ex, HttpStatus httpStatus, WebRequest request) {
         log.error(starLine);
         log.error("* A Validation exception occurred: {}[=type] {}[=message]", ex.getClass().getSimpleName(), ex.getMessage());
+        log.error(fullStackTraceLog, ex);
+        log.error(starLine);
+        return createErrorMessage(ex, httpStatus, request);
+    }
+
+    private ErrorMessage createFeignExceptionErrorMessage(Throwable ex, HttpStatus httpStatus, WebRequest request) {
+        log.error(starLine);
+        log.error("* A connection exception occurred: {}[=type] {}[=message]", ex.getClass().getSimpleName(), ex.getMessage());
         log.error(fullStackTraceLog, ex);
         log.error(starLine);
         return createErrorMessage(ex, httpStatus, request);
