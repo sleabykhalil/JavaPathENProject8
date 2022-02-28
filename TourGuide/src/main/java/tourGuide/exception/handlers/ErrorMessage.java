@@ -1,13 +1,15 @@
 package tourGuide.exception.handlers;
 
 import lombok.Builder;
+import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Builder
+@Data
 public class ErrorMessage {
     private int httpStatusCode;
-    private LocalDateTime timestamp;
+    private Date timestamp;
     private String message;
     private String description;
 }
