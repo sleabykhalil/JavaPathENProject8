@@ -79,7 +79,6 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
-                    "com/baeldung/**/ExcludedPOJO.class",
                     "**/dto/**",
                     "**/helper/*",
                     "**/exception/**",

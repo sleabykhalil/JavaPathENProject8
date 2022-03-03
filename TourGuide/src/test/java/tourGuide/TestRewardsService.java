@@ -52,13 +52,12 @@ public class TestRewardsService {
         stopWatch.start();
 
         tourGuideService.trackUserLocation(userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()));
-        //rewardsService.calculateRewards(userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp())).get();
         rewardsService.calculateRewards(userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()));
         int userRewardsSize;
         do {
             userRewardsSize = userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()).getUserRewards().size();
         } while ((userRewardsSize == 0) &&
-                (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) < TimeUnit.SECONDS.toSeconds(1)));
+                (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) < TimeUnit.SECONDS.toSeconds(10)));
         stopWatch.stop();
 
         tourGuideService.tracker.stopTracking();
