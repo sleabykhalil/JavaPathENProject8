@@ -11,9 +11,4 @@ public class BeanModule {
     public GpsUtil getGpsUtil() {
         return new GpsUtil();
     }
-
-    @Bean
-    public RewardCentral getRewardCentral() {
-        return new RewardCentral();
-    }
 }

@@ -157,8 +157,6 @@ public class TestTourGuideService {
         tourGuideService.tracker.stopTracking();
 
         assertEquals(5, providers.size());
-        // todo ask for what it must be 10
-//        assertEquals(10, providers.size());
     }
 
     @Test

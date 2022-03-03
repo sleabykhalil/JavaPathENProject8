@@ -33,12 +33,13 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(FeignException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorMessage feignExceptionHandler(ValidationException ex, WebRequest request) {
+    public ErrorMessage feignExceptionHandler(TechnicalException ex, WebRequest request) {
         return createFeignExceptionErrorMessage(ex, HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
     //All unknown errors unknown exception will be handled as TechnicalException
     @ExceptionHandler(Throwable.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage globalExceptionHandler(TechnicalException ex, WebRequest request) {
         return createTechnicalErrorMessage(ex, HttpStatus.INTERNAL_SERVER_ERROR, request);
     }

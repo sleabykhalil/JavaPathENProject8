@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class User {
-    private  UUID userId;
-    private  String userName;
+    private UUID userId;
+    private String userName;
     private String phoneNumber;
     private String emailAddress;
     private Date latestLocationTimestamp;
@@ -90,12 +90,6 @@ public class User {
 
     public void clearVisitedLocations() {
         visitedLocations.clear();
-    }
-
-    public void addUserReward(UserReward userReward) {
-        if (userRewards.stream().filter(r -> !r.attraction.attractionName.equals(userReward.attraction)).count() == 0) {
-            userRewards.add(userReward);
-        }
     }
 
     public List<UserReward> getUserRewards() {

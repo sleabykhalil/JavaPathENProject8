@@ -13,7 +13,7 @@ networks:
     driver: bridge
 
 services:
-  microservice_gps:
+  microservice.gps:
     build: ./gps-api
     expose:
       - 8083
@@ -31,7 +31,7 @@ services:
       - "traefik.port=80"
       - "traefik.http.routers.gps.rule=Host(`gps.localhost`)"
 
-  microservice_reward:
+  microservice.reward:
     build: ./reward-api
     expose:
       - 8082
@@ -49,7 +49,7 @@ services:
       - "traefik.port=80"
       - "traefik.http.routers.reward.rule=Host(`reward.localhost`)"
 
-  microservice_users:
+  microservice.users:
     build: ./user-api
     expose:
       - 8081
@@ -62,6 +62,24 @@ services:
       - "traefik.docker.network=traefik-net"
       - "traefik.port=80"
       - "traefik.http.routers.user.rule=Host(`user.localhost`)"
+
+  microservice.tourguide:
+    build: ./TourGuide
+    expose:
+      - 8084
+    depends_on:
+      - "microservice.users"
+      - "microservice.gps"
+      - "microservice.reward"
+    networks:
+      traefik-net:
+        aliases:
+          - tourguide.localhost
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      - "traefik.port=80"
+      - "traefik.http.routers.tourguide.rule=Host(`tourguide.localhost`)"
 
   traefik:
     #image: traefik:v1.7.14-alpine
@@ -81,6 +99,7 @@ services:
           - gps.localhost
           - user.localhost
           - reward.localhost
+          - tourguide.localhost
     labels:
       - "traefik.http.routers.dashboard.rule=Host(`dash.localhost`)"
       - "traefik.docker.network=traefik-net"

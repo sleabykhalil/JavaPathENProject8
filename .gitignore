@@ -11,3 +11,4 @@
 /gps-api/.gradle/
 /gps-api/build/
 /.idea/
+/docker-compose-traefik-backup.yml

@@ -10,8 +10,7 @@ import tourGuide.feign.dto.tripPricerDto.ProviderDto;
 
 import java.util.List;
 
-//@FeignClient(name = "user-Api", url = "http://localhost:8081")
-@FeignClient(name = "user-Api", url = "http://user.localhost:81")
+@FeignClient(name = "user-Api", url = "${feign.users.url}")
 public interface UserApi {
 
     @GetMapping("/users/{timeStamp}")

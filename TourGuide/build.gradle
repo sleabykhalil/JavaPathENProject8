@@ -41,7 +41,7 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    
+
     // https://mvnrepository.com/artifact/org.mockito/mockito-core
     testImplementation 'org.mockito:mockito-core:4.3.1'
 /*
@@ -73,6 +73,18 @@ jacocoTestReport {
         xml.enabled true
         csv.enabled false
         html.destination file("${buildDir}/jacocoHtml")
+    }
+    dependsOn test // tests are required to run before generating the report
+
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "**/dto/**",
+                    "**/helper/*",
+                    "**/exception/**",
+                    "**/config/*"
+            ])
+        }))
     }
 }
 
