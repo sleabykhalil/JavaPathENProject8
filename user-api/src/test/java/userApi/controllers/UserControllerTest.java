@@ -9,11 +9,13 @@ import userApi.dto.AttractionDto;
 import userApi.dto.UserDto;
 import userApi.dto.VisitedLocationDto;
 import userApi.model.User;
+import userApi.model.UserReward;
 import userApi.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,6 +57,13 @@ class UserControllerTest {
         when(userServiceMock.getUserRewards(any())).thenReturn(new ArrayList<>());
         userControllerUnderTest.getUserRewardsById("username", "timeStamp");
         verify(userServiceMock, times(1)).getUserRewards(any());
+    }
+
+    @Test
+    void getUserRewardsByIdWhenUserNameNullReturnArrayList() {
+        List<UserReward> result = userControllerUnderTest.getUserRewardsById(null, "timeStamp");
+        verify(userServiceMock, times(0)).getUserRewards(any());
+        assertThat(result).isNotNull();
     }
 
     @Test
