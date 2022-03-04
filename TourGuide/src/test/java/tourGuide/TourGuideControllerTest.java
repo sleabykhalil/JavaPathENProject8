@@ -6,19 +6,21 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import tourGuide.controller.TourGuideController;
+import tourGuide.exception.ValidationException;
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDto.User;
 import tourGuide.feign.dto.UserDto.UserPreferences;
+import tourGuide.feign.dto.gpsDto.Location;
+import tourGuide.feign.dto.gpsDto.VisitedLocation;
 import tourGuide.service.TourGuideService;
-import tripPricer.Provider;
 
 import javax.money.CurrencyUnit;
 import javax.money.Monetary;
-import java.util.List;
+import java.util.Date;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -62,5 +64,41 @@ class TourGuideControllerTest {
         //then
         verify(tourGuideServiceMocked, times(1)).addUserPreferences(user.getUserName(), userPreferences);
         assertThat(result.getUserPreferences()).isEqualTo(userPreferences);
+    }
+
+    @Test
+    void index() {
+        String result = tourGuideControllerUnderTest.index();
+        assertThat(result).isEqualTo("Greetings from TourGuide!");
+    }
+
+    @Test
+    void getLocationWhenUserNotFoundThrowException() {
+        //given
+        String username = "notExist";
+        when(userApiMock.getUserByUserName(eq(username), anyString())).thenReturn(null);
+        //when
+        assertThatExceptionOfType(ValidationException.class)
+                .isThrownBy(() ->
+                        tourGuideControllerUnderTest.getLocation(username)
+                ).withMessageContaining(username);
+    }
+
+    @Test
+    void getLocationWhenUserFoundLocationIsReturned() {
+        //given
+        User user = new User(UUID.randomUUID(),
+                "jon",
+                "000",
+                "jon@tourGuide.com");
+        VisitedLocation visitedLocation = new VisitedLocation(user.getUserId()
+                , new Location(10.00, 10.00), new Date());
+        user.getVisitedLocations().add(visitedLocation);
+        when(userApiMock.getUserByUserName(eq(user.getUserName()), anyString())).thenReturn(user);
+        when(tourGuideServiceMocked.getUserLocation(user)).thenReturn(visitedLocation);
+        //when
+        Location result = tourGuideControllerUnderTest.getLocation(user.getUserName());
+        //then
+        assertThat(result).isEqualTo(user.getVisitedLocations().get(0).getLocation());
     }
 }

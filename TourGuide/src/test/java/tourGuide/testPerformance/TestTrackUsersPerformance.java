@@ -85,8 +85,8 @@ public class TestTrackUsersPerformance {
                 break;
             } else {
                 Thread.sleep(Math.max(Math.min(allUsers.size(),10000),500));
-                if (counter != tourGuideService.getTrackUserMap().size()) {
-                    counter = tourGuideService.getTrackUserMap().size();
+                if (counter != tourGuideService.getTrackedUserMap().size()) {
+                    counter = tourGuideService.getTrackedUserMap().size();
                     System.out.println("Number of tracked users = " + counter);
                 }
             }

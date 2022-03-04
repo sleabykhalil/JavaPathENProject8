@@ -23,7 +23,7 @@ public class FeignTest {
     @Test
     void gpsGetAttractionForUser() {
 
-        VisitedLocation visitedLocation = gpsApi.getUserAttraction(UUID.randomUUID().toString(), dateTimeHelper.getTimeStamp());
+        VisitedLocation visitedLocation = gpsApi.getUserLocation(UUID.randomUUID().toString(), dateTimeHelper.getTimeStamp());
 
         assertThat(visitedLocation).isNotNull();
     }

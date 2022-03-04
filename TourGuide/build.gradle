@@ -27,20 +27,23 @@ dependencies {
     implementation 'org.javamoney:moneta:1.4.2'
     implementation 'com.jsoniter:jsoniter:0.9.23'
     implementation 'org.zalando:jackson-datatype-money:1.3.0'
+// https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-ui
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.6'
 
     implementation name: 'gpsUtil', ext: 'jar'
     implementation name: 'TripPricer', ext: 'jar'
     implementation name: 'RewardCentral', ext: 'jar'
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    // https://mvnrepository.com/artifact/org.mockito/mockito-core
-    testImplementation 'org.mockito:mockito-core:4.3.1'
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
 
     testCompileOnly 'org.projectlombok:lombok:1.18.22'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+
+    // https://mvnrepository.com/artifact/org.mockito/mockito-core
+    testImplementation 'org.mockito:mockito-core:4.3.1'
 /*
     testImplementation 'junit:junit:4.13.2'
 */
@@ -70,6 +73,18 @@ jacocoTestReport {
         xml.enabled true
         csv.enabled false
         html.destination file("${buildDir}/jacocoHtml")
+    }
+    dependsOn test // tests are required to run before generating the report
+
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "**/dto/**",
+                    "**/helper/*",
+                    "**/exception/**",
+                    "**/config/*"
+            ])
+        }))
     }
 }
 

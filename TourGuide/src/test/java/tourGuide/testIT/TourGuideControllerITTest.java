@@ -65,7 +65,7 @@ public class TourGuideControllerITTest {
     }
 
     @Test
-    void getNearbyAttractions(){
+    void getNearbyAttractions() {
         User user = new User(UUID.randomUUID(),
                 "jon",
                 "000",
@@ -88,7 +88,7 @@ public class TourGuideControllerITTest {
         }
         for (int i = 0; i < 4; i++) {
             assertThat(result.getPotentialAttractions().get(i).getDistanceFromUserLocation()).
-                    isLessThan(result.getPotentialAttractions().get(i+1).getDistanceFromUserLocation());
+                    isLessThan(result.getPotentialAttractions().get(i + 1).getDistanceFromUserLocation());
         }
     }
 }

@@ -1,10 +1,15 @@
 package tourGuide.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.*;
 import tourGuide.dto.NearByAttractionDto;
+import tourGuide.exception.ValidationException;
 import tourGuide.feign.UserApi;
 import tourGuide.feign.dto.UserDto.User;
 import tourGuide.feign.dto.UserDto.UserPreferences;
@@ -28,14 +33,19 @@ public class TourGuideController {
 
     DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
-    @RequestMapping("/")
+    @Operation(summary = "Get greeting message")
+    @GetMapping("/")
     public String index() {
         return "Greetings from TourGuide!";
     }
 
-    @RequestMapping("/getLocation")
-    public Location getLocation(@RequestParam String userName) {
-        VisitedLocation visitedLocation = tourGuideService.getUserLocation(userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp()));
+    @Operation(summary = "Get user location")
+    @GetMapping("/getLocation")
+    public Location getLocation(@Parameter(description = "username", required = true)
+                                @RequestParam String userName) {
+        User user = userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp());
+        if (user == null) throw new ValidationException("user with username =[" + userName + "] not found");
+        VisitedLocation visitedLocation = tourGuideService.getUserLocation(user);
         return visitedLocation.location;
     }
 
@@ -48,17 +58,27 @@ public class TourGuideController {
     // The distance in miles between the user's location and each of the attractions.
     // The reward points for visiting each Attraction.
     //    Note: Attraction reward points can be gathered from RewardsCentral
-    @RequestMapping("/getNearbyAttractions")
-    public NearByAttractionDto getNearbyAttractions(@RequestParam String userName) {
+    @Operation(summary = "Get top 5 near by attraction for user by username")
+    @GetMapping("/getNearbyAttractions")
+    public NearByAttractionDto getNearbyAttractions(@Parameter(description = "username", required = true)
+                                                    @RequestParam String userName) {
         return tourGuideService.getTopFiveNearByAttractions(userName);
     }
 
-    @RequestMapping("/getRewards")
-    public List<UserReward> getRewards(@RequestParam String userName) {
-        return userApi.getUserRewardsById(userName, dateTimeHelper.getTimeStamp());
+    @Operation(summary = "Get list of rewards for user by username")
+    @GetMapping("/getRewards")
+    public List<UserReward> getRewards(@Parameter(description = "username", required = true)
+                                       @RequestParam String userName) {
+//        List<UserReward> userRewards = userApi.getUserRewardsById(userName, dateTimeHelper.getTimeStamp());
+//        if (userRewards == null) throw new ValidationException("user with username =[" + userName + "] not found");
+        User user = userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp());
+        if (user == null) throw new ValidationException("user with username =[" + userName + "] not found");
+
+        return user.getUserRewards();
     }
 
-    @RequestMapping("/getAllCurrentLocations")
+    @Operation(summary = "Get all users")
+    @GetMapping("/getAllCurrentLocations")
     public Map<UUID, Location> getAllCurrentLocations() {
         // TO DO: Get a list of every user's most recent location as JSON
         //- Note: does not use gpsUtil to query for their current location,
@@ -72,13 +92,22 @@ public class TourGuideController {
         return tourGuideService.getCurrentLocationsMap();
     }
 
-    @RequestMapping("/getTripDeals")
-    public List<Provider> getTripDeals(@RequestParam String userName) {
-        return tourGuideService.getTripDeals(userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp()));
+    @Operation(summary = "Add trip deals to user by username")
+    @GetMapping("/getTripDeals")
+    public List<Provider> getTripDeals(@Parameter(description = "username", required = true)
+                                       @RequestParam String userName) {
+        User user = userApi.getUserByUserName(userName, dateTimeHelper.getTimeStamp());
+        if (user == null) throw new ValidationException("user with username =[" + userName + "] not found");
+        return tourGuideService.getTripDeals(user);
     }
 
+    @Operation(summary = "Update preferences for user by username  ")
     @PutMapping("/users/addUserPreferences")
-    public User addUserPreferences(@RequestParam String userName, @RequestBody UserPreferences userPreferences) {
+    public User addUserPreferences(@Parameter(description = "username", required = true)
+                                   @RequestParam String userName,
+                                   @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User preferences to update",
+                                           required = true, content = @Content(schema = @Schema(implementation = UserPreferences.class)))
+                                   @RequestBody UserPreferences userPreferences) {
         return tourGuideService.addUserPreferences(userName, userPreferences);
 
     }

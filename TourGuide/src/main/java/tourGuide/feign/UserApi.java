@@ -10,8 +10,7 @@ import tourGuide.feign.dto.tripPricerDto.ProviderDto;
 
 import java.util.List;
 
-//@FeignClient(name = "user-Api", url = "http://localhost:8081")
-@FeignClient(name = "user-Api", url = "http://user.localhost:81")
+@FeignClient(name = "user-Api", url = "${feign.users.url}")
 public interface UserApi {
 
     @GetMapping("/users/{timeStamp}")
@@ -22,12 +21,6 @@ public interface UserApi {
 
     @PostMapping("/users/addUser/{timeStamp}")
     User addUser(@PathVariable String timeStamp, @RequestBody User userDto);
-
-    @PostMapping("/users/initForTest/{timeStamp}")
-    void initUser(@PathVariable String timeStamp, @RequestParam int internalUserNumber);
-
-    @PostMapping("/users/initForTest/addVisitedLocation/{timeStamp}")
-    void initUserByAddVisitedLocation(@PathVariable String timeStamp, @RequestBody Attraction attractionDto);
 
     @GetMapping("/users/rewards/{userName}/{timeStamp}")
     List<UserReward> getUserRewardsById(@PathVariable String userName, @PathVariable String timeStamp);
@@ -40,4 +33,15 @@ public interface UserApi {
 
     @PostMapping("/users/addRewardList/{userName}/{timeStamp}")
     List<UserReward> addUserRewardList(@PathVariable String timeStamp, @PathVariable String userName, @RequestBody List<UserReward> userRewardListDto);
+
+    //*****************************//
+    //***********For TEST**********//
+    //*****************************//
+    @PostMapping("/users/initForTest/{timeStamp}")
+    void initUser(@PathVariable String timeStamp, @RequestParam int internalUserNumber);
+
+    @PostMapping("/users/initForTest/addVisitedLocation/{timeStamp}")
+    void addFirstAttractionForAllUser(@PathVariable String timeStamp, @RequestBody Attraction attractionDto);
+
+
 }

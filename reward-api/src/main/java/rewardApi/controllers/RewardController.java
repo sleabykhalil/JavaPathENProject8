@@ -1,5 +1,8 @@
 package rewardApi.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,26 +13,23 @@ import org.springframework.web.bind.annotation.RestController;
 import rewardApi.service.RewardService;
 
 @RestController
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RewardController {
     private Logger logger = LoggerFactory.getLogger(RewardController.class);
 
-    @Autowired
-    RewardService rewardService;
+    private final RewardService rewardService;
 
-/*    @PostMapping("/reward/calculateRewards")
-    public void calculateRewards(@RequestBody User user) {
-        rewardService.calculateRewards(user);
+    @Operation(summary = "Get all attractions")
+    @GetMapping("/reward/getRewardPoints/{timeStamp}")
+    public int getRewardPoints(@Parameter(description = "TimeStamp", required = true)
+                               @PathVariable String timeStamp,
+                               @Parameter(description = "User UUID as string", required = true)
+                               @RequestParam String userId,
+                               @Parameter(description = "Attraction UUID as string", required = true)
+                               @RequestParam String attractionId) {
+        logger.info("/reward/getRewardPoints/timeStamp={}", timeStamp);
+        return rewardService.getRewardPoints(userId, attractionId);
     }
 
-    @GetMapping("/reward/isWithinAttractionProximity")
-    public boolean isWithinAttractionProximity(@RequestBody List<Attraction> attractions){
-        return  rewardService.isWithinAttractionProximity(attractions);
-    }*/
-
-    @GetMapping("/reward/getRewardPoints/{timeStamp}")
-    public int getRewardPoints(@PathVariable String timeStamp, @RequestParam String userId, @RequestParam String attractionId){
-        logger.info("/reward/getRewardPoints/timeStamp={}",timeStamp);
-        return rewardService.getRewardPoints(userId,attractionId);
-    };
 }
 

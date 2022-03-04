@@ -27,11 +27,20 @@ dependencies {
     implementation 'org.javamoney:moneta:1.4.2'
     implementation 'com.jsoniter:jsoniter:0.9.23'
     implementation 'org.zalando:jackson-datatype-money:1.3.0'
+// https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-ui
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.6'
 
     implementation name: 'gpsUtil', ext: 'jar'
     implementation name: 'TripPricer', ext: 'jar'
     implementation name: 'RewardCentral', ext: 'jar'
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
 
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.1'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.22'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
 /*

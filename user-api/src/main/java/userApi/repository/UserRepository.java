@@ -13,17 +13,16 @@ import java.util.Map;
 @Repository
 public class UserRepository {
     private Logger logger = LoggerFactory.getLogger(UserRepository.class);
+
+    public Map<String, User> getInternalUserMap() {
+        return internalUserMap;
+    }
+
     private final Map<String, User> internalUserMap = new HashMap<>();
 
     public void addUser(String userName, User user) {
         if (!internalUserMap.containsKey(userName)) {
             internalUserMap.put(userName, user);
-        }
-    }
-
-    public void addUser(User user) {
-        if (!internalUserMap.containsKey(user.getUserName())) {
-            internalUserMap.put(user.getUserName(), user);
         }
     }
 

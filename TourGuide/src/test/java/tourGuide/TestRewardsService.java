@@ -43,7 +43,7 @@ public class TestRewardsService {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         userApi.addUser(dateTimeHelper.getTimeStamp(), user);
 
-        Attraction attraction = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).get(0);
+        Attraction attraction = gpsApi.getAllAttractions(dateTimeHelper.getTimeStamp()).get(0);
         userApi.addToVisitedLocations(dateTimeHelper.getTimeStamp(),
                 user.getUserName(),
                 dateTimeHelper.getTimeStamp(), new VisitedLocation(user.getUserId(), attraction, new Date()));
@@ -52,13 +52,12 @@ public class TestRewardsService {
         stopWatch.start();
 
         tourGuideService.trackUserLocation(userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()));
-        //rewardsService.calculateRewards(userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp())).get();
         rewardsService.calculateRewards(userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()));
         int userRewardsSize;
         do {
             userRewardsSize = userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()).getUserRewards().size();
         } while ((userRewardsSize == 0) &&
-                (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) < TimeUnit.SECONDS.toSeconds(1)));
+                (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) < TimeUnit.SECONDS.toSeconds(10)));
         stopWatch.stop();
 
         tourGuideService.tracker.stopTracking();
@@ -68,7 +67,7 @@ public class TestRewardsService {
     @Test //need to verify
     public void isWithinAttractionProximity() {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
-        Attraction attraction = gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).get(0);
+        Attraction attraction = gpsApi.getAllAttractions(dateTimeHelper.getTimeStamp()).get(0);
         assertTrue(rewardsService.isWithinAttractionProximity(attraction, attraction));
     }
 
@@ -86,7 +85,7 @@ public class TestRewardsService {
         User userAfterCalculate = userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp());
         tourGuideService.tracker.stopTracking();
 
-        assertEquals(gpsApi.getAllAttraction(dateTimeHelper.getTimeStamp()).size(), userAfterCalculate.getUserRewards().size());
+        assertEquals(gpsApi.getAllAttractions(dateTimeHelper.getTimeStamp()).size(), userAfterCalculate.getUserRewards().size());
     }
 
 }
