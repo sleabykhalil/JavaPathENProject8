@@ -129,4 +129,36 @@ class UserServiceTest {
 
     }
 
+    @Test
+    void initializeInternalUsers() {
+        User user = new User(UUID.randomUUID(), "username", "000", "jon@tourGuide.com");
+
+        doNothing().when(userRepositoryMock).addUser(anyString(), any());
+        doNothing().when(userRepositoryMock).deleteAll();
+        when(userRepositoryMock.getUserByUserName(anyString())).thenReturn(user);
+        when(userRepositoryMock.save(any())).thenReturn(user);
+
+        userServiceUnderTest.initializeInternalUsers(10);
+
+        verify(userRepositoryMock, times(10)).addUser(anyString(), any());
+    }
+
+    @Test
+    void addVisitedLocationForTest() {
+        User user = new User(UUID.randomUUID(), "username", "000", "jon@tourGuide.com");
+        VisitedLocation visitedLocation = new VisitedLocation(user.getUserId(),
+                new Location(-44.437913, -34.185441), new Date());
+        user.getVisitedLocations().add(visitedLocation);
+        List<User> userList = new ArrayList<>();
+        Attraction attraction = new Attraction("Disneyland", "Anaheim", "CA", 33.817595, -117.922008);
+
+        userList.add(user);
+        when(userRepositoryMock.getAllUser()).thenReturn(userList);
+        when(userRepositoryMock.save(any())).thenReturn(user);
+
+        userServiceUnderTest.addVisitedLocationForTest(attraction);
+
+        verify(userRepositoryMock, times(1)).save(any());
+    }
+
 }
