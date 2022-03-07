@@ -123,18 +123,19 @@ public class UserController {
     @Operation(summary = "Initialize List of user for test mode")
     @PostMapping("/users/initForTest/{timeStamp}")
     void initUser(@PathVariable String timeStamp, @RequestParam int internalUserNumber) {
+        logger.info("pass from here/timeStamp{}", timeStamp);
         logger.info("/users/initForTest/timeStamp{}", timeStamp);
         userService.initializeInternalUsers(internalUserNumber);
     }
 
     @Operation(summary = "Add first attraction to all user for test mode")
     @PostMapping("/users/initForTest/addVisitedLocation/{timeStamp}")
-    void addFirstAttractionForAllUser(@Parameter(description = "TimeStamp", required = true)
-                                      @PathVariable String timeStamp,
-                                      @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Attraction add to all user *for test only*",
-                                              required = true, content = @Content(schema = @Schema(implementation = AttractionDto.class)))
-                                      @RequestBody AttractionDto attractionDto) {
+    List<User> addFirstAttractionForAllUser(@Parameter(description = "TimeStamp", required = true)
+                                            @PathVariable String timeStamp,
+                                            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Attraction add to all user *for test only*",
+                                                    required = true, content = @Content(schema = @Schema(implementation = AttractionDto.class)))
+                                            @RequestBody AttractionDto attractionDto) {
         logger.info("/users/initForTest/addVisitedLocation/timeStamp{}", timeStamp);
-        userService.addVisitedLocationForTest(mapper.toAttraction(attractionDto));
+        return userService.addVisitedLocationForTest(mapper.toAttraction(attractionDto));
     }
 }

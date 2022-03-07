@@ -1,6 +1,8 @@
 package tourGuide.testPerformance;
 
 import org.apache.commons.lang3.time.StopWatch;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,6 +32,16 @@ public class TestCaculateRewardsPerformance {
     RewardApi rewardApi;
 
     DateTimeHelper dateTimeHelper = new DateTimeHelper();
+
+    @BeforeAll
+    static void beforeAll() {
+        TourGuideService.testMode = true;
+    }
+
+    @AfterAll
+    static void afterAll() {
+        TourGuideService.testMode = false;
+    }
     /*
      * A note on performance improvements:
      *
@@ -56,7 +68,7 @@ public class TestCaculateRewardsPerformance {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
         int numberOfUsers = 100;
-        if (System.getProperty("numberOfUsers")!= null && !System.getProperty("numberOfUsers").isEmpty()) {
+        if (System.getProperty("numberOfUsers") != null && !System.getProperty("numberOfUsers").isEmpty()) {
             try {
                 System.out.println("Users number pass from command line =" + System.getProperty("numberOfUsers"));
                 numberOfUsers = Integer.parseInt(System.getProperty("numberOfUsers"));
@@ -69,10 +81,10 @@ public class TestCaculateRewardsPerformance {
 
         System.out.println("Start adding attraction for test");
         Attraction attraction = gpsApi.getAllAttractions(dateTimeHelper.getTimeStamp()).get(0);
-        userApi.addFirstAttractionForAllUser(dateTimeHelper.getTimeStamp(), attraction);
+
         System.out.println("Add attraction is done");
         List<User> allUsers;
-        allUsers = userApi.getAllUsers(dateTimeHelper.getTimeStamp());
+        allUsers = userApi.addFirstAttractionForAllUser(dateTimeHelper.getTimeStamp(), attraction);
 
         //when
         StopWatch stopWatch = new StopWatch();
@@ -82,7 +94,7 @@ public class TestCaculateRewardsPerformance {
         int counter = 0;
         while (true) {
             if (tourGuideService.getCalculatedRewardForUserMap().size() < allUsers.size()) {
-                Thread.sleep(Math.max(Math.min(allUsers.size(),10000),1000));
+                Thread.sleep(Math.max(Math.min(allUsers.size(), 10000), 1000));
                 if (counter != tourGuideService.getCalculatedRewardForUserMap().size()) {
                     counter = tourGuideService.getCalculatedRewardForUserMap().size();
                     System.out.println("Number of calculated users = " + counter);

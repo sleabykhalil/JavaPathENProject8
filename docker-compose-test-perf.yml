@@ -23,7 +23,7 @@ services:
           - gps.localhost
     deploy:
       mode: replicated
-      replicas: 6
+      replicas: 1
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-net"
@@ -40,7 +40,7 @@ services:
           - reward.localhost
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: 1
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-net"
@@ -61,6 +61,20 @@ services:
       - "traefik.port=80"
       - "traefik.http.routers.user.rule=Host(`user.localhost`)"
 
+  microservice.testusers:
+    build: ./user-api
+    expose:
+      - 8081
+    networks:
+      traefik-net:
+        aliases:
+          - testusers.localhost
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      - "traefik.port=80"
+      - "traefik.http.routers.testusers.rule=Host(`testusers.localhost`)"
+
   traefik:
     #image: traefik:v1.7.14-alpine
     #    image: traefik:v2.3.0
@@ -79,6 +93,7 @@ services:
           - gps.localhost
           - user.localhost
           - reward.localhost
+          - testusers.localhost
     labels:
       - "traefik.http.routers.dashboard.rule=Host(`dash.localhost`)"
       - "traefik.docker.network=traefik-net"

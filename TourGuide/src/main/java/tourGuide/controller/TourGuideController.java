@@ -77,7 +77,7 @@ public class TourGuideController {
         return user.getUserRewards();
     }
 
-    @Operation(summary = "Get all users")
+    @Operation(summary = "Get all users current location")
     @GetMapping("/getAllCurrentLocations")
     public Map<UUID, Location> getAllCurrentLocations() {
         // TO DO: Get a list of every user's most recent location as JSON

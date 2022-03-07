@@ -131,12 +131,13 @@ public class UserService {
      * For test, add first attraction to all users
      * @param attraction
      */
-    public void addVisitedLocationForTest(Attraction attraction) {
+    public List<User> addVisitedLocationForTest(Attraction attraction) {
         List<User> allUser = userRepository.getAllUser();
         for (User user : allUser) {
             user.getVisitedLocations().add(new VisitedLocation(user.getUserId(), new Location(attraction.latitude, attraction.longitude), getRandomTime()));
             userRepository.save(user);
         }
+      return  userRepository.getAllUser();
     }
 
     private void generateUserLocationHistory(User user) {
