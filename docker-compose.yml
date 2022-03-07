@@ -22,9 +22,9 @@ services:
         aliases:
           - gps.localhost
     deploy:
-      #mode: replicated
-      replicas: 1
-#      replicas: 6
+#      mode: replicated
+#      replicas: 1
+      replicas: 6
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-net"
@@ -40,9 +40,9 @@ services:
         aliases:
           - reward.localhost
     deploy:
-      #mode: replicated
-      replicas: 1
-#      replicas: 3
+#      mode: replicated
+#      replicas: 1
+      replicas: 3
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-net"

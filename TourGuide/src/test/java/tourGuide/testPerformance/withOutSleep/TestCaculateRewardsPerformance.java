@@ -16,7 +16,9 @@ import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,7 +65,7 @@ public class TestCaculateRewardsPerformance {
      */
 
     @Test
-    public void highVolumeGetRewards() throws InterruptedException {
+    public void highVolumeGetRewards()  {
         //given
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
@@ -81,17 +83,19 @@ public class TestCaculateRewardsPerformance {
 
         System.out.println("Start adding attraction for test");
         Attraction attraction = gpsApi.getAllAttractions(dateTimeHelper.getTimeStamp()).get(0);
-
+        userApi.addFirstAttractionForAllUser(dateTimeHelper.getTimeStamp(), attraction);
+        List<User> allUsers = new ArrayList<>(userApi.getAllUsers(dateTimeHelper.getTimeStamp()));
         System.out.println("Add attraction is done");
-        List<User> allUsers;
-        allUsers = userApi.addFirstAttractionForAllUser(dateTimeHelper.getTimeStamp(), attraction);
 
 
         //when
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        tourGuideService.calculateRewardForPerfTest(allUsers);
-
+        try {
+            tourGuideService.calculateRewardForPerfTest(allUsers);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         while (true) {
             if (tourGuideService.getCalculatedRewardForUserMap().size() >= allUsers.size()) {
                 System.out.println("Number of calculated users = " + tourGuideService.getCalculatedRewardForUserMap().size());
