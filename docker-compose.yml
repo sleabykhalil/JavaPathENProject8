@@ -63,6 +63,20 @@ services:
       - "traefik.port=80"
       - "traefik.http.routers.user.rule=Host(`user.localhost`)"
 
+  microservice.testusers:
+    build: ./user-api
+    expose:
+      - 8081
+    networks:
+      traefik-net:
+        aliases:
+          - testusers.localhost
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      - "traefik.port=80"
+      - "traefik.http.routers.testusers.rule=Host(`testusers.localhost`)"
+
   microservice.tourguide:
     build: ./TourGuide
     expose:

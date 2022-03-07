@@ -1,6 +1,8 @@
 package tourGuide.testPerformance;
 
 import org.apache.commons.lang3.time.StopWatch;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,6 +32,16 @@ public class TestTrackUsersPerformance {
     RewardApi rewardApi;
 
     DateTimeHelper dateTimeHelper = new DateTimeHelper();
+
+    @BeforeAll
+    static void beforeAll() {
+        TourGuideService.testMode = true;
+    }
+
+    @AfterAll
+    static void afterAll() {
+        TourGuideService.testMode = false;
+    }
     /*
      * A note on performance improvements:
      *
@@ -56,7 +68,7 @@ public class TestTrackUsersPerformance {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
         int numberOfUsers = 100;
-        if (System.getProperty("numberOfUsers")!= null && !System.getProperty("numberOfUsers").isEmpty()) {
+        if (System.getProperty("numberOfUsers") != null && !System.getProperty("numberOfUsers").isEmpty()) {
             try {
                 System.out.println("Users number pass from command line =" + System.getProperty("numberOfUsers"));
                 numberOfUsers = Integer.parseInt(System.getProperty("numberOfUsers"));
@@ -84,7 +96,7 @@ public class TestTrackUsersPerformance {
                 tourGuideService.tracker.stopTracking();
                 break;
             } else {
-                Thread.sleep(Math.max(Math.min(allUsers.size(),10000),500));
+                Thread.sleep(Math.max(Math.min(allUsers.size(), 10000), 500));
                 if (counter != tourGuideService.getTrackedUserMap().size()) {
                     counter = tourGuideService.getTrackedUserMap().size();
                     System.out.println("Number of tracked users = " + counter);

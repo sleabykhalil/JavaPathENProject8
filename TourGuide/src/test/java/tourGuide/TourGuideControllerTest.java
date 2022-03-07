@@ -1,6 +1,8 @@
 package tourGuide;
 
 import org.javamoney.moneta.Money;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -37,6 +39,16 @@ class TourGuideControllerTest {
 
     String dateTimeHelperTimeStamp = "2020-10-10";
     CurrencyUnit currency = Monetary.getCurrency("USD");
+
+    @BeforeAll
+    static void beforeAll() {
+        TourGuideService.testMode = true;
+    }
+
+    @AfterAll
+    static void afterAll() {
+        TourGuideService.testMode = false;
+    }
 
     @BeforeEach
     public void init() {

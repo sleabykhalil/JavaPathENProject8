@@ -1,6 +1,8 @@
 package tourGuide;
 
 import org.apache.commons.lang3.time.StopWatch;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,6 +35,16 @@ public class TestRewardsService {
     RewardApi rewardApi;
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
 
+    @BeforeAll
+    static void beforeAll() {
+        TourGuideService.testMode = true;
+    }
+
+    @AfterAll
+    static void afterAll() {
+        TourGuideService.testMode = false;
+    }
+
     @Test
     public void userGetRewards() throws ExecutionException, InterruptedException {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
@@ -52,12 +64,11 @@ public class TestRewardsService {
         stopWatch.start();
 
         tourGuideService.trackUserLocation(userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()));
-        rewardsService.calculateRewards(userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()));
-        int userRewardsSize;
-        do {
-            userRewardsSize = userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp()).getUserRewards().size();
-        } while ((userRewardsSize == 0) &&
-                (TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) < TimeUnit.SECONDS.toSeconds(10)));
+        while (true) {
+            if (tourGuideService.getCalculatedRewardForUserMap().size() >= 1) {
+                break;
+            }
+        }
         stopWatch.stop();
 
         tourGuideService.tracker.stopTracking();
@@ -76,10 +87,13 @@ public class TestRewardsService {
     public void nearAllAttractions() throws ExecutionException, InterruptedException {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
         rewardsService.setProximityBuffer(Integer.MAX_VALUE);
-
         InternalTestHelper.setInternalUserNumber(1);
         TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
-        Thread.sleep(20000);//until trucking finished
+        while (true) {
+            if (tourGuideService.getCalculatedRewardForUserMap().size() >= 1) {
+                break;
+            }
+        }
         User user = userApi.getAllUsers(dateTimeHelper.getTimeStamp()).get(0);
         rewardsService.calculateRewards(user);
         User userAfterCalculate = userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp());
