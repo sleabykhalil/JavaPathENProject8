@@ -41,7 +41,7 @@ public interface UserApi {
     void initUser(@PathVariable String timeStamp, @RequestParam int internalUserNumber);
 
     @PostMapping("/users/initForTest/addVisitedLocation/{timeStamp}")
-    void addFirstAttractionForAllUser(@PathVariable String timeStamp, @RequestBody Attraction attractionDto);
+    List<User> addFirstAttractionForAllUser(@PathVariable String timeStamp, @RequestBody Attraction attractionDto);
 
 
 }

@@ -76,10 +76,13 @@ public class TestRewardsService {
     public void nearAllAttractions() throws ExecutionException, InterruptedException {
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
         rewardsService.setProximityBuffer(Integer.MAX_VALUE);
-
         InternalTestHelper.setInternalUserNumber(1);
         TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
-        Thread.sleep(20000);//until trucking finished
+        while (true) {
+            if (tourGuideService.getCalculatedRewardForUserMap().size() >= 1) {
+                break;
+            }
+        }
         User user = userApi.getAllUsers(dateTimeHelper.getTimeStamp()).get(0);
         rewardsService.calculateRewards(user);
         User userAfterCalculate = userApi.getUserByUserName(user.getUserName(), dateTimeHelper.getTimeStamp());

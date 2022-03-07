@@ -97,7 +97,7 @@ class UserControllerTest {
 
     @Test
     void addFirstAttractionForAllUser() {
-        doNothing().when(userServiceMock).addVisitedLocationForTest(any());
+        when(userServiceMock.addVisitedLocationForTest(any())).thenReturn(any());
         userControllerUnderTest.addFirstAttractionForAllUser("timeStamp", new AttractionDto());
         verify(userServiceMock, times(1)).addVisitedLocationForTest(any());
     }

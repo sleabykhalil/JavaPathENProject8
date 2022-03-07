@@ -3,6 +3,7 @@ package tourGuide.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import tourGuide.dto.NearByAttractionDto;
@@ -35,7 +36,9 @@ public class TourGuideService {
     private final RewardsService rewardsService;
     private final TripPricer tripPricer = new TripPricer();
     public final Tracker tracker;
-    boolean testMode = true;
+    @Value("${test.mode}")
+    private String testModeAsString;
+    boolean testMode = Boolean.parseBoolean("true");
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
     GpsApi gpsApi;
     UserApi userApi;
