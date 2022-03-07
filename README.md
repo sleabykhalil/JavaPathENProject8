@@ -76,3 +76,5 @@ gradle test --tests tourGuide.testPerformance.TestTrackUsersPerformance -Dnumber
 
 ![TourGuide+Architectural+Overview+without+discription](https://user-images.githubusercontent.com/64974948/157071953-237efa6f-6182-427c-8045-ba2fb0094bcf.jpg)
 
+#### Traefik dashboard
+[Traefik dashboard](http://localhost:28081/dashboard/#/)
