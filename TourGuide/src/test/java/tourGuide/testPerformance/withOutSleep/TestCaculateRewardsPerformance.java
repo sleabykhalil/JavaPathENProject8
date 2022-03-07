@@ -1,6 +1,8 @@
 package tourGuide.testPerformance.withOutSleep;
 
 import org.apache.commons.lang3.time.StopWatch;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,6 +32,16 @@ public class TestCaculateRewardsPerformance {
     RewardApi rewardApi;
 
     DateTimeHelper dateTimeHelper = new DateTimeHelper();
+
+    @BeforeAll
+    static void beforeAll() {
+        TourGuideService.testMode = true;
+    }
+
+    @AfterAll
+    static void afterAll() {
+        TourGuideService.testMode = false;
+    }
     /*
      * A note on performance improvements:
      *

@@ -36,9 +36,7 @@ public class TourGuideService {
     private final RewardsService rewardsService;
     private final TripPricer tripPricer = new TripPricer();
     public final Tracker tracker;
-    @Value("${test.mode}")
-    private String testModeAsString;
-    boolean testMode = Boolean.parseBoolean("true");
+    public static boolean testMode;
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
     GpsApi gpsApi;
     UserApi userApi;
@@ -61,6 +59,9 @@ public class TourGuideService {
         this.gpsApi = gpsApi;
         this.userApi = userApi;
         this.rewardsService = rewardsService;
+
+        //Todo delete testMode=true
+        testMode = true;
 
         if (testMode) {
             logger.info("TestMode enabled");

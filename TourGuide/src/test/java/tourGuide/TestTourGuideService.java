@@ -1,6 +1,8 @@
 package tourGuide;
 
 import org.javamoney.moneta.Money;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,6 +39,16 @@ public class TestTourGuideService {
     RewardApi rewardApi;
     private final DateTimeHelper dateTimeHelper = new DateTimeHelper();
     CurrencyUnit currency = Monetary.getCurrency("USD");
+
+    @BeforeAll
+    static void beforeAll() {
+        TourGuideService.testMode = true;
+    }
+
+    @AfterAll
+    static void afterAll() {
+        TourGuideService.testMode = false;
+    }
 
     @Test
     public void getUserLocation() {
