@@ -67,6 +67,7 @@ public class TestCaculateRewardsPerformance {
     public void highVolumeGetRewards() throws InterruptedException {
         //given
         RewardsService rewardsService = new RewardsService(gpsApi, rewardApi, userApi);
+        Attraction attraction = gpsApi.getAllAttractions(dateTimeHelper.getTimeStamp()).get(0);
         // Users should be incremented up to 100,000, and test finishes within 20 minutes
         int numberOfUsers = 100;
         if (System.getProperty("numberOfUsers") != null && !System.getProperty("numberOfUsers").isEmpty()) {
@@ -81,7 +82,6 @@ public class TestCaculateRewardsPerformance {
         TourGuideService tourGuideService = new TourGuideService(rewardsService, gpsApi, userApi);
 
         System.out.println("Start adding attraction for test");
-        Attraction attraction = gpsApi.getAllAttractions(dateTimeHelper.getTimeStamp()).get(0);
         userApi.addFirstAttractionForAllUser(dateTimeHelper.getTimeStamp(), attraction);
         List<User> allUsers = new ArrayList<>(userApi.getAllUsers(dateTimeHelper.getTimeStamp()));
         System.out.println("Add attraction is done");
